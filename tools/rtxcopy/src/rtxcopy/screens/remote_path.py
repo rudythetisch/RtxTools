@@ -58,6 +58,9 @@ class RemotePathScreen(Screen):
         self._sftp: paramiko.SFTPClient | None = None
         self._ssh: paramiko.SSHClient | None = None
         self._current_path: str = "/"
+        self._is_proxmox: bool = False
+        self._vmid: int = 0
+        self._vm_type: str = ""  # "lxc" or "qemu"
 
     def compose(self) -> ComposeResult:
         dest = self.app.selected_destination  # type: ignore[attr-defined]
@@ -80,7 +83,14 @@ class RemotePathScreen(Screen):
     # ── Connection ────────────────────────────────────────────────────────────
 
     def _connect_and_load_root(self) -> None:
+        from rtxcopy.destinations import ProxmoxLXCDestination, ProxmoxQEMUDestination
         dest = self.app.selected_destination  # type: ignore[attr-defined]
+
+        self._is_proxmox = isinstance(dest, (ProxmoxLXCDestination, ProxmoxQEMUDestination))
+        if self._is_proxmox:
+            self._vmid = dest.vmid
+            self._vm_type = "lxc" if isinstance(dest, ProxmoxLXCDestination) else "qemu"
+
         host = getattr(dest, "host", None) or getattr(dest, "node_host")
         port = getattr(dest, "port", None) or getattr(dest, "node_port", 22)
         username = getattr(dest, "username", None) or getattr(dest, "node_username")
@@ -90,11 +100,13 @@ class RemotePathScreen(Screen):
             self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self._ssh.connect(host, port=port, username=username,
                               key_filename=str(dest.key_path), timeout=10)
-            try:
-                self._sftp = self._ssh.open_sftp()
-            except Exception:
-                self.app.call_from_thread(self._show_sftp_unavailable)
-                return
+
+            if not self._is_proxmox:
+                try:
+                    self._sftp = self._ssh.open_sftp()
+                except Exception:
+                    self.app.call_from_thread(self._show_sftp_unavailable)
+                    return
 
             start = getattr(dest, "default_remote_path", "/")
             self.app.call_from_thread(self._build_tree, start)
@@ -102,37 +114,84 @@ class RemotePathScreen(Screen):
             self.app.call_from_thread(self._show_error, str(e))
 
     def _build_tree(self, start_path: str) -> None:
+        """Called on main thread — only sets up the root node, children load in a worker."""
         self._current_path = start_path
         tree = self.query_one("#remote_tree", Tree)
         tree.clear()
         tree.root.set_label(start_path)
         tree.root.data = start_path
-        self._load_children(tree.root, start_path)
-        tree.root.expand()
         self.query_one("#loader", LoadingIndicator).display = False
         tree.display = True
         tree.focus()
         self._update_path_label(start_path)
         self.query_one("#btn_copy", Button).disabled = False
+        # Load root children in a worker to avoid blocking the main thread
+        self.run_worker(
+            lambda: self.app.call_from_thread(self._load_children, tree.root, start_path),
+            thread=True,
+        )
 
     def _load_children(self, node: TreeNode, path: str) -> None:
+        if self._is_proxmox:
+            self._load_children_proxmox(node, path)
+        else:
+            self._load_children_sftp(node, path)
+
+    def _load_children_sftp(self, node: TreeNode, path: str) -> None:
         if self._sftp is None:
             return
         try:
             entries = self._sftp.listdir_attr(path)
         except OSError:
             return
-        entries.sort(key=lambda e: (not self._is_dir(e), e.filename.lower()))
+        entries.sort(key=lambda e: (not self._is_dir_sftp(e), e.filename.lower()))
         for entry in entries:
             if entry.filename.startswith("."):
                 continue
             full = str(PurePosixPath(path) / entry.filename)
-            is_dir = self._is_dir(entry)
+            is_dir = self._is_dir_sftp(entry)
             label = f"📁 {entry.filename}" if is_dir else f"📄 {entry.filename}"
             node.add(label, data=full, allow_expand=is_dir)
 
+    def _load_children_proxmox(self, node: TreeNode, path: str) -> None:
+        """List entries inside the LXC/VM using pct exec or qm guest exec."""
+        if self._ssh is None:
+            return
+        import json, shlex
+        safe_path = shlex.quote(path)
+        try:
+            if self._vm_type == "lxc":
+                cmd = f"pct exec {self._vmid} -- ls -1p {safe_path} 2>/dev/null"
+                _, stdout, _ = self._ssh.exec_command(cmd)
+                lines = stdout.read().decode().splitlines()
+            else:
+                cmd = f"qm guest exec {self._vmid} -- ls -1p {safe_path}"
+                _, stdout, _ = self._ssh.exec_command(cmd)
+                raw = stdout.read().decode().strip()
+                data = json.loads(raw)
+                lines = data.get("out-data", "").splitlines()
+        except Exception:
+            return
+
+        dirs, files = [], []
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("."):
+                continue
+            if line.endswith("/"):
+                dirs.append(line.rstrip("/"))
+            else:
+                files.append(line)
+
+        for name in sorted(dirs, key=str.lower):
+            full = str(PurePosixPath(path) / name)
+            node.add(f"📁 {name}", data=full, allow_expand=True)
+        for name in sorted(files, key=str.lower):
+            full = str(PurePosixPath(path) / name)
+            node.add(f"📄 {name}", data=full, allow_expand=False)
+
     @staticmethod
-    def _is_dir(entry: Any) -> bool:
+    def _is_dir_sftp(entry: Any) -> bool:
         import stat
         return entry.st_mode is not None and stat.S_ISDIR(entry.st_mode)
 

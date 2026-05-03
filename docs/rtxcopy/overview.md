@@ -39,3 +39,6 @@ FilePicker → DestinationPicker → RemotePath → Progress → (back to FilePi
 - **SSH key deploy**: single compound command via stdin to avoid `MaxSessions 1` on Synology
 - **SFTP unavailable**: graceful fallback to manual path input with Synology-specific guidance
 - **Favorites**: stored per destination in `config.toml` under `[favorites]`, managed with `f`/`F` in remote browser
+- **Proxmox browser**: uses `pct exec <vmid> -- ls -1p` (LXC) or `qm guest exec <vmid> -- ls -1p` + JSON parse (QEMU) — lists files inside the container/VM, not on the node
+- **HAOS config path**: `/mnt/data/supervisor/homeassistant/` (not `/config` or `/root`)
+- **`_build_tree` threading**: `_load_children` runs in a worker — never block the main asyncio thread with SSH calls

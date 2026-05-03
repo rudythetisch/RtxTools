@@ -39,3 +39,22 @@
 - `tools/rtxcopy/src/rtxcopy/screens/dest_manager.py`: CRUD destinations + gestion clés SSH en TUI
   Reason: ajout/suppression/déploiement de clés sans quitter l'app
   Source: `DestManagerScreen`, `KeyManagerScreen`, `DeployKeyScreen`
+
+## 2026-05-03 (session 2)
+
+### rtxcopy — édition destinations, browser Proxmox, fix HAOS
+
+- `screens/dest_manager.py`: refactorisé `AddDestScreen` → `DestFormScreen` avec pré-remplissage pour l'édition, touche `e`, support `proxmox_qemu` dans le Select, colonne `VM/LXC ID` dans la table, validation inline
+  Reason: impossible de modifier l'IP ou l'ID d'une destination existante
+  Source: `DestFormScreen`, `action_edit`, `_on_dest_edited`
+
+- `screens/remote_path.py`: browser Proxmox utilise maintenant `pct exec` (LXC) ou `qm guest exec` + JSON parsing (QEMU) pour lister les dossiers **dans la VM**, pas sur le nœud
+  Reason: le browser SFTP montrait le filesystem du nœud Proxmox au lieu de celui de la VM/LXC
+  Source: `_load_children_proxmox`, `_load_children_sftp`, `_is_proxmox`
+
+- `screens/remote_path.py`: `_load_children` déplacé dans un worker thread dans `_build_tree`
+  Reason: appel SSH bloquant sur le thread principal causait des timeouts silencieux
+  Source: `_build_tree`
+
+- Config HASS: `default_remote_path` mis à jour → `/mnt/data/supervisor/homeassistant`
+  Reason: sur HAOS, `configuration.yaml` est à `/mnt/data/supervisor/homeassistant/`, pas à `/`
