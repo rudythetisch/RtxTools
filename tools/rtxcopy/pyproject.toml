@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rtxcopy"
+version = "0.1.0"
+description = "TUI tool to copy files to NAS or Proxmox LXC/VM over SSH"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.60.0",
+    "paramiko>=3.4.0",
+    "cryptography>=42.0.0",
+    "tomli-w>=1.0.0",
+    "click>=8.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+rtxcopy = "rtxcopy.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rtxcopy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

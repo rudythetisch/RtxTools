@@ -1,0 +1,48 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repo structure
+
+```
+RtxTools/
+├── docs/           Markdown documentation (sync to Obsidian)
+├── shared/rtxlib/  Future shared lib (empty for now)
+└── tools/
+    └── rtxcopy/    File-copy TUI tool (Python + Textual)
+```
+
+Each tool under `tools/` is an independent Python package with its own `pyproject.toml`.
+
+## rtxcopy — dev commands
+
+```bash
+cd tools/rtxcopy
+uv sync             # install deps into .venv
+uv run rtxcopy      # launch TUI
+uv run rtxcopy manage  # destination manager
+uv run pytest       # run tests
+uv tool install .   # install globally as `rtxcopy`
+```
+
+Requires Python ≥ 3.11 and `uv` (`brew install uv`).
+
+## rtxcopy — architecture
+
+- `src/rtxcopy/config.py` — loads/saves `~/.config/rtxtools/rtxcopy/config.toml` (atomic write)
+- `src/rtxcopy/destinations.py` — dataclasses: `NASDestination`, `ProxmoxLXCDestination`, `ProxmoxQEMUDestination`
+- `src/rtxcopy/ssh_keys.py` — Ed25519 key generation + deployment via paramiko (no subprocess ssh-keygen)
+- `src/rtxcopy/transfer.py` — paramiko SFTP for NAS; for Proxmox: SFTP to node `/tmp/` then `pct push`
+- `src/rtxcopy/proxmox.py` — `pct push` / `qm guest exec` wrappers
+- `src/rtxcopy/app.py` — Textual App root; screen flow: FilePicker → DestinationPicker → RemotePath → Progress
+- `src/rtxcopy/screens/dest_manager.py` — destination CRUD + SSH key management modals
+
+## Infrastructure (home network)
+
+- TischNAS2: `192.168.10.5`
+- TischNAS3: `192.168.10.3`
+- Proxmox node: `192.168.10.2`
+
+## Documentation
+
+`docs/` contains Markdown files intended for Obsidian sync. Use standard Markdown (no frontmatter required). Wikilinks (`[[file]]`) are fine for cross-references within `docs/`.
