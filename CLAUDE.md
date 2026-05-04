@@ -6,13 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 RtxTools/
-├── docs/           Markdown documentation (sync to Obsidian)
-├── shared/rtxlib/  Future shared lib (empty for now)
+├── docs/                    Markdown documentation (sync to Obsidian)
+│   ├── rtxcopy/             rtxcopy docs
+│   └── network/             Network scripts docs (parental control, pfSense)
+├── scripts/                 Standalone scripts (no build system)
+│   ├── home-assistant/      HA automations, config, dashboard, scripts
+│   ├── pfsense/             pfSense firewall commands + SSH setup
+│   └── installation-guide.md
+├── shared/rtxlib/           Future shared lib (empty for now)
 └── tools/
-    └── rtxcopy/    File-copy TUI tool (Python + Textual)
+    └── rtxcopy/             File-copy TUI tool (Python + Textual)
 ```
 
 Each tool under `tools/` is an independent Python package with its own `pyproject.toml`.
+Scripts under `scripts/` are standalone YAML/shell files — no build step required.
 
 ## rtxcopy — dev commands
 

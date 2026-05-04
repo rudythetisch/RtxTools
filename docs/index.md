@@ -1,12 +1,19 @@
 # RtxTools
 
-Collection of personal command-line tools for home infrastructure management.
+Collection of personal tools and scripts for home infrastructure management.
 
 ## Tools
 
 | Tool | Description |
 |------|-------------|
 | [[rtxcopy/overview\|rtxcopy]] | Copy files/folders to NAS or Proxmox LXC/VM over SSH |
+
+## Scripts
+
+| Script set | Description |
+|------------|-------------|
+| [[network/README\|network/home-assistant]] | Parental control timer system — HA + pfSense integration |
+| [[network/README\|network/pfsense]] | pfSense firewall commands and SSH setup |
 
 ## Infrastructure
 
@@ -16,4 +23,6 @@ Collection of personal command-line tools for home infrastructure management.
 
 ## Setup
 
-Each tool is self-contained under `tools/<toolname>/`. Prerequisites: `uv` (`brew install uv`).
+Tools are self-contained under `tools/<toolname>/`. Prerequisites: `uv` (`brew install uv`).
+
+Scripts under `scripts/` are standalone — see each folder's README or `installation-guide.md`.
