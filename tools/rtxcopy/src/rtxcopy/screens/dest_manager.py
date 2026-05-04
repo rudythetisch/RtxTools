@@ -20,8 +20,8 @@ class DestManagerScreen(Screen):
         Binding("e", "edit", "Éditer"),
         Binding("d", "delete", "Supprimer"),
         Binding("k", "manage_key", "SSH Key"),
-        Binding("escape", "app.pop_screen", "Retour"),
-        Binding("q", "app.quit", "Quitter"),
+        Binding("escape", "app.quit", "Quitter"),
+        Binding("q", "app.quit", "Quitter", show=False),
     ]
 
     def compose(self) -> ComposeResult:
@@ -110,7 +110,8 @@ class DestFormScreen(ModalScreen):
                 ],
                 prompt="Type",
                 id="dest_type",
-                value=ex.type if ex else Select.BLANK,
+                allow_blank=True,
+                **( {"value": ex.type} if ex else {} ),
             )
             yield Input(
                 placeholder="Nom (ex. TischNAS2)",
@@ -157,6 +158,9 @@ class DestFormScreen(ModalScreen):
             return
 
         dest_type = self.query_one("#dest_type", Select).value
+        if not isinstance(dest_type, str):
+            self.query_one("#error_msg", Label).update("[red]Sélectionne un type.[/]")
+            return
         name = self.query_one("#name", Input).value.strip()
         host = self.query_one("#host", Input).value.strip()
         port_str = self.query_one("#port", Input).value.strip()
@@ -195,7 +199,7 @@ class DestFormScreen(ModalScreen):
                 vmid=vmid, default_remote_path=remote_path,
             )
         else:
-            self.query_one("#error_msg", Label).update("[red]Sélectionne un type.[/]")
+            self.query_one("#error_msg", Label).update("[red]Type non reconnu.[/]")
             return
 
         self.dismiss(dest)

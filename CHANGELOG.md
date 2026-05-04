@@ -40,6 +40,32 @@
   Reason: ajout/suppression/déploiement de clés sans quitter l'app
   Source: `DestManagerScreen`, `KeyManagerScreen`, `DeployKeyScreen`
 
+## 2026-05-04
+
+### Merge NetworkScripts → RtxTools
+
+- `scripts/home-assistant/`, `scripts/pfsense/`, `scripts/installation-guide.md`, `docs/network/`: import initial depuis NetworkScripts (parental control HA/pfSense)
+  Reason: consolidation des repos dans RtxTools
+  Source: commit 5568b38
+
+- `scripts/guides/`, `scripts/nipogi-shutdown.sh`, `scripts/synology-shutdown.sh`, `tools/network-shutdown/`: import contenu manquant (guides NUT/SSH, shutdown scripts, web app Express)
+  Reason: le repo local ne contenait qu'un seul commit partiel ; contenu complet récupéré depuis GitHub
+  Source: commit ce2c13c
+
+- `docs/index.md`, `CLAUDE.md`: arborescence et index mis à jour pour refléter la nouvelle structure
+  Reason: doc stale après merge
+  Source: commits 887844c, ce2c13c
+
+### rtxcopy — bugfixes dest_manager
+
+- `tools/rtxcopy/src/rtxcopy/screens/dest_manager.py`: fix crash `InvalidSelectValueError` à l'ouverture du form d'ajout
+  Reason: breaking change Textual — `Select.BLANK` (`False`) rejeté comme valeur explicite ; fix via `allow_blank=True` + valeur conditionnelle
+  Source: `DestFormScreen.compose`
+
+- `tools/rtxcopy/src/rtxcopy/screens/dest_manager.py`: fix écran noir sur ESC dans `DestManagerScreen`
+  Reason: `app.pop_screen` sur le dernier écran laisse l'app sans écran ; remplacé par `app.quit`
+  Source: `DestManagerScreen.BINDINGS`
+
 ## 2026-05-03 (session 2)
 
 ### rtxcopy — édition destinations, browser Proxmox, fix HAOS
