@@ -6,19 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 RtxTools/
-├── docs/                    Markdown documentation (sync to Obsidian)
-│   ├── rtxcopy/             rtxcopy docs
-│   └── network/             Network scripts docs (parental control, pfSense)
-├── scripts/                 Standalone scripts (no build system)
-│   ├── home-assistant/      HA automations, config, dashboard, scripts
-│   ├── pfsense/             pfSense firewall commands + SSH setup
+├── docs/                      Markdown documentation (sync to Obsidian)
+│   ├── rtxcopy/               rtxcopy docs
+│   └── network/               Network scripts docs (parental control, pfSense)
+├── scripts/                   Standalone scripts (no build system)
+│   ├── home-assistant/        HA automations, config, dashboard, scripts
+│   ├── pfsense/               pfSense firewall commands + SSH setup
+│   ├── guides/                Setup guides (NUT UPS, SSH keys)
+│   ├── nipogi-shutdown.sh     Shutdown script for NIPoGi server
+│   ├── synology-shutdown.sh   Shutdown script for Synology NAS
 │   └── installation-guide.md
-├── shared/rtxlib/           Future shared lib (empty for now)
+├── shared/rtxlib/             Future shared lib (empty for now)
 └── tools/
-    └── rtxcopy/             File-copy TUI tool (Python + Textual)
+    ├── rtxcopy/               File-copy TUI tool (Python + Textual)
+    └── network-shutdown/      Web UI for shutting down network devices (Node.js/Express)
 ```
 
-Each tool under `tools/` is an independent Python package with its own `pyproject.toml`.
+Each tool under `tools/` has its own dependencies:
+- `rtxcopy/` — Python package, use `uv`
+- `network-shutdown/` — Node.js app, use `npm install && npm start` (or `start-server.sh`)
+
 Scripts under `scripts/` are standalone YAML/shell files — no build step required.
 
 ## rtxcopy — dev commands

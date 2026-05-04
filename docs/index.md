@@ -7,6 +7,7 @@ Collection of personal tools and scripts for home infrastructure management.
 | Tool | Description |
 |------|-------------|
 | [[rtxcopy/overview\|rtxcopy]] | Copy files/folders to NAS or Proxmox LXC/VM over SSH |
+| `tools/network-shutdown/` | Web UI (Node.js/Express) for shutting down network devices |
 
 ## Scripts
 
@@ -14,6 +15,9 @@ Collection of personal tools and scripts for home infrastructure management.
 |------------|-------------|
 | [[network/README\|network/home-assistant]] | Parental control timer system — HA + pfSense integration |
 | [[network/README\|network/pfsense]] | pfSense firewall commands and SSH setup |
+| `scripts/guides/` | Setup guides: NUT UPS, SSH key setup |
+| `scripts/nipogi-shutdown.sh` | Shutdown NIPoGi server |
+| `scripts/synology-shutdown.sh` | Shutdown Synology NAS |
 
 ## Infrastructure
 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Shutdown Control</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔌 Network Shutdown Control</h1>
+            <p class="subtitle">Gestion à distance de vos serveurs et NAS</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-icon">🖥️</div>
+                <h2>NIPoGi Server <span id="online-nipogi" class="online-badge">…</span></h2>
+                <p>Arrêt du serveur Proxmox et de toutes les VMs</p>
+                <div class="card-actions">
+                    <button id="btn-nipogi" class="btn btn-danger" type="button" onclick="shutdown('nipogi')">
+                        <span class="btn-icon">⏻</span>
+                        Arrêter NIPoGi
+                    </button>
+                </div>
+                <div id="status-nipogi" class="status"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">💾</div>
+                <h2>Synology DS916+ <span id="online-ds916" class="online-badge">…</span></h2>
+                <p>Arrêt du NAS Synology DS916+</p>
+                <div class="card-actions">
+                    <button id="btn-ds916" class="btn btn-warning" type="button" onclick="shutdown('ds916')">
+                        <span class="btn-icon">⏻</span>
+                        Arrêter
+                    </button>
+                    <button id="wol-ds916" class="btn btn-success" type="button" onclick="wakeUp('ds916')">
+                        <span class="btn-icon">⚡</span>
+                        Réveiller
+                    </button>
+                </div>
+                <div id="status-ds916" class="status"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">💾</div>
+                <h2>Synology DS925+ <span id="online-ds925" class="online-badge">…</span></h2>
+                <p>Arrêt du NAS Synology DS925+</p>
+                <div class="card-actions">
+                    <button id="btn-ds925" class="btn btn-warning" type="button" onclick="shutdown('ds925')">
+                        <span class="btn-icon">⏻</span>
+                        Arrêter
+                    </button>
+                    <button id="wol-ds925" class="btn btn-success" type="button" onclick="wakeUp('ds925')">
+                        <span class="btn-icon">⚡</span>
+                        Réveiller
+                    </button>
+                </div>
+                <div id="status-ds925" class="status"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>⚠️ Attention : Ces actions sont irréversibles. Assurez-vous de sauvegarder vos données.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
