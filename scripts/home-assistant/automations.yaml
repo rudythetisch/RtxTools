@@ -1,0 +1,199 @@
+# Parental Control Timer Automations
+# Add these automations to your Home Assistant automations.yaml
+
+- id: start_kids_timer
+  alias: "Start Kids Timer"
+  description: "Enable internet access when timer starts"
+  trigger:
+    - platform: state
+      entity_id: timer.kids_screen_time
+      to: 'active'
+  condition: []
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kids_devices_blocked
+    - service: shell_command.enable_kids_internet
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.last_timer_action
+      data:
+        datetime: "{{ now() }}"
+    - service: notify.parents_phones
+      data:
+        title: "Kids Timer Started"
+        message: "Internet access enabled for {{ states('input_select.timer_duration') }}"
+        data:
+          tag: "kids_timer"
+          group: "parental_control"
+  mode: single
+
+- id: kids_timer_finished
+  alias: "Kids Timer Finished"
+  description: "Block internet access when timer expires"
+  trigger:
+    - platform: state
+      entity_id: timer.kids_screen_time
+      to: 'idle'
+      from: 'active'
+  condition: []
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.kids_devices_blocked
+    - service: shell_command.disable_kids_internet
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.last_timer_action
+      data:
+        datetime: "{{ now() }}"
+    - service: notify.parents_phones
+      data:
+        title: "Kids Timer Expired"
+        message: "Internet access has been blocked for kids' devices"
+        data:
+          tag: "kids_timer"
+          group: "parental_control"
+          actions:
+            - action: "EXTEND_TIMER_15"
+              title: "Extend 15min"
+            - action: "EXTEND_TIMER_30"
+              title: "Extend 30min"
+  mode: single
+
+- id: manual_kids_block_toggle
+  alias: "Manual Kids Block Toggle"
+  description: "Handle manual blocking/unblocking of kids devices"
+  trigger:
+    - platform: state
+      entity_id: input_boolean.kids_devices_blocked
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.context.user_id is not none }}"
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'on'
+          sequence:
+            - service: timer.cancel
+              target:
+                entity_id: timer.kids_screen_time
+            - service: shell_command.disable_kids_internet
+            - service: notify.parents_phones
+              data:
+                title: "Kids Internet Manually Blocked"
+                message: "Timer cancelled - internet access blocked"
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'off'
+          sequence:
+            - service: shell_command.enable_kids_internet
+            - service: notify.parents_phones
+              data:
+                title: "Kids Internet Manually Enabled"
+                message: "Internet access restored without timer"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.last_timer_action
+      data:
+        datetime: "{{ now() }}"
+  mode: single
+
+- id: extend_timer_notification_action
+  alias: "Extend Timer from Notification"
+  description: "Handle timer extension from notification actions"
+  trigger:
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: EXTEND_TIMER_15
+    - platform: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: EXTEND_TIMER_30
+  condition: []
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kids_devices_blocked
+    - service: shell_command.enable_kids_internet
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: >
+          {% if trigger.event.data.action == 'EXTEND_TIMER_15' %}
+            00:15:00
+          {% else %}
+            00:30:00
+          {% endif %}
+    - service: notify.parents_phones
+      data:
+        title: "Timer Extended"
+        message: >
+          {% if trigger.event.data.action == 'EXTEND_TIMER_15' %}
+            Timer extended by 15 minutes
+          {% else %}
+            Timer extended by 30 minutes
+          {% endif %}
+        data:
+          tag: "kids_timer"
+          group: "parental_control"
+  mode: single
+
+- id: kids_timer_startup_sync
+  alias: "Kids Timer Startup Sync"
+  description: "Sync firewall state with Home Assistant state on startup"
+  trigger:
+    - platform: homeassistant
+      event: start
+  condition: []
+  action:
+    - delay: 30  # Wait for system to fully start
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'on'
+          sequence:
+            - service: shell_command.disable_kids_internet
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'off'
+          sequence:
+            - service: shell_command.enable_kids_internet
+  mode: single
+
+- id: kids_timer_watchdog
+  alias: "Kids Timer Watchdog"
+  description: "Periodic check to ensure firewall state matches HA state"
+  trigger:
+    - platform: time_pattern
+      minutes: "/5"  # Check every 5 minutes
+  condition: []
+  action:
+    - service: shell_command.check_kids_status
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'on'
+            - condition: state
+              entity_id: timer.kids_screen_time
+              state: 'idle'
+          sequence:
+            - service: shell_command.disable_kids_internet
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'off'
+            - condition: state
+              entity_id: timer.kids_screen_time
+              state: 'active'
+          sequence:
+            - service: shell_command.enable_kids_internet
+  mode: single

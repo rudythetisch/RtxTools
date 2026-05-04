@@ -1,0 +1,186 @@
+# Parental Control Dashboard Configuration
+# Add this to your Home Assistant dashboard or create a new dashboard
+
+title: Kids Screen Time Control
+views:
+  - title: Timer Control
+    path: timer-control
+    icon: mdi:timer
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: entities
+            title: Kids Screen Time Control
+            show_header_toggle: false
+            entities:
+              - entity: sensor.kids_timer_status
+                name: Current Status
+                icon: mdi:information
+              - entity: input_select.timer_duration
+                name: Timer Duration
+              - entity: timer.kids_screen_time
+                name: Remaining Time
+              - entity: input_boolean.kids_devices_blocked
+                name: Internet Access Blocked
+                toggle: true
+              - entity: input_datetime.last_timer_action
+                name: Last Action
+                format: relative
+
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Start Timer
+                icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: script.start_kids_timer
+                hold_action:
+                  action: more-info
+                show_state: false
+                
+              - type: button
+                name: Stop Timer
+                icon: mdi:stop
+                tap_action:
+                  action: call-service
+                  service: timer.cancel
+                  target:
+                    entity_id: timer.kids_screen_time
+                hold_action:
+                  action: more-info
+                show_state: false
+
+              - type: button
+                name: Block Now
+                icon: mdi:wifi-off
+                tap_action:
+                  action: call-service
+                  service: input_boolean.turn_on
+                  target:
+                    entity_id: input_boolean.kids_devices_blocked
+                hold_action:
+                  action: more-info
+                show_state: false
+
+          - type: entities
+            title: Quick Timer Actions
+            show_header_toggle: false
+            entities:
+              - type: button
+                name: 15 Minutes
+                icon: mdi:timer-15
+                tap_action:
+                  action: call-service
+                  service: script.start_kids_timer_15min
+                
+              - type: button
+                name: 30 Minutes
+                icon: mdi:timer-30
+                tap_action:
+                  action: call-service
+                  service: script.start_kids_timer_30min
+                
+              - type: button
+                name: 1 Hour
+                icon: mdi:timer-1
+                tap_action:
+                  action: call-service
+                  service: script.start_kids_timer_1hr
+                
+              - type: button
+                name: 2 Hours
+                icon: mdi:timer-2
+                tap_action:
+                  action: call-service
+                  service: script.start_kids_timer_2hr
+
+  - title: Status & History
+    path: status-history
+    icon: mdi:chart-line
+    cards:
+      - type: entities
+        title: System Status
+        entities:
+          - entity: input_text.pfsense_ip
+            name: pfSense IP Address
+          - entity: sensor.kids_timer_status
+            name: Current Status
+          - entity: input_datetime.last_timer_action
+            name: Last Action
+
+      - type: history-graph
+        title: Timer Usage History
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - entity: timer.kids_screen_time
+          - entity: input_boolean.kids_devices_blocked
+
+      - type: logbook
+        title: Recent Timer Events
+        hours_to_show: 24
+        entities:
+          - timer.kids_screen_time
+          - input_boolean.kids_devices_blocked
+          - input_select.timer_duration
+
+  - title: Settings
+    path: settings
+    icon: mdi:cog
+    cards:
+      - type: entities
+        title: Configuration
+        entities:
+          - entity: input_text.pfsense_ip
+            name: pfSense IP Address
+          - entity: input_select.timer_duration
+            name: Default Timer Duration
+
+      - type: markdown
+        content: |
+          ## Setup Instructions
+          
+          ### 1. SSH Key Setup
+          1. Generate SSH key: `ssh-keygen -t rsa -b 4096 -f /config/ssh_keys/pfsense_key`
+          2. Copy public key to pfSense admin user
+          3. Test connection: `ssh -i /config/ssh_keys/pfsense_key admin@PFSENSE_IP`
+          
+          ### 2. pfSense Configuration
+          1. Ensure KID_DEVICES alias exists with children's device IPs
+          2. Verify SSH access is enabled
+          3. Test firewall rule commands
+          
+          ### 3. Mobile App Setup
+          1. Install Home Assistant mobile app
+          2. Enable notifications
+          3. Add dashboard to favorites
+          
+          ### 4. Testing
+          1. Start timer and verify internet access
+          2. Wait for timer to expire and verify blocking
+          3. Test manual override functions
+
+      - type: entities
+        title: System Test
+        entities:
+          - type: button
+            name: Test Enable Internet
+            icon: mdi:wifi
+            tap_action:
+              action: call-service
+              service: shell_command.enable_kids_internet
+              
+          - type: button
+            name: Test Disable Internet
+            icon: mdi:wifi-off
+            tap_action:
+              action: call-service
+              service: shell_command.disable_kids_internet
+              
+          - type: button
+            name: Check Status
+            icon: mdi:information
+            tap_action:
+              action: call-service
+              service: shell_command.check_kids_status

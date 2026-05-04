@@ -1,0 +1,193 @@
+# Parental Control Timer Scripts
+# Add these scripts to your Home Assistant scripts.yaml
+
+start_kids_timer:
+  alias: "Start Kids Timer"
+  description: "Start the kids screen time timer with selected duration"
+  sequence:
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: >
+          {% set duration = states('input_select.timer_duration') %}
+          {% if duration == '15min' %}00:15:00
+          {% elif duration == '30min' %}00:30:00
+          {% elif duration == '1hr' %}01:00:00
+          {% elif duration == '2hr' %}02:00:00
+          {% else %}00:30:00
+          {% endif %}
+  mode: single
+  icon: mdi:play
+
+start_kids_timer_15min:
+  alias: "Start 15min Timer"
+  description: "Quick start 15 minute timer"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.timer_duration
+      data:
+        option: "15min"
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: "00:15:00"
+  mode: single
+  icon: mdi:timer-15
+
+start_kids_timer_30min:
+  alias: "Start 30min Timer"
+  description: "Quick start 30 minute timer"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.timer_duration
+      data:
+        option: "30min"
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: "00:30:00"
+  mode: single
+  icon: mdi:timer-30
+
+start_kids_timer_1hr:
+  alias: "Start 1hr Timer"
+  description: "Quick start 1 hour timer"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.timer_duration
+      data:
+        option: "1hr"
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: "01:00:00"
+  mode: single
+  icon: mdi:timer-1
+
+start_kids_timer_2hr:
+  alias: "Start 2hr Timer"
+  description: "Quick start 2 hour timer"
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.timer_duration
+      data:
+        option: "2hr"
+    - service: timer.start
+      target:
+        entity_id: timer.kids_screen_time
+      data:
+        duration: "02:00:00"
+  mode: single
+  icon: mdi:timer-2
+
+stop_kids_timer:
+  alias: "Stop Kids Timer"
+  description: "Stop the timer and restore internet access"
+  sequence:
+    - service: timer.cancel
+      target:
+        entity_id: timer.kids_screen_time
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kids_devices_blocked
+  mode: single
+  icon: mdi:stop
+
+emergency_unblock:
+  alias: "Emergency Unblock"
+  description: "Emergency unblock all kids devices (bypass timer)"
+  sequence:
+    - service: timer.cancel
+      target:
+        entity_id: timer.kids_screen_time
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.kids_devices_blocked
+    - service: shell_command.enable_kids_internet
+    - service: notify.parents_phones
+      data:
+        title: "Emergency Unblock Activated"
+        message: "All kids devices have been unblocked via emergency override"
+        data:
+          tag: "emergency"
+          group: "parental_control"
+  mode: single
+  icon: mdi:alert
+
+extend_timer:
+  alias: "Extend Timer"
+  description: "Extend current timer by specified amount"
+  fields:
+    minutes:
+      description: "Minutes to extend"
+      example: 15
+  sequence:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: timer.kids_screen_time
+              state: 'active'
+          sequence:
+            - service: timer.start
+              target:
+                entity_id: timer.kids_screen_time
+              data:
+                duration: >
+                  {% set current_remaining = state_attr('timer.kids_screen_time', 'remaining') %}
+                  {% if current_remaining %}
+                    {% set parts = current_remaining.split(':') %}
+                    {% set hours = parts[0] | int %}
+                    {% set mins = parts[1] | int %}
+                    {% set secs = parts[2] | int %}
+                    {% set total_mins = (hours * 60) + mins + (minutes | int) %}
+                    {% set new_hours = (total_mins // 60) %}
+                    {% set new_mins = (total_mins % 60) %}
+                    {{ '%02d:%02d:%02d' | format(new_hours, new_mins, secs) }}
+                  {% else %}
+                    {{ '00:%02d:00' | format(minutes | int) }}
+                  {% endif %}
+            - service: notify.parents_phones
+              data:
+                title: "Timer Extended"
+                message: "Timer extended by {{ minutes }} minutes"
+      default:
+        - service: notify.parents_phones
+          data:
+            title: "Cannot Extend Timer"
+            message: "Timer is not currently active"
+  mode: single
+  icon: mdi:timer-plus
+
+sync_firewall_state:
+  alias: "Sync Firewall State"
+  description: "Manually sync pfSense firewall state with Home Assistant"
+  sequence:
+    - service: shell_command.check_kids_status
+    - delay: 2
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'on'
+          sequence:
+            - service: shell_command.disable_kids_internet
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.kids_devices_blocked
+              state: 'off'
+          sequence:
+            - service: shell_command.enable_kids_internet
+    - service: notify.parents_phones
+      data:
+        title: "Firewall State Synced"
+        message: "pfSense firewall rules have been synchronized with Home Assistant state"
+  mode: single
+  icon: mdi:sync

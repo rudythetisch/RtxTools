@@ -1,0 +1,76 @@
+# Parental Control Timer System Configuration
+# Add these sections to your existing Home Assistant configuration.yaml
+
+# Input Helpers
+input_select:
+  timer_duration:
+    name: "Kids Timer Duration"
+    options:
+      - "15min"
+      - "30min"
+      - "1hr"
+      - "2hr"
+    initial: "30min"
+    icon: mdi:timer
+
+input_boolean:
+  kids_devices_blocked:
+    name: "Kids Internet Blocked"
+    initial: false
+    icon: mdi:wifi-off
+
+input_datetime:
+  last_timer_action:
+    name: "Last Timer Action"
+    has_date: true
+    has_time: true
+
+# Timer Helper
+timer:
+  kids_screen_time:
+    name: "Kids Screen Time"
+    icon: mdi:timer-sand
+
+# Shell Commands for pfSense Control
+shell_command:
+  enable_kids_internet: 'ssh -o StrictHostKeyChecking=no -i /config/ssh_keys/pfsense_key hass_scripter@{{ states("input_text.pfsense_ip") }} "pfctl -a kids_block -F rules"'
+  disable_kids_internet: 'ssh -o StrictHostKeyChecking=no -i /config/ssh_keys/pfsense_key hass_scripter@{{ states("input_text.pfsense_ip") }} "echo \"block out quick from <KID_DEVICES> to any\" | pfctl -a kids_block -f -"'
+  check_kids_status: 'ssh -o StrictHostKeyChecking=no -i /config/ssh_keys/pfsense_key hass_scripter@{{ states("input_text.pfsense_ip") }} "pfctl -a kids_block -s rules"'
+
+# Additional input for pfSense IP (add your pfSense IP here)
+input_text:
+  pfsense_ip:
+    name: "pfSense IP Address"
+    initial: "192.168.10.1"  # Change this to your pfSense IP
+    pattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
+
+# Sensors to track status
+sensor:
+  - platform: template
+    sensors:
+      kids_timer_status:
+        friendly_name: "Kids Timer Status"
+        value_template: >
+          {% if is_state('timer.kids_screen_time', 'active') %}
+            Active ({{ state_attr('timer.kids_screen_time', 'remaining') }})
+          {% elif is_state('input_boolean.kids_devices_blocked', 'on') %}
+            Blocked
+          {% else %}
+            Available
+          {% endif %}
+        icon_template: >
+          {% if is_state('timer.kids_screen_time', 'active') %}
+            mdi:timer
+          {% elif is_state('input_boolean.kids_devices_blocked', 'on') %}
+            mdi:wifi-off
+          {% else %}
+            mdi:wifi
+          {% endif %}
+
+# Notifications
+notify:
+  - name: parents_phones
+    platform: group
+    services:
+      - service: mobile_app_parent_android  # Change to your actual device name
+      - service: mobile_app_parent_iphone   # Change to your actual device name
