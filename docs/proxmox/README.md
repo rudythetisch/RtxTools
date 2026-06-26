@@ -71,6 +71,39 @@ Teste que chaque service **répond correctement** — à lancer après un reboot
 ### /proxmox-updates
 Audite les paquets disponibles sur le nœud Proxmox, tous les LXC et les VMs. Produit un rapport avec recommandations et commandes d'installation. À lancer hebdomadairement.
 
+## Monitoring
+
+Stack : Prometheus (LXC 113) + Grafana (LXC 107) + Alertmanager (LXC 111) + Blackbox (LXC 112).
+
+### Exporters installés
+
+| Target | Exporter | Port | Notes |
+|--------|----------|------|-------|
+| Proxmox node | pve-exporter 3.9.0 | 9221 | Service systemd sur le nœud, token root@pam!claude |
+| TischNAS2 | node_exporter 1.11.1 | 9100 | /usr/local/bin/, démarrage via /etc/rc.local |
+| TischNAS3 | node_exporter 1.11.1 | 9100 | idem |
+
+### Accès SSH NAS
+
+- `ssh secureAdmin@192.168.10.5` / `ssh secureAdmin@192.168.10.3`
+- Clé Ed25519 déployée, sudo disponible (password requis)
+- Root SSH désactivé sur les deux NAS
+
+### Jobs Prometheus actifs
+
+```
+prometheus, proxmox, blackbox, nas-tischnas2, nas-tischnas3, homeassistant
+```
+
+Config : `/etc/prometheus/prometheus.yml` dans LXC 113.
+
+### En cours (issue #1)
+- [ ] AC3 : Dashboard Grafana Proxmox (communautaire)
+- [ ] AC4 : Dashboard Grafana Synology (communautaire)
+- [ ] AC5 : Règles d'alerte Prometheus
+- [ ] AC6 : Alertmanager → Telegram bot dédié homelab
+- [ ] AC7 : Architecture extensible documentée
+
 ## Notes opérationnelles
 
 ### Alertmanager (LXC 111)

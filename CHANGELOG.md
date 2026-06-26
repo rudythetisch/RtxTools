@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-06-27
+
+### Monitoring homelab — AC1 + AC2 (issue #1)
+
+- Nœud Proxmox : pve-exporter 3.9.0 installé (pip), service systemd sur port 9221
+  Reason: exposer métriques Proxmox (LXC/VMs CPU/RAM/disk) à Prometheus
+  Source: /etc/systemd/system/pve-exporter.service, /etc/pve-exporter.yml
+
+- TischNAS2 + TischNAS3 : node_exporter 1.11.1 installé sur /usr/local/bin/, démarrage /etc/rc.local
+  Reason: métriques système des NAS dans Prometheus
+  Source: secureAdmin@192.168.10.5 et .3
+
+- docs/proxmox/README.md : section Monitoring ajoutée (exporters, jobs, accès SSH NAS)
+  Reason: documenter l'état du monitoring pour les sessions futures
+
+- prometheus.yml (LXC 113) : jobs nas-tischnas2 + nas-tischnas3 ajoutés, placeholders corrigés
+  Reason: activer le scraping des NAS, corriger les IPs blackbox
+
+- Skills créés : /proxmox-health (health check fonctionnel) + /proxmox-updates (audit mises à jour)
+
 ## 2026-06-26
 
 ### Proxmox homelab — gestion via MCP + skills Claude Code
