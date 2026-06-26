@@ -23,7 +23,7 @@ Collection of personal tools and scripts for home infrastructure management.
 
 - **TischNAS2** — `192.168.10.5` (Synology NAS)
 - **TischNAS3** — `192.168.10.3` (Synology NAS)
-- **Proxmox node** — `192.168.10.2`
+- **Proxmox node** — `192.168.10.2` — voir [[proxmox/README]]
 
 ## Setup
 

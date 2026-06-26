@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-06-26
+
+### Proxmox homelab — gestion via MCP + skills Claude Code
+
+- `docs/proxmox/README.md`: documentation complète du homelab Proxmox (inventaire LXC/VMs, MCP, SSH, notes opérationnelles)
+  Reason: centraliser la connaissance opérationnelle pour les sessions Claude Code futures
+  Source: skills `/proxmox-health`, `/proxmox-updates`
+
+- `~/.claude/skills/proxmox-health/`: skill de health check fonctionnel par service (HTTP, DNS, ports, systemctl)
+  Reason: vérifier que chaque service répond correctement après reboot ou incident
+
+- `~/.claude/skills/proxmox-updates/`: skill d'audit des mises à jour avec niveaux de risque 🟢/🟡/🔴
+  Reason: maintenir le homelab à jour de façon sécurisée et documentée
+
+### Opérations effectuées ce jour
+
+- RustDesk (LXC 108) : 1.1.14 → 1.1.15
+- Proxmox node : 69 paquets sécurité + qemu-server 8.4.5→8.4.8 + pve-container 5.3.4→5.3.5 + corosync 3.1.9→3.1.10
+- Kernel Proxmox épinglé à 6.8.12-30-pve (actif au prochain reboot)
+- Alertmanager (LXC 111) : fix crash au démarrage (`--cluster.listen-address=''`)
+- VM rtxbot (116) supprimée (ancienne version obsolète)
+- Clé SSH `~/.ssh/id_ed25519` déployée sur `root@192.168.10.2`
+
 ## 2026-05-03
 
 ### rtxcopy — initial implementation
