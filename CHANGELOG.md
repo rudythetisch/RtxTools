@@ -8,7 +8,7 @@
   Reason: visualiser les métriques Proxmox et NAS
   Source: http://192.168.10.182:3000
 
-- Prometheus : règles d'alerte homelab créées dans /etc/prometheus/rules/homelab.yml (8 règles : CPU, RAM, disk, NAS temp, Proxmox containers, blackbox)
+- Prometheus : règles d'alerte homelab créées dans /etc/prometheus/rules/homelab.yml (8 règles : CPU, RAM, disk, NAS CPU temp >85°C, Proxmox containers, blackbox)
   Reason: alerting automatique sur les seuils standards
   Source: LXC 113, promtool check OK
 
