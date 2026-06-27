@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-06-27 (session 2)
+
+### pfSense API + infrastructure
+
+- pfSense-pkg-API v1.8.1 installé sur pfSense CE 2.7.2 (VM 104) via pkg add depuis HTTP server temporaire Proxmox
+  Reason: accès programmatique pfSense (logs, interfaces, actions) sans dépendre du browser
+  Source: https://pfsense.tixhon.be/api/v1/, auth API Token (client-id + token)
+
+- GRUB reboot=pci ajouté sur nœud Proxmox nipogi
+  Reason: NIPoGi bloquait (curseur clignotant) au reboot software — nécessitait power cycle manuel (bug reproduit 2x)
+  Source: /etc/default/grub, update-grub appliqué
+
+- Kernel Proxmox 6.8.12-30-pve activé (reboot effectué 2026-06-27)
+  Reason: kernel 6.8.12-30-pve épinglé depuis session précédente, reboot planifié
+
+- docs/proxmox/README.md : section reboot=pci + procédure WAN VOO après reboot
+  Reason: documenter les deux bugs récurrents découverts lors du reboot
+
+- docs/services.md : créé — cadastre des services principaux (pfSense, AdGuard, NPM, WireGuard, Proxmox)
+  Reason: demande utilisateur — historique centralisé de tous les changements de config par service
+
+- Issue #2 créée + raffinée : Dashboard homelab (React + Express, cadastre matos/services, polling statut, actions rapides)
+  Reason: remplacement de network-shutdown + vision long terme cadastre infrastructure
+  Source: feature/homelab-dashboard branch créée
+
 ## 2026-06-27
 
 ### Monitoring homelab — AC3 à AC7 (issue #1)
