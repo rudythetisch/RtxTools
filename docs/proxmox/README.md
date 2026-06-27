@@ -152,7 +152,16 @@ Le service peut crasher au démarrage après un reboot (race condition réseau).
 Écoute sur `:8000` mais répond en HTTP/0.9 (Rocket framework). `curl` refuse ce protocol — tester via `systemctl is-active vaultwarden`. Accès réel via NPM (HTTPS).
 
 ### Kernel Proxmox
-Kernel épinglé à `6.8.12-30-pve` via `proxmox-boot-tool kernel pin`. Actif au prochain reboot.
+Kernel épinglé à `6.8.12-30-pve` via `proxmox-boot-tool kernel pin`. Actif depuis le reboot du 2026-06-27.
+
+Paramètre GRUB `reboot=pci` ajouté dans `/etc/default/grub` pour éviter le blocage au reboot (NIPoGi restait sur curseur clignotant, nécessitait un power cycle manuel). Fix appliqué le 2026-06-27.
+
+### Après un reboot Proxmox — WAN VOO
+Le modem VOO (bridgé, IPoE) ne libère pas toujours l'IP WAN automatiquement. Si pfSense n'a plus d'IP WAN après reboot :
+
+1. **Status > Interfaces** → cocher "Send a gratuitous DHCP release packet" → cliquer **Release WAN**
+2. Attendre quelques secondes → cliquer **Renew WAN**
+3. Si toujours pas d'IP : rebooter le modem VOO
 
 ### Mise à jour RustDesk (LXC 108)
 Procédure : télécharger les `.deb` sur le nœud Proxmox puis `pct push` + `dpkg -i` dans le container (pas d'accès Internet direct depuis le LXC).
