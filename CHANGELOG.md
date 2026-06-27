@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-06-27 (session 4)
+
+### Dashboard homelab — inventaire enrichi + NPM SSL
+
+- `server/data/inventory.json` : champs `ipType`, `mac`, `config`, `installScript` ajoutés sur tous les devices/services ; hostnames manquants complétés (tischnas2/3.tixhon.be, adg, npm, prometheus) ; pfSense specs complètes (2 vCPU, 4GB, 2 NICs WAN/LAN) ; VM Home Assistant (VM 100) ajoutée ; Grafana LXC corrigé 112 → 107
+  Reason: cadastre infrastructure complet — IP assignation, MACs, scripts d'install, config réseau pfSense
+  Source: `inventory.json`
+
+- `server/routes/npm.js` : route Express `/api/npm` — authentification NPM, liste proxy hosts + certs SSL avec cache 5min
+  Reason: afficher le statut SSL de chaque hostname depuis NPM (source de vérité)
+  Source: `fetchNpmData`, `getToken`
+
+- `client/src/pages/InventoryPage.jsx` : colonnes MAC, Config, Script ajoutées ; badge `ipType` (static/dhcp/dhcp-reserved) ; composant `SslBadge` avec jours restants (vert/amber/rouge) depuis `/api/npm`
+  Reason: visibilité immédiate sur l'assignation IP, les certs SSL et les scripts community
+  Source: `SslBadge`, `IP_TYPE_COLOR`
+
+- NPM : 13 anciens certificats expirés `*.tischhome.duckdns.org` supprimés (IDs 16–43)
+  Reason: nettoyage — certs orphelins depuis ~1 an, plus aucun proxy host ne les utilisait
+
 ## 2026-06-27 (session 3)
 
 ### Dashboard homelab — Issue #2 + Issue #3
