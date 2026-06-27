@@ -97,12 +97,51 @@ prometheus, proxmox, blackbox, nas-tischnas2, nas-tischnas3, homeassistant
 
 Config : `/etc/prometheus/prometheus.yml` dans LXC 113.
 
-### En cours (issue #1)
-- [ ] AC3 : Dashboard Grafana Proxmox (communautaire)
-- [ ] AC4 : Dashboard Grafana Synology (communautaire)
-- [ ] AC5 : Règles d'alerte Prometheus
-- [ ] AC6 : Alertmanager → Telegram bot dédié homelab
-- [ ] AC7 : Architecture extensible documentée
+### Dashboards Grafana
+
+| Dashboard | ID | URL |
+|-----------|-----|-----|
+| Proxmox via Prometheus | 10347 | http://192.168.10.182:3000/d/Dp7Cd57Zza |
+| Node Exporter Full (NAS) | 1860 | http://192.168.10.182:3000/d/rYdddlPWk |
+
+Datasource Prometheus configurée dans Grafana (id: 2, uid: `bfqe4memsbke8e`, url: `http://192.168.10.184:9090`).
+
+### Règles d'alerte
+
+Fichier : `/etc/prometheus/rules/homelab.yml` sur LXC 113.
+
+| Alerte | Seuil | Sévérité |
+|--------|-------|----------|
+| HighCPU | CPU > 90% pendant 5min | warning |
+| HighMemory | RAM > 85% pendant 5min | warning |
+| DiskSpaceWarning | Disque > 80% | warning |
+| DiskSpaceCritical | Disque > 90% | critical |
+| NASHighDiskTemp | Temp > 50°C | warning |
+| ProxmoxContainerDown | pve_up == 0 pendant 1min | critical |
+| ProxmoxNodeHighCPU | CPU nœud > 90% pendant 5min | warning |
+| ServiceDown | probe_success == 0 pendant 2min | critical |
+
+### Notifications Telegram
+
+Alertmanager (LXC 111) : `telegram_configs` natif, bot `8791888244:AAGFTD-...`, chat `7251478112`.
+- Alertes `critical` : group_wait 10s, repeat 1h
+- Alertes `warning` : group_wait 30s, repeat 4h
+- Inhibition : une alerte `critical` supprime le `warning` correspondant
+
+### Ajouter un nouveau device
+
+1. **Installer node_exporter** sur le device (port 9100)
+2. **Ajouter un job** dans `/etc/prometheus/prometheus.yml` sur LXC 113 :
+   ```yaml
+   - job_name: "mon-device"
+     static_configs:
+       - targets: ["<IP>:9100"]
+         labels:
+           instance: "NomDevice"
+   ```
+3. **Recharger Prometheus** : `kill -HUP $(pgrep prometheus)` dans LXC 113
+4. Les règles d'alerte CPU/RAM/disk s'appliquent automatiquement au nouveau device
+5. Optionnel : importer un dashboard Grafana communautaire spécifique
 
 ## Notes opérationnelles
 

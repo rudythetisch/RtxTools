@@ -2,6 +2,23 @@
 
 ## 2026-06-27
 
+### Monitoring homelab — AC3 à AC7 (issue #1)
+
+- Grafana : datasource Prometheus ajoutée (id: 2), dashboards importés : Proxmox via Prometheus (10347) + Node Exporter Full (1860)
+  Reason: visualiser les métriques Proxmox et NAS
+  Source: http://192.168.10.182:3000
+
+- Prometheus : règles d'alerte homelab créées dans /etc/prometheus/rules/homelab.yml (8 règles : CPU, RAM, disk, NAS temp, Proxmox containers, blackbox)
+  Reason: alerting automatique sur les seuils standards
+  Source: LXC 113, promtool check OK
+
+- Alertmanager : config migrée vers telegram_configs natif (v0.31.1), inhibit rules critical→warning
+  Reason: intégration Telegram propre, messages formatés Markdown avec emoji, inhibition doublons
+  Source: LXC 111, /etc/alertmanager/alertmanager.yml
+
+- docs/proxmox/README.md : section monitoring complétée (dashboards, règles, Telegram, guide ajout device)
+  Reason: AC7 — architecture extensible documentée
+
 ### Monitoring homelab — AC1 + AC2 (issue #1)
 
 - Nœud Proxmox : pve-exporter 3.9.0 installé (pip), service systemd sur port 9221
