@@ -7,7 +7,7 @@ Collection of personal tools and scripts for home infrastructure management.
 | Tool | Description |
 |------|-------------|
 | [[rtxcopy/overview\|rtxcopy]] | Copy files/folders to NAS or Proxmox LXC/VM over SSH |
-| `tools/network-shutdown/` | Web UI (Node.js/Express) for shutting down network devices |
+| `tools/homelab-dashboard/` | Dashboard homelab (React + Express) — statut, inventaire, actions rapides |
 
 ## Scripts
 

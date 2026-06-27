@@ -1,0 +1,109 @@
+{
+  "devices": [
+    {
+      "id": "nipogi",
+      "name": "NIPoGi (Proxmox)",
+      "type": "server",
+      "ip": "192.168.10.2",
+      "hostname": "proxmox.tixhon.be",
+      "mac": null,
+      "specs": "Intel N100, 16GB RAM, 512GB NVMe",
+      "role": "Proxmox VE node — 13 LXC + 2 VMs",
+      "sshUser": "root",
+      "actions": ["shutdown", "wol"]
+    },
+    {
+      "id": "tischnas2",
+      "name": "TischNAS2 (DS916+)",
+      "type": "nas",
+      "ip": "192.168.10.5",
+      "hostname": null,
+      "mac": null,
+      "specs": "DS916+ 6-bay, 8GB RAM",
+      "role": "Synology NAS principal",
+      "sshUser": "secureAdmin",
+      "actions": ["shutdown", "wol"]
+    },
+    {
+      "id": "tischnas3",
+      "name": "TischNAS3 (DS925+)",
+      "type": "nas",
+      "ip": "192.168.10.3",
+      "hostname": null,
+      "mac": null,
+      "specs": "DS925+ 5-bay",
+      "role": "Synology NAS secondaire",
+      "sshUser": "secureAdmin",
+      "actions": ["shutdown", "wol"]
+    },
+    {
+      "id": "pfsense",
+      "name": "pfSense (VM 104)",
+      "type": "firewall",
+      "ip": "192.168.10.1",
+      "hostname": "pfsense.tixhon.be",
+      "mac": null,
+      "specs": "VM 104 sur Proxmox",
+      "role": "Firewall, routeur, WireGuard, DynDNS",
+      "sshUser": null,
+      "actions": ["release-wan"]
+    }
+  ],
+  "services": [
+    {
+      "id": "adguard",
+      "name": "AdGuard Home",
+      "lxcId": 103,
+      "ip": "192.168.10.12",
+      "hostname": null,
+      "port": 3000,
+      "url": "http://192.168.10.12:3000",
+      "role": "DNS avec blocage pub/tracking",
+      "actions": ["start-lxc", "stop-lxc"]
+    },
+    {
+      "id": "npm",
+      "name": "Nginx Proxy Manager",
+      "lxcId": 105,
+      "ip": "192.168.10.11",
+      "hostname": null,
+      "port": 81,
+      "url": "http://192.168.10.11:81",
+      "role": "Reverse proxy HTTPS",
+      "actions": ["start-lxc", "stop-lxc"]
+    },
+    {
+      "id": "prometheus",
+      "name": "Prometheus",
+      "lxcId": 113,
+      "ip": "192.168.10.184",
+      "hostname": null,
+      "port": 9090,
+      "url": "http://192.168.10.184:9090",
+      "role": "Monitoring métriques",
+      "actions": ["start-lxc", "stop-lxc"]
+    },
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "lxcId": 112,
+      "ip": "192.168.10.182",
+      "hostname": "grafana.tixhon.be",
+      "port": 3000,
+      "url": "https://grafana.tixhon.be",
+      "role": "Dashboards monitoring",
+      "actions": ["start-lxc", "stop-lxc"]
+    },
+    {
+      "id": "alertmanager",
+      "name": "Alertmanager",
+      "lxcId": 111,
+      "ip": "192.168.10.183",
+      "hostname": null,
+      "port": 9093,
+      "url": "http://192.168.10.183:9093",
+      "role": "Alerting → Telegram",
+      "actions": ["start-lxc", "stop-lxc"]
+    }
+  ]
+}

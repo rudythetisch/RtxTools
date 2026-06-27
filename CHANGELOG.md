@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-06-27 (session 3)
+
+### Dashboard homelab — Issue #2 + Issue #3
+
+- `tools/homelab-dashboard/` : nouveau dashboard React + Express (port 8160 + 5173)
+  Reason: remplacer network-shutdown, vision cadastre infrastructure
+  Source: `server/routes/status.js`, `server/routes/inventory.js`, `server/routes/actions.js`
+
+- `tools/homelab-dashboard/server/routes/status.js` : SSE polling 30s — SSH nipogi (CPU/RAM/disk via /proc), Prometheus NAS (TischNAS2/3 via node_exporter, labels, /volume1), pct exec batch LXC, pfSense REST API (WAN status/delay/loss)
+  Reason: métriques temps réel de toute l'infrastructure
+  Source: `getNipogiMetrics`, `getDeviceMetrics`, `refreshAllLxcMetrics`, `getPfSenseStatus`
+
+- `tools/homelab-dashboard/client/src/pages/StatusPage.jsx` : cartes statut avec MetricBar, hostname cliquable, espace disque NAS en To, confirmations sur toutes les actions destructives
+  Reason: UX claire avec vraies valeurs disque et sécurité sur actions shutdown
+
+- `tools/homelab-dashboard/client/src/pages/InventoryPage.jsx` : CRUD complet devices + services, champs hostname, purchasedAt, installedAt, version, notes
+  Reason: cadastre matos avec historique date achat/installation
+
+- `tools/network-shutdown/` : supprimé (migré dans homelab-dashboard)
+  Reason: AC4 — consolidation
+
+- `CLAUDE.md`, `docs/index.md` : références network-shutdown → homelab-dashboard
+  Reason: doc à jour post-migration
+
+- Issue #3 créée + refinée (ready) : page Réseau dans le dashboard — AdGuard stats/live + pfSense logs/live + embed Grafana
+
 ## 2026-06-27 (session 2)
 
 ### pfSense API + infrastructure
