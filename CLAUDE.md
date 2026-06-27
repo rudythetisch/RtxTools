@@ -19,12 +19,12 @@ RtxTools/
 ├── shared/rtxlib/             Future shared lib (empty for now)
 └── tools/
     ├── rtxcopy/               File-copy TUI tool (Python + Textual)
-    └── network-shutdown/      Web UI for shutting down network devices (Node.js/Express)
+    └── homelab-dashboard/     Dashboard homelab — statut, inventaire, actions rapides (React + Express)
 ```
 
 Each tool under `tools/` has its own dependencies:
 - `rtxcopy/` — Python package, use `uv`
-- `network-shutdown/` — Node.js app, use `npm install && npm start` (or `start-server.sh`)
+- `homelab-dashboard/` — Node.js/React app, use `npm install && npm run dev` (port 8160 Express + 5173 Vite)
 
 Scripts under `scripts/` are standalone YAML/shell files — no build step required.
 

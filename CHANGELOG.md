@@ -1,5 +1,75 @@
 # Changelog
 
+## 2026-06-27 (session 4)
+
+### Dashboard homelab — inventaire enrichi + NPM SSL
+
+- `server/data/inventory.json` : champs `ipType`, `mac`, `config`, `installScript` ajoutés sur tous les devices/services ; hostnames manquants complétés (tischnas2/3.tixhon.be, adg, npm, prometheus) ; pfSense specs complètes (2 vCPU, 4GB, 2 NICs WAN/LAN) ; VM Home Assistant (VM 100) ajoutée ; Grafana LXC corrigé 112 → 107
+  Reason: cadastre infrastructure complet — IP assignation, MACs, scripts d'install, config réseau pfSense
+  Source: `inventory.json`
+
+- `server/routes/npm.js` : route Express `/api/npm` — authentification NPM, liste proxy hosts + certs SSL avec cache 5min
+  Reason: afficher le statut SSL de chaque hostname depuis NPM (source de vérité)
+  Source: `fetchNpmData`, `getToken`
+
+- `client/src/pages/InventoryPage.jsx` : colonnes MAC, Config, Script ajoutées ; badge `ipType` (static/dhcp/dhcp-reserved) ; composant `SslBadge` avec jours restants (vert/amber/rouge) depuis `/api/npm`
+  Reason: visibilité immédiate sur l'assignation IP, les certs SSL et les scripts community
+  Source: `SslBadge`, `IP_TYPE_COLOR`
+
+- NPM : 13 anciens certificats expirés `*.tischhome.duckdns.org` supprimés (IDs 16–43)
+  Reason: nettoyage — certs orphelins depuis ~1 an, plus aucun proxy host ne les utilisait
+
+## 2026-06-27 (session 3)
+
+### Dashboard homelab — Issue #2 + Issue #3
+
+- `tools/homelab-dashboard/` : nouveau dashboard React + Express (port 8160 + 5173)
+  Reason: remplacer network-shutdown, vision cadastre infrastructure
+  Source: `server/routes/status.js`, `server/routes/inventory.js`, `server/routes/actions.js`
+
+- `tools/homelab-dashboard/server/routes/status.js` : SSE polling 30s — SSH nipogi (CPU/RAM/disk via /proc), Prometheus NAS (TischNAS2/3 via node_exporter, labels, /volume1), pct exec batch LXC, pfSense REST API (WAN status/delay/loss)
+  Reason: métriques temps réel de toute l'infrastructure
+  Source: `getNipogiMetrics`, `getDeviceMetrics`, `refreshAllLxcMetrics`, `getPfSenseStatus`
+
+- `tools/homelab-dashboard/client/src/pages/StatusPage.jsx` : cartes statut avec MetricBar, hostname cliquable, espace disque NAS en To, confirmations sur toutes les actions destructives
+  Reason: UX claire avec vraies valeurs disque et sécurité sur actions shutdown
+
+- `tools/homelab-dashboard/client/src/pages/InventoryPage.jsx` : CRUD complet devices + services, champs hostname, purchasedAt, installedAt, version, notes
+  Reason: cadastre matos avec historique date achat/installation
+
+- `tools/network-shutdown/` : supprimé (migré dans homelab-dashboard)
+  Reason: AC4 — consolidation
+
+- `CLAUDE.md`, `docs/index.md` : références network-shutdown → homelab-dashboard
+  Reason: doc à jour post-migration
+
+- Issue #3 créée + refinée (ready) : page Réseau dans le dashboard — AdGuard stats/live + pfSense logs/live + embed Grafana
+
+## 2026-06-27 (session 2)
+
+### pfSense API + infrastructure
+
+- pfSense-pkg-API v1.8.1 installé sur pfSense CE 2.7.2 (VM 104) via pkg add depuis HTTP server temporaire Proxmox
+  Reason: accès programmatique pfSense (logs, interfaces, actions) sans dépendre du browser
+  Source: https://pfsense.tixhon.be/api/v1/, auth API Token (client-id + token)
+
+- GRUB reboot=pci ajouté sur nœud Proxmox nipogi
+  Reason: NIPoGi bloquait (curseur clignotant) au reboot software — nécessitait power cycle manuel (bug reproduit 2x)
+  Source: /etc/default/grub, update-grub appliqué
+
+- Kernel Proxmox 6.8.12-30-pve activé (reboot effectué 2026-06-27)
+  Reason: kernel 6.8.12-30-pve épinglé depuis session précédente, reboot planifié
+
+- docs/proxmox/README.md : section reboot=pci + procédure WAN VOO après reboot
+  Reason: documenter les deux bugs récurrents découverts lors du reboot
+
+- docs/services.md : créé — cadastre des services principaux (pfSense, AdGuard, NPM, WireGuard, Proxmox)
+  Reason: demande utilisateur — historique centralisé de tous les changements de config par service
+
+- Issue #2 créée + raffinée : Dashboard homelab (React + Express, cadastre matos/services, polling statut, actions rapides)
+  Reason: remplacement de network-shutdown + vision long terme cadastre infrastructure
+  Source: feature/homelab-dashboard branch créée
+
 ## 2026-06-27
 
 ### Monitoring homelab — AC3 à AC7 (issue #1)
