@@ -93,7 +93,7 @@ async function getNipogiMetrics() {
 async function getPfSenseStatus() {
   try {
     const res = await axios.get(`${PFSENSE_URL}/api/v2/status/gateways`, {
-      headers: { 'X-API-Key': PFSENSE_API_KEY },
+      headers: { 'X-API-Key': PFSENSE_API_KEY, 'Accept': 'application/json' },
       timeout: 5000,
     });
     const gateways = res.data.data || [];

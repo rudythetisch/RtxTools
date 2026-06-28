@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import StatusPage from './pages/StatusPage.jsx';
 import InventoryPage from './pages/InventoryPage.jsx';
+import NetworkPage from './pages/NetworkPage.jsx';
 
 const NAV = [
   { id: 'status', label: 'Statut' },
   { id: 'inventory', label: 'Inventaire' },
+  { id: 'network', label: 'Réseau' },
 ];
 
 const s = {
@@ -43,6 +45,7 @@ export default function App() {
       <main style={s.main}>
         {page === 'status' && <StatusPage />}
         {page === 'inventory' && <InventoryPage />}
+        {page === 'network' && <NetworkPage />}
       </main>
     </div>
   );

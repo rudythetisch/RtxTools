@@ -7,6 +7,8 @@ const inventoryRoutes = require('./routes/inventory');
 const statusRoutes = require('./routes/status');
 const actionsRoutes = require('./routes/actions');
 const npmRoutes = require('./routes/npm');
+const adguardRoutes = require('./routes/adguard');
+const networkRoutes = require('./routes/network');
 
 const app = express();
 const PORT = process.env.PORT || 8160;
@@ -19,6 +21,8 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/actions', actionsRoutes);
 app.use('/api/npm', npmRoutes);
+app.use('/api/adguard', adguardRoutes);
+app.use('/api/network', networkRoutes);
 
 if (isProd) {
   app.use(express.static(path.join(__dirname, '../client/dist')));
