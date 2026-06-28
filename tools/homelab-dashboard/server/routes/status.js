@@ -90,6 +90,26 @@ async function getNipogiMetrics() {
   });
 }
 
+async function getHaosMetrics() {
+  return new Promise((resolve) => {
+    const remoteCmd = `PID=$(cat /var/run/qemu-server/100.pid 2>/dev/null); CPU=$(ps -p $PID -o %cpu --no-headers 2>/dev/null | tr -d ' '); MEM_KB=$(grep VmRSS /proc/$PID/status 2>/dev/null | awk '{print $2}'); echo "$CPU $MEM_KB"`;
+    execFile('ssh', [
+      '-o', 'StrictHostKeyChecking=no',
+      '-o', 'ConnectTimeout=5',
+      'root@192.168.10.2',
+      remoteCmd,
+    ], { timeout: 10000 }, (err, stdout) => {
+      if (err || !stdout.trim()) return resolve({ cpu: null, mem: null });
+      const [cpu, memKb] = stdout.trim().split(' ');
+      const memPct = memKb ? (parseInt(memKb) / (4096 * 1024) * 100).toFixed(1) : null;
+      resolve({
+        cpu: cpu ? parseFloat(cpu).toFixed(1) : null,
+        mem: memPct,
+      });
+    });
+  });
+}
+
 async function getPfSenseStatus() {
   try {
     const res = await axios.get(`${PFSENSE_URL}/api/v2/status/gateways`, {
@@ -165,6 +185,8 @@ router.get('/stream', (req, res) => {
         if (online) {
           if (device.id === 'nipogi') {
             metrics = await getNipogiMetrics();
+          } else if (device.id === 'haos') {
+            metrics = await getHaosMetrics();
           } else if (device.type === 'nas') {
             const nasInstance = device.id === 'tischnas2' ? 'TischNAS2' : 'TischNAS3';
             metrics = await getDeviceMetrics(nasInstance);
