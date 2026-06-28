@@ -10,8 +10,8 @@ const router = express.Router();
 const DATA_FILE = path.join(__dirname, '../data/inventory.json');
 
 const PROMETHEUS_URL = 'http://192.168.10.184:9090';
-const PFSENSE_API = 'https://pfsense.tixhon.be/api/v1';
-const PFSENSE_AUTH = '72746978686f6e 3421f597ad3a33ed18976a875491c762';
+const PFSENSE_URL = process.env.PFSENSE_URL || 'http://192.168.10.1';
+const PFSENSE_API_KEY = process.env.PFSENSE_API_KEY || '';
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
@@ -92,17 +92,16 @@ async function getNipogiMetrics() {
 
 async function getPfSenseStatus() {
   try {
-    const gatewaysRes = await axios.get(`${PFSENSE_API}/status/gateway/`, {
-      headers: { Authorization: PFSENSE_AUTH },
-      httpsAgent,
+    const res = await axios.get(`${PFSENSE_URL}/api/v2/status/gateways`, {
+      headers: { 'X-API-Key': PFSENSE_API_KEY },
       timeout: 5000,
     });
-    const gateways = gatewaysRes.data.data || [];
+    const gateways = res.data.data || [];
     const wan = gateways.find(g => g.name?.toLowerCase().includes('wan'));
     return {
       wanStatus: wan?.status || 'unknown',
       wanIp: wan?.srcip || null,
-      wanDelay: wan?.delay != null ? `${wan.delay.toFixed(0)}ms` : null,
+      wanDelay: wan?.delay != null ? `${parseFloat(wan.delay).toFixed(0)}ms` : null,
       wanLoss: wan?.loss != null ? `${wan.loss}%` : null,
     };
   } catch {

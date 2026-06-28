@@ -2,9 +2,9 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
-const NPM_URL = 'http://192.168.10.11:81';
-const NPM_USER = 'rudy.tixhon@gmail.com';
-const NPM_PASS = 'WJ6nBfGXg4gu9j';
+const NPM_URL = process.env.NPM_URL || 'http://192.168.10.11:81';
+const NPM_USER = process.env.NPM_USER || '';
+const NPM_PASS = process.env.NPM_PASS || '';
 
 let cache = null;
 let cacheAt = 0;

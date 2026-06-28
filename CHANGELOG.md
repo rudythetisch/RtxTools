@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-06-28 (session 5)
+
+### Dashboard homelab — inventaire complet + pfSense API v2
+
+- `server/data/inventory.json` : 8 LXC ajoutés (mqtt/101, z2m/102, influxdb/106, rustdesk/108, cloudflared/109, vaultwarden/110, blackbox-exporter/112, linkwarden/114) ; tous les `ipType` "dhcp" → "dhcp-reserved" (réservations DHCP confirmées via pfSense GUI) ; MAC Grafana corrigé (BC:24:11:9A:5E:65) ; IP + URL Alertmanager corrigés (192.168.10.185)
+  Reason: inventaire exhaustif de toute l'infra LXC ; ipType correct reflétant les réservations statiques
+  Source: `inventory.json`
+
+- `server/routes/status.js` : migration pfSense v1 → REST API v2 — `PFSENSE_URL`/`PFSENSE_API_KEY` depuis `.env` ; endpoint `/api/v2/status/gateways` avec header `X-API-Key` ; suppression ancien auth `client-id token`
+  Reason: pfSense 2.8.1 avec package RESTAPI v2 — ancienne API v1 supprimée
+  Source: `getPfSenseStatus`, `PFSENSE_URL`, `PFSENSE_API_KEY`
+
+- `server/routes/npm.js` : credentials NPM lus depuis `.env` via `process.env`
+  Reason: sortir les secrets du code source
+  Source: `NPM_URL`, `NPM_USER`, `NPM_PASS`
+
+- `server/index.js` : chargement `dotenv` au démarrage du serveur
+  Reason: rendre les variables `.env` disponibles dans toutes les routes
+  Source: `require('dotenv').config(...)`
+
+- `.gitignore` + `.env` : secrets pfSense API v2 et NPM stockés localement, exclus du dépôt
+  Reason: sécurité — clé API pfSense `83f842ade...` et mot de passe NPM hors VCS
+  Source: `.env`, `.gitignore`
+
+- pfSense CE upgradé 2.7.2 → 2.8.1 (FreeBSD 15) ; package `pfrest/pfSense-pkg-RESTAPI` v2.7.2 installé ; clé API créée
+  Reason: FreeBSD 14 → 15 ABI break, nouveau package RESTAPI requis
+  Source: pfSense GUI / SSH WAN
+
 ## 2026-06-27 (session 4)
 
 ### Dashboard homelab — inventaire enrichi + NPM SSL
