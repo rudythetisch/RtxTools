@@ -158,7 +158,7 @@ router.get('/stream', (req, res) => {
 
     await Promise.all([
       ...inventory.devices.map(async (device) => {
-        const online = await checkPort(device.ip, 22);
+        const online = await checkPort(device.ip, device.port || 22);
         let metrics = { cpu: null, mem: null, disk: null };
         let extra = {};
 

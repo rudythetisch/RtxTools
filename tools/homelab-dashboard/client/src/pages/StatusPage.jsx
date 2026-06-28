@@ -146,11 +146,11 @@ export default function StatusPage() {
                 </div>
               )}
               <div style={s.actions}>
-                {service.lxcId && (
-                  <>
-                    <ActionButton label="Start" endpoint={`/api/actions/lxc/${service.lxcId}/start`} />
-                    <ActionButton label="Stop" endpoint={`/api/actions/lxc/${service.lxcId}/stop`} confirm />
-                  </>
+                {service.lxcId && !st.online && (
+                  <ActionButton label="Start" endpoint={`/api/actions/lxc/${service.lxcId}/start`} />
+                )}
+                {service.lxcId && st.online && (
+                  <ActionButton label="Stop" endpoint={`/api/actions/lxc/${service.lxcId}/stop`} confirm />
                 )}
               </div>
             </div>

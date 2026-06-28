@@ -72,6 +72,7 @@
       "ipType": "dhcp-reserved",
       "hostname": "hass.tixhon.be",
       "mac": "02:33:BE:33:4D:E0",
+      "port": 8123,
       "specs": "VM 100 — 2 vCPU (host), 4GB RAM, 32GB SSD",
       "role": "Domotique — Home Assistant OS 12.4",
       "sshUser": null,
