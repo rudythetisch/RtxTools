@@ -10,7 +10,7 @@ const s = {
   cardHeader: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
   badge: (online) => ({
     width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-    background: online ? '#22c55e' : '#ef4444',
+    background: online === undefined ? '#475569' : online ? '#22c55e' : '#ef4444',
     boxShadow: online ? '0 0 6px #22c55e88' : 'none',
   }),
   name: { fontWeight: 600, fontSize: 14, color: '#e2e8f0' },
@@ -61,7 +61,7 @@ export default function StatusPage() {
                       <a href={`https://${device.hostname}`} target="_blank" rel="noreferrer"
                         style={{ color: '#475569', textDecoration: 'none' }}>{device.hostname}</a>
                     ) : device.ip}
-                    {' · '}{st.online ? 'En ligne' : 'Hors ligne'}
+                    {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
                   </div>
                   {device.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{device.ip}</div>}
                 </div>
@@ -130,7 +130,7 @@ export default function StatusPage() {
                       <a href={`https://${service.hostname}`} target="_blank" rel="noreferrer"
                         style={{ color: '#475569', textDecoration: 'none' }}>{service.hostname}</a>
                     ) : `${service.ip}:${service.port}`}
-                    {' · '}{st.online ? 'En ligne' : 'Hors ligne'}
+                    {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
                   </div>
                   {service.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{service.ip}:{service.port}</div>}
                 </div>
@@ -146,10 +146,10 @@ export default function StatusPage() {
                 </div>
               )}
               <div style={s.actions}>
-                {service.lxcId && !st.online && (
+                {service.lxcId && st.online === false && (
                   <ActionButton label="Start" endpoint={`/api/actions/lxc/${service.lxcId}/start`} />
                 )}
-                {service.lxcId && st.online && (
+                {service.lxcId && st.online === true && (
                   <ActionButton label="Stop" endpoint={`/api/actions/lxc/${service.lxcId}/stop`} confirm />
                 )}
               </div>
