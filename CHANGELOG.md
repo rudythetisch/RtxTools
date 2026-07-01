@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-01 (session 7)
+
+### Inventaire réseau — topologie physique + devices complets
+
+- `server/data/inventory.json` : 30+ devices ajoutés — infrastructure réseau (D-Link DGS-1100-24, 3× Deco M4R, TL-WPA7617, TL-PA7017P, TL-WR802N/Neato), IoT (NHC2 .22, HomeWizard P1 .23, SMLIGHT SLZB-06 .53, Tado ×2, Eufy ×2, Meross ×2, Dreame vacuum + tondeuse, Netatmo, Philips soundbar, Bosch lave-linge + lave-vaisselle, LG C1, Apple TV, Nintendo Switch, Gigaset), clients (iPhone 17 Pro Max Rudy, iPhone 14 Pro Elias, iPhone Xs Tristan, Samsung A54 Céline, iPad Air 13" M3, iPad 5e gen, MacBook Pro Céline, Mac Mini M2)
+  Reason: documenter la topologie complète du réseau domestique pour référence future et monitoring
+  Source: pfSense ARP table `/api/v2/diagnostics/arp_table`, Proxmox `ip neigh show`, macvendors API
+
+- `memory/network-topology.md` : nouvelle note mémoire — topologie physique (VOO bridge → NIPoGi → pfSense → D-Link DGS-1100-24 → patch panel + Deco M4R ×3 + CPL), foyer (Rudy, Céline, Elias, Tristan)
+  Reason: persister la topologie réseau entre sessions
+
 ## 2026-07-01 (session 6)
 
 ### Dashboard homelab — Page Réseau, AdGuard, HAOS metrics, prod Mac Mini
