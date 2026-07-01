@@ -2,7 +2,27 @@ import { useEffect, useState } from 'react';
 import MetricBar from '../components/MetricBar.jsx';
 import ActionButton from '../components/ActionButton.jsx';
 
-const TYPE_ICON = { server: '🖥', nas: '🗄', firewall: '🛡', default: '📦' };
+const TYPE_ICON = { server: '🖥', nas: '🗄', firewall: '🛡', ap: '📡', client: '💻', default: '📦' };
+
+const FAMILY_LABEL = {
+  infra: 'INFRASTRUCTURE',
+  network: 'RÉSEAU & WI-FI',
+  iot: 'IOT & DOMOTIQUE',
+  appliances: 'ÉLECTROMÉNAGER',
+  media: 'MÉDIA & DIVERTISSEMENT',
+  clients: 'APPAREILS CLIENTS',
+};
+
+function groupByFamily(devices) {
+  const order = ['infra', 'network', 'iot', 'appliances', 'media', 'clients'];
+  const groups = {};
+  for (const d of devices) {
+    const f = d.family || 'other';
+    if (!groups[f]) groups[f] = [];
+    groups[f].push(d);
+  }
+  return order.filter(f => groups[f]).map(f => ({ family: f, devices: groups[f] }));
+}
 
 const s = {
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 32 },
@@ -45,75 +65,66 @@ export default function StatusPage() {
     <div>
       {lastUpdate && <div style={s.timestamp}>Dernière mise à jour : {lastUpdate} (polling 30s)</div>}
 
-      <div style={s.section}>APPAREILS</div>
-      <div style={s.grid}>
-        {inventory.devices.map(device => {
-          const st = deviceStatus(device.id);
-          const icon = TYPE_ICON[device.type] || TYPE_ICON.default;
-          return (
-            <div key={device.id} style={s.card}>
-              <div style={s.cardHeader}>
-                <div style={s.badge(st.online)} />
-                <div>
-                  <div style={s.name}>{icon} {device.name}</div>
-                  <div style={s.ip}>
-                    {device.hostname ? (
-                      <a href={`https://${device.hostname}`} target="_blank" rel="noreferrer"
-                        style={{ color: '#475569', textDecoration: 'none' }}>{device.hostname}</a>
-                    ) : device.ip}
-                    {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
+      {groupByFamily(inventory.devices).map(({ family, devices }) => (
+        <div key={family}>
+          <div style={s.section}>{FAMILY_LABEL[family] || family.toUpperCase()}</div>
+          <div style={s.grid}>
+            {devices.map(device => {
+              const st = deviceStatus(device.id);
+              const icon = TYPE_ICON[device.type] || TYPE_ICON.default;
+              return (
+                <div key={device.id} style={s.card}>
+                  <div style={s.cardHeader}>
+                    <div style={s.badge(st.online)} />
+                    <div>
+                      <div style={s.name}>{icon} {device.name}</div>
+                      <div style={s.ip}>
+                        {device.hostname ? (
+                          <a href={`https://${device.hostname}`} target="_blank" rel="noreferrer"
+                            style={{ color: '#475569', textDecoration: 'none' }}>{device.hostname}</a>
+                        ) : device.ip || '—'}
+                        {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
+                      </div>
+                      {device.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{device.ip}</div>}
+                    </div>
                   </div>
-                  {device.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{device.ip}</div>}
-                </div>
-              </div>
-              <MetricBar label="CPU" value={st.cpu} />
-              <MetricBar label="RAM" value={st.mem} />
-              {device.type !== 'firewall' && (
-                <>
-                  <MetricBar label="Disk" value={st.disk} />
-                  {st.diskUsedTB && (
-                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                      {st.diskUsedTB} To / {st.diskTotalTB} To utilisés
+                  <MetricBar label="CPU" value={st.cpu} />
+                  <MetricBar label="RAM" value={st.mem} />
+                  {device.type !== 'firewall' && (
+                    <>
+                      <MetricBar label="Disk" value={st.disk} />
+                      {st.diskUsedTB && (
+                        <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                          {st.diskUsedTB} To / {st.diskTotalTB} To utilisés
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {device.id === 'pfsense' && (
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>
+                      WAN: <span style={{ color: st.wanStatus === 'online' ? '#22c55e' : '#f59e0b' }}>{st.wanStatus || '—'}</span>
+                      {st.wanIp && ` · ${st.wanIp}`}
+                      {st.wanDelay && ` · ${st.wanDelay}`}
+                      {st.wanLoss != null && ` · perte ${st.wanLoss}`}
                     </div>
                   )}
-                </>
-              )}
-              {device.id === 'pfsense' && (
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 6 }}>
-                  WAN: <span style={{ color: st.wanStatus === 'online' ? '#22c55e' : '#f59e0b' }}>{st.wanStatus || '—'}</span>
-                  {st.wanIp && ` · ${st.wanIp}`}
-                  {st.wanDelay && ` · ${st.wanDelay}`}
-                  {st.wanLoss != null && ` · perte ${st.wanLoss}`}
+                  <div style={s.actions}>
+                    {device.actions?.includes('shutdown') && (
+                      <ActionButton label="Shutdown" endpoint={`/api/actions/shutdown/${device.id}`} confirm />
+                    )}
+                    {device.actions?.includes('wol') && device.mac && (
+                      <ActionButton label="Wake (WoL)" endpoint={`/api/actions/wol/${device.id}`} body={{ mac: device.mac }} confirm />
+                    )}
+                    {device.actions?.includes('release-wan') && (
+                      <ActionButton label="Release WAN" endpoint="/api/actions/release-wan" confirm />
+                    )}
+                  </div>
                 </div>
-              )}
-              <div style={s.actions}>
-                {device.actions?.includes('shutdown') && (
-                  <ActionButton
-                    label="Shutdown"
-                    endpoint={`/api/actions/shutdown/${device.id}`}
-                    confirm
-                  />
-                )}
-                {device.actions?.includes('wol') && device.mac && (
-                  <ActionButton
-                    label="Wake (WoL)"
-                    endpoint={`/api/actions/wol/${device.id}`}
-                    body={{ mac: device.mac }}
-                    confirm
-                  />
-                )}
-                {device.actions?.includes('release-wan') && (
-                  <ActionButton
-                    label="Release WAN"
-                    endpoint="/api/actions/release-wan"
-                    confirm
-                  />
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       <div style={s.section}>SERVICES LXC</div>
       <div style={s.grid}>
