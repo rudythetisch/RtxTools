@@ -15,50 +15,64 @@ const FAMILY_LABEL = {
 };
 const FAMILY_ORDER = ['infra', 'network', 'iot', 'appliances', 'media', 'clients'];
 
+const SI = 'https://cdn.simpleicons.org';
+const FAV = (domain) => `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
 const DEVICE_LOGO = {
-  nipogi:               'https://cdn.simpleicons.org/proxmox/slate',
-  pfsense:              'https://cdn.simpleicons.org/pfsense/slate',
-  haos:                 'https://cdn.simpleicons.org/homeassistant/slate',
-  tischnas2:            'https://cdn.simpleicons.org/synology/slate',
-  tischnas3:            'https://cdn.simpleicons.org/synology/slate',
-  'deco-salon':         'https://cdn.simpleicons.org/tp-link/slate',
-  'deco-mezzanine':     'https://cdn.simpleicons.org/tp-link/slate',
-  'deco-grenier':       'https://cdn.simpleicons.org/tp-link/slate',
-  'cpl-tplink':         'https://cdn.simpleicons.org/tp-link/slate',
-  'cpl-pa7017p':        'https://cdn.simpleicons.org/tp-link/slate',
-  'neato-router':       'https://cdn.simpleicons.org/tp-link/slate',
-  'homewizard-p1':      'https://cdn.simpleicons.org/homewizard/slate',
-  netatmo:              'https://cdn.simpleicons.org/netatmo/slate',
-  'tado-ac-1':          'https://cdn.simpleicons.org/tado/slate',
-  'tado-ac-2':          'https://cdn.simpleicons.org/tado/slate',
-  'dreame-vacuum':      'https://cdn.simpleicons.org/dreame/slate',
-  'dreame-mower':       'https://cdn.simpleicons.org/dreame/slate',
-  'bosch-lavelinge':    'https://cdn.simpleicons.org/bosch/slate',
-  'bosch-lavevaisselle':'https://cdn.simpleicons.org/bosch/slate',
-  'lg-tv-c1':           'https://cdn.simpleicons.org/lg/slate',
-  'philips-soundbar':   'https://cdn.simpleicons.org/philips/slate',
-  'appletv-salon':      'https://cdn.simpleicons.org/apple/slate',
-  'nintendo-switch':    'https://cdn.simpleicons.org/nintendo/slate',
-  macmini:              'https://cdn.simpleicons.org/apple/slate',
-  'macbook-celine':     'https://cdn.simpleicons.org/apple/slate',
-  'mac-unknown':        'https://cdn.simpleicons.org/apple/slate',
-  'ipad-air-13-m3':     'https://cdn.simpleicons.org/apple/slate',
-  'ipad-5gen':          'https://cdn.simpleicons.org/apple/slate',
-  'iphone-rudy':        'https://cdn.simpleicons.org/apple/slate',
-  'iphone-elias':       'https://cdn.simpleicons.org/apple/slate',
-  'iphone-tristan':     'https://cdn.simpleicons.org/apple/slate',
-  'samsung-a54-celine': 'https://cdn.simpleicons.org/samsung/slate',
+  nipogi:               [SI + '/proxmox/slate',       true],
+  pfsense:              [SI + '/pfsense/slate',        true],
+  haos:                 [SI + '/homeassistant/slate',  true],
+  tischnas2:            [SI + '/synology/slate',       true],
+  tischnas3:            [SI + '/synology/slate',       true],
+  'deco-salon':         [SI + '/tp-link/slate',        true],
+  'deco-mezzanine':     [SI + '/tp-link/slate',        true],
+  'deco-grenier':       [SI + '/tp-link/slate',        true],
+  'cpl-tplink':         [SI + '/tp-link/slate',        true],
+  'cpl-pa7017p':        [SI + '/tp-link/slate',        true],
+  'neato-router':       [SI + '/tp-link/slate',        true],
+  nhc2:                 [FAV('niko.eu'),                false],
+  'homewizard-p1':      [FAV('homewizard.com'),         false],
+  'smlight-slzb06':     [FAV('smlight.tech'),           false],
+  netatmo:              [FAV('netatmo.com'),             false],
+  'tado-ac-1':          [FAV('tado.com'),               false],
+  'tado-ac-2':          [FAV('tado.com'),               false],
+  'meross-plug-1':      [FAV('meross.com'),             false],
+  'meross-plug-2':      [FAV('meross.com'),             false],
+  'meross-plug-3':      [FAV('meross.com'),             false],
+  'eufy-doorbell':      [FAV('eufylife.com'),           false],
+  'eufy-cam-mezzanine': [FAV('eufylife.com'),           false],
+  'eufy-cam-cuisine':   [FAV('eufylife.com'),           false],
+  'dreame-vacuum':      [FAV('dreame.tech'),            false],
+  'dreame-mower':       [FAV('dreame.tech'),            false],
+  'bosch-lavelinge':    [FAV('bosch-home.com'),         false],
+  'bosch-lavevaisselle':[FAV('bosch-home.com'),         false],
+  'lg-tv-c1':           [SI + '/lg/slate',              true],
+  'philips-soundbar':   [FAV('philips.com'),            false],
+  'appletv-salon':      [SI + '/apple/slate',           true],
+  'nintendo-switch':    [SI + '/nintendo/slate',        true],
+  macmini:              [SI + '/apple/slate',           true],
+  'macbook-celine':     [SI + '/apple/slate',           true],
+  'mac-unknown':        [SI + '/apple/slate',           true],
+  'ipad-air-13-m3':     [SI + '/apple/slate',           true],
+  'ipad-5gen':          [SI + '/apple/slate',           true],
+  'iphone-rudy':        [SI + '/apple/slate',           true],
+  'iphone-elias':       [SI + '/apple/slate',           true],
+  'iphone-tristan':     [SI + '/apple/slate',           true],
+  'samsung-a54-celine': [SI + '/samsung/slate',         true],
 };
 
 const TYPE_EMOJI = { server: '🖥', nas: '🗄', firewall: '🛡', ap: '📡', client: '💻', default: '📦' };
 
 function DeviceLogo({ id, type }) {
-  const src = DEVICE_LOGO[id];
+  const entry = DEVICE_LOGO[id];
   const [err, setErr] = useState(false);
-  if (!src || err) return <span style={{ fontSize: 18 }}>{TYPE_EMOJI[type] || TYPE_EMOJI.default}</span>;
+  if (!entry || err) return <span style={{ fontSize: 18 }}>{TYPE_EMOJI[type] || TYPE_EMOJI.default}</span>;
+  const [src, mono] = entry;
   return <img src={src} alt="" width={20} height={20} onError={() => setErr(true)}
-    style={{ opacity: 0.55, filter: 'brightness(0) invert(1)', verticalAlign: 'middle' }} />;
+    style={{ opacity: mono ? 0.55 : 0.85, filter: mono ? 'brightness(0) invert(1)' : 'none', verticalAlign: 'middle' }} />;
 }
+
+const ipToNum = ip => ip ? ip.split('.').reduce((n, oct) => n * 256 + parseInt(oct, 10), 0) : 0;
 
 function groupByFamily(devices) {
   const groups = {};
@@ -67,7 +81,10 @@ function groupByFamily(devices) {
     if (!groups[f]) groups[f] = [];
     groups[f].push(d);
   }
-  return FAMILY_ORDER.filter(f => groups[f]).map(f => ({ family: f, devices: groups[f] }));
+  return FAMILY_ORDER.filter(f => groups[f]).map(f => ({
+    family: f,
+    devices: groups[f].slice().sort((a, b) => ipToNum(a.ip) - ipToNum(b.ip)),
+  }));
 }
 
 const s = {
