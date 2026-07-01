@@ -5,11 +5,78 @@ const IP_TYPES = ['static', 'dhcp', 'dhcp-reserved'];
 const EMPTY_DEVICE = { name: '', type: 'server', ip: '', ipType: 'static', hostname: '', mac: '', specs: '', role: '', sshUser: '', purchasedAt: '', config: '', notes: '', actions: [] };
 const EMPTY_SERVICE = { name: '', lxcId: '', ip: '', ipType: 'dhcp', hostname: '', mac: '', port: '', url: '', role: '', installedAt: '', version: '', installScript: '', notes: '' };
 
+const FAMILY_LABEL = {
+  infra: 'INFRASTRUCTURE',
+  network: 'RÉSEAU & WI-FI',
+  iot: 'IOT & DOMOTIQUE',
+  appliances: 'ÉLECTROMÉNAGER',
+  media: 'MÉDIA & DIVERTISSEMENT',
+  clients: 'APPAREILS CLIENTS',
+};
+const FAMILY_ORDER = ['infra', 'network', 'iot', 'appliances', 'media', 'clients'];
+
+const DEVICE_LOGO = {
+  nipogi:               'https://cdn.simpleicons.org/proxmox/slate',
+  pfsense:              'https://cdn.simpleicons.org/pfsense/slate',
+  haos:                 'https://cdn.simpleicons.org/homeassistant/slate',
+  tischnas2:            'https://cdn.simpleicons.org/synology/slate',
+  tischnas3:            'https://cdn.simpleicons.org/synology/slate',
+  'deco-salon':         'https://cdn.simpleicons.org/tp-link/slate',
+  'deco-mezzanine':     'https://cdn.simpleicons.org/tp-link/slate',
+  'deco-grenier':       'https://cdn.simpleicons.org/tp-link/slate',
+  'cpl-tplink':         'https://cdn.simpleicons.org/tp-link/slate',
+  'cpl-pa7017p':        'https://cdn.simpleicons.org/tp-link/slate',
+  'neato-router':       'https://cdn.simpleicons.org/tp-link/slate',
+  'homewizard-p1':      'https://cdn.simpleicons.org/homewizard/slate',
+  netatmo:              'https://cdn.simpleicons.org/netatmo/slate',
+  'tado-ac-1':          'https://cdn.simpleicons.org/tado/slate',
+  'tado-ac-2':          'https://cdn.simpleicons.org/tado/slate',
+  'dreame-vacuum':      'https://cdn.simpleicons.org/dreame/slate',
+  'dreame-mower':       'https://cdn.simpleicons.org/dreame/slate',
+  'bosch-lavelinge':    'https://cdn.simpleicons.org/bosch/slate',
+  'bosch-lavevaisselle':'https://cdn.simpleicons.org/bosch/slate',
+  'lg-tv-c1':           'https://cdn.simpleicons.org/lg/slate',
+  'philips-soundbar':   'https://cdn.simpleicons.org/philips/slate',
+  'appletv-salon':      'https://cdn.simpleicons.org/apple/slate',
+  'nintendo-switch':    'https://cdn.simpleicons.org/nintendo/slate',
+  macmini:              'https://cdn.simpleicons.org/apple/slate',
+  'macbook-celine':     'https://cdn.simpleicons.org/apple/slate',
+  'mac-unknown':        'https://cdn.simpleicons.org/apple/slate',
+  'ipad-air-13-m3':     'https://cdn.simpleicons.org/apple/slate',
+  'ipad-5gen':          'https://cdn.simpleicons.org/apple/slate',
+  'iphone-rudy':        'https://cdn.simpleicons.org/apple/slate',
+  'iphone-elias':       'https://cdn.simpleicons.org/apple/slate',
+  'iphone-tristan':     'https://cdn.simpleicons.org/apple/slate',
+  'samsung-a54-celine': 'https://cdn.simpleicons.org/samsung/slate',
+};
+
+const TYPE_EMOJI = { server: '🖥', nas: '🗄', firewall: '🛡', ap: '📡', client: '💻', default: '📦' };
+
+function DeviceLogo({ id, type }) {
+  const src = DEVICE_LOGO[id];
+  const [err, setErr] = useState(false);
+  if (!src || err) return <span style={{ fontSize: 18 }}>{TYPE_EMOJI[type] || TYPE_EMOJI.default}</span>;
+  return <img src={src} alt="" width={20} height={20} onError={() => setErr(true)}
+    style={{ opacity: 0.55, filter: 'brightness(0) invert(1)', verticalAlign: 'middle' }} />;
+}
+
+function groupByFamily(devices) {
+  const groups = {};
+  for (const d of devices) {
+    const f = d.family || 'other';
+    if (!groups[f]) groups[f] = [];
+    groups[f].push(d);
+  }
+  return FAMILY_ORDER.filter(f => groups[f]).map(f => ({ family: f, devices: groups[f] }));
+}
+
 const s = {
   section: { fontSize: 12, fontWeight: 600, color: '#7c83ff', marginBottom: 12, marginTop: 24 },
   table: { width: '100%', borderCollapse: 'collapse', marginBottom: 12 },
   th: { textAlign: 'left', fontSize: 11, color: '#475569', padding: '6px 10px', borderBottom: '1px solid #2d3148', fontWeight: 500 },
   td: { fontSize: 13, color: '#cbd5e1', padding: '8px 10px', borderBottom: '1px solid #1e2235', verticalAlign: 'middle' },
+  familyRow: { background: '#12141f' },
+  familyCell: { fontSize: 11, fontWeight: 700, color: '#7c83ff', padding: '6px 10px', letterSpacing: 1 },
   btn: (variant) => ({
     background: variant === 'danger' ? '#450a0a' : variant === 'primary' ? '#312e81' : '#2d3148',
     color: variant === 'danger' ? '#fca5a5' : variant === 'primary' ? '#a5b4fc' : '#cbd5e1',
@@ -139,6 +206,13 @@ export default function InventoryPage() {
   const [npmHosts, setNpmHosts] = useState(null);
   const [deviceModal, setDeviceModal] = useState(null);
   const [serviceModal, setServiceModal] = useState(null);
+  const [hiddenFamilies, setHiddenFamilies] = useState(new Set());
+
+  const toggleFamily = (f) => setHiddenFamilies(prev => {
+    const next = new Set(prev);
+    next.has(f) ? next.delete(f) : next.add(f);
+    return next;
+  });
 
   const reload = () => fetch('/api/inventory').then(r => r.json()).then(setInventory);
   useEffect(() => { reload(); }, []);
@@ -180,6 +254,8 @@ export default function InventoryPage() {
     reload();
   }
 
+  const groups = groupByFamily(inventory.devices);
+
   return (
     <div>
       {deviceModal !== null && (
@@ -201,9 +277,25 @@ export default function InventoryPage() {
         <div style={s.section}>APPAREILS ({inventory.devices.length})</div>
         <button style={s.btn('primary')} onClick={() => setDeviceModal('new')}>+ Ajouter</button>
       </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+        {groups.map(({ family }) => (
+          <button key={family} onClick={() => toggleFamily(family)} style={{
+            padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+            border: '1px solid', transition: 'all 0.15s',
+            background: hiddenFamilies.has(family) ? 'transparent' : '#7c83ff22',
+            borderColor: hiddenFamilies.has(family) ? '#334155' : '#7c83ff',
+            color: hiddenFamilies.has(family) ? '#475569' : '#7c83ff',
+          }}>
+            {hiddenFamilies.has(family) ? '○' : '●'} {FAMILY_LABEL[family] || family}
+          </button>
+        ))}
+      </div>
+
       <table style={s.table}>
         <thead>
           <tr>
+            <th style={{ ...s.th, width: 32 }}></th>
             <th style={s.th}>Nom</th>
             <th style={s.th}>Type</th>
             <th style={s.th}>IP</th>
@@ -215,29 +307,37 @@ export default function InventoryPage() {
           </tr>
         </thead>
         <tbody>
-          {inventory.devices.map(d => (
-            <tr key={d.id}>
-              <td style={s.td}>
-                <strong>{d.name}</strong>
-                {d.hostname && <SslBadge hostname={d.hostname} npmHosts={npmHosts} />}
-              </td>
-              <td style={s.td}>{d.type}</td>
-              <td style={s.td}>
-                <code style={{ fontSize: 12 }}>{d.ip}</code>
-                {d.ipType && <span style={{ marginLeft: 5, fontSize: 10, color: IP_TYPE_COLOR[d.ipType] || '#94a3b8', border: '1px solid currentColor', borderRadius: 3, padding: '1px 4px' }}>{d.ipType}</span>}
-              </td>
-              <td style={s.td}><code style={{ fontSize: 11, color: '#64748b' }}>{d.mac || '—'}</code></td>
-              <td style={s.td} title={d.specs}>{d.specs?.substring(0, 40) || '—'}</td>
-              <td style={s.td}>{d.config ? <span title={d.config} style={{ cursor: 'help', borderBottom: '1px dotted #475569' }}>voir ▾</span> : '—'}</td>
-              <td style={s.td}>{d.purchasedAt || '—'}</td>
-              <td style={s.td}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button style={s.btn()} onClick={() => setDeviceModal(d)}>Modifier</button>
-                  <button style={s.btn('danger')} onClick={() => deleteDevice(d.id)}>Supprimer</button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {groups.map(({ family, devices }) => hiddenFamilies.has(family) ? null : [
+            <tr key={`fam-${family}`} style={s.familyRow}>
+              <td colSpan={9} style={s.familyCell}>{FAMILY_LABEL[family] || family.toUpperCase()}</td>
+            </tr>,
+            ...devices.map(d => (
+              <tr key={d.id}>
+                <td style={{ ...s.td, textAlign: 'center' }}>
+                  <DeviceLogo id={d.id} type={d.type} />
+                </td>
+                <td style={s.td}>
+                  <strong>{d.name}</strong>
+                  {d.hostname && <SslBadge hostname={d.hostname} npmHosts={npmHosts} />}
+                </td>
+                <td style={s.td}>{d.type}</td>
+                <td style={s.td}>
+                  <code style={{ fontSize: 12 }}>{d.ip}</code>
+                  {d.ipType && <span style={{ marginLeft: 5, fontSize: 10, color: IP_TYPE_COLOR[d.ipType] || '#94a3b8', border: '1px solid currentColor', borderRadius: 3, padding: '1px 4px' }}>{d.ipType}</span>}
+                </td>
+                <td style={s.td}><code style={{ fontSize: 11, color: '#64748b' }}>{d.mac || '—'}</code></td>
+                <td style={s.td} title={d.specs}>{d.specs?.substring(0, 40) || '—'}</td>
+                <td style={s.td}>{d.config ? <span title={d.config} style={{ cursor: 'help', borderBottom: '1px dotted #475569' }}>voir ▾</span> : '—'}</td>
+                <td style={s.td}>{d.purchasedAt || '—'}</td>
+                <td style={s.td}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button style={s.btn()} onClick={() => setDeviceModal(d)}>Modifier</button>
+                    <button style={s.btn('danger')} onClick={() => deleteDevice(d.id)}>Supprimer</button>
+                  </div>
+                </td>
+              </tr>
+            )),
+          ])}
         </tbody>
       </table>
 
