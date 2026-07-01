@@ -13,6 +13,53 @@ const FAMILY_LABEL = {
   clients: 'APPAREILS CLIENTS',
 };
 
+// Simple Icons slugs: https://cdn.simpleicons.org/{slug}/slate
+const DEVICE_LOGO = {
+  nipogi:              'https://cdn.simpleicons.org/proxmox/slate',
+  pfsense:             'https://cdn.simpleicons.org/pfsense/slate',
+  haos:                'https://cdn.simpleicons.org/homeassistant/slate',
+  tischnas2:           'https://cdn.simpleicons.org/synology/slate',
+  tischnas3:           'https://cdn.simpleicons.org/synology/slate',
+  'deco-salon':        'https://cdn.simpleicons.org/tp-link/slate',
+  'deco-mezzanine':    'https://cdn.simpleicons.org/tp-link/slate',
+  'deco-grenier':      'https://cdn.simpleicons.org/tp-link/slate',
+  'cpl-tplink':        'https://cdn.simpleicons.org/tp-link/slate',
+  'cpl-pa7017p':       'https://cdn.simpleicons.org/tp-link/slate',
+  'neato-router':      'https://cdn.simpleicons.org/tp-link/slate',
+  'homewizard-p1':     'https://cdn.simpleicons.org/homewizard/slate',
+  netatmo:             'https://cdn.simpleicons.org/netatmo/slate',
+  'tado-ac-1':         'https://cdn.simpleicons.org/tado/slate',
+  'tado-ac-2':         'https://cdn.simpleicons.org/tado/slate',
+  'dreame-vacuum':     'https://cdn.simpleicons.org/dreame/slate',
+  'dreame-mower':      'https://cdn.simpleicons.org/dreame/slate',
+  'bosch-lavelinge':   'https://cdn.simpleicons.org/bosch/slate',
+  'bosch-lavevaisselle': 'https://cdn.simpleicons.org/bosch/slate',
+  'lg-tv-c1':          'https://cdn.simpleicons.org/lg/slate',
+  'philips-soundbar':  'https://cdn.simpleicons.org/philips/slate',
+  'appletv-salon':     'https://cdn.simpleicons.org/apple/slate',
+  'nintendo-switch':   'https://cdn.simpleicons.org/nintendo/slate',
+  macmini:             'https://cdn.simpleicons.org/apple/slate',
+  'macbook-celine':    'https://cdn.simpleicons.org/apple/slate',
+  'mac-unknown':       'https://cdn.simpleicons.org/apple/slate',
+  'ipad-air-13-m3':    'https://cdn.simpleicons.org/apple/slate',
+  'ipad-5gen':         'https://cdn.simpleicons.org/apple/slate',
+  'iphone-rudy':       'https://cdn.simpleicons.org/apple/slate',
+  'iphone-elias':      'https://cdn.simpleicons.org/apple/slate',
+  'iphone-tristan':    'https://cdn.simpleicons.org/apple/slate',
+  'samsung-a54-celine':'https://cdn.simpleicons.org/samsung/slate',
+};
+
+function DeviceLogo({ id, type }) {
+  const src = DEVICE_LOGO[id];
+  const [err, setErr] = useState(false);
+  if (!src || err) {
+    const emoji = TYPE_ICON[type] || TYPE_ICON.default;
+    return <span style={{ fontSize: 20, lineHeight: 1 }}>{emoji}</span>;
+  }
+  return <img src={src} alt="" width={22} height={22} onError={() => setErr(true)}
+    style={{ opacity: 0.6, filter: 'brightness(0) invert(1)', flexShrink: 0 }} />;
+}
+
 function groupByFamily(devices) {
   const order = ['infra', 'network', 'iot', 'appliances', 'media', 'clients'];
   const groups = {};
@@ -44,6 +91,13 @@ export default function StatusPage() {
   const [data, setData] = useState(null);
   const [inventory, setInventory] = useState({ devices: [], services: [] });
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [hiddenFamilies, setHiddenFamilies] = useState(new Set());
+
+  const toggleFamily = (f) => setHiddenFamilies(prev => {
+    const next = new Set(prev);
+    next.has(f) ? next.delete(f) : next.add(f);
+    return next;
+  });
 
   useEffect(() => {
     fetch('/api/inventory').then(r => r.json()).then(setInventory);
@@ -65,7 +119,21 @@ export default function StatusPage() {
     <div>
       {lastUpdate && <div style={s.timestamp}>Dernière mise à jour : {lastUpdate} (polling 30s)</div>}
 
-      {groupByFamily(inventory.devices).map(({ family, devices }) => (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+        {groupByFamily(inventory.devices).map(({ family }) => (
+          <button key={family} onClick={() => toggleFamily(family)} style={{
+            padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+            border: '1px solid', transition: 'all 0.15s',
+            background: hiddenFamilies.has(family) ? 'transparent' : '#7c83ff22',
+            borderColor: hiddenFamilies.has(family) ? '#334155' : '#7c83ff',
+            color: hiddenFamilies.has(family) ? '#475569' : '#7c83ff',
+          }}>
+            {hiddenFamilies.has(family) ? '○' : '●'} {FAMILY_LABEL[family] || family}
+          </button>
+        ))}
+      </div>
+
+      {groupByFamily(inventory.devices).map(({ family, devices }) => hiddenFamilies.has(family) ? null : ( // eslint-disable-line
         <div key={family}>
           <div style={s.section}>{FAMILY_LABEL[family] || family.toUpperCase()}</div>
           <div style={s.grid}>
@@ -76,8 +144,9 @@ export default function StatusPage() {
                 <div key={device.id} style={s.card}>
                   <div style={s.cardHeader}>
                     <div style={s.badge(st.online)} />
+                    <DeviceLogo id={device.id} type={device.type} />
                     <div>
-                      <div style={s.name}>{icon} {device.name}</div>
+                      <div style={s.name}>{device.name}</div>
                       <div style={s.ip}>
                         {device.hostname ? (
                           <a href={`https://${device.hostname}`} target="_blank" rel="noreferrer"
