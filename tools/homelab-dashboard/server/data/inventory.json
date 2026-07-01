@@ -1,6 +1,24 @@
 {
   "devices": [
     {
+      "id": "haos",
+      "name": "Home Assistant (VM 100)",
+      "type": "server",
+      "ip": "192.168.10.10",
+      "ipType": "dhcp-reserved",
+      "hostname": "hass.tixhon.be",
+      "mac": "02:33:BE:33:4D:E0",
+      "port": 8123,
+      "specs": "VM 100 — 2 vCPU (host), 4GB RAM, 32GB SSD",
+      "role": "Domotique — Home Assistant OS 12.4",
+      "sshUser": null,
+      "purchasedAt": "",
+      "config": "",
+      "notes": "HAOS 12.4. CPU type=host (accès instructions natives). Discard+SSD activé. onboot=1.",
+      "actions": [],
+      "family": "infra"
+    },
+    {
       "id": "nipogi",
       "name": "NIPoGi (Proxmox)",
       "type": "server",
@@ -14,39 +32,11 @@
       "purchasedAt": "",
       "config": "",
       "notes": "MAC enp1s0 (LAN principal). MAC c8:A3:62:2C:3F:03 = USB ethernet (enxc8a3622c3f03).",
-      "actions": ["shutdown", "wol"]
-    },
-    {
-      "id": "tischnas2",
-      "name": "TischNAS2 (DS916+)",
-      "type": "nas",
-      "ip": "192.168.10.5",
-      "ipType": "dhcp-reserved",
-      "hostname": "tischnas2.tixhon.be",
-      "mac": "00:11:32:6D:D9:09",
-      "specs": "DS916+ 6-bay, 8GB RAM",
-      "role": "Synology NAS principal",
-      "sshUser": "secureAdmin",
-      "purchasedAt": "",
-      "config": "",
-      "notes": "",
-      "actions": ["shutdown", "wol"]
-    },
-    {
-      "id": "tischnas3",
-      "name": "TischNAS3 (DS925+)",
-      "type": "nas",
-      "ip": "192.168.10.3",
-      "ipType": "dhcp-reserved",
-      "hostname": "tischnas3.tixhon.be",
-      "mac": "00:E0:4C:68:00:01",
-      "specs": "DS925+ 5-bay",
-      "role": "Synology NAS secondaire",
-      "sshUser": "secureAdmin",
-      "purchasedAt": "",
-      "config": "",
-      "notes": "MAC permaddr (adresse physique réelle du chipset RTL).",
-      "actions": ["shutdown", "wol"]
+      "actions": [
+        "shutdown",
+        "wol"
+      ],
+      "family": "infra"
     },
     {
       "id": "pfsense",
@@ -62,7 +52,50 @@
       "purchasedAt": "",
       "config": "WAN: DHCP VOO — net0 MAC BC:24:11:20:9F:18 (bridge vmbr0)\nLAN: 192.168.10.0/24 — net1 MAC BC:24:11:1C:CD:A7 (bridge vmbr1)\nDNS: AdGuard Home (192.168.10.12) forcé sur tout le LAN\nWireGuard: port 51820 UDP, accès full tunnel\nRègles firewall: tout bloqué par défaut sauf HTTP/HTTPS sortant, DNS interne, WireGuard\nAccès SSH: WAN uniquement (pas depuis LAN)\nDynDNS: tixhon.be via plugin pfSense",
       "notes": "2 NICs virtuelles : net0=WAN (vmbr0/Internet), net1=LAN (vmbr1/192.168.10.x). onboot=1.",
-      "actions": ["release-wan"]
+      "actions": [
+        "release-wan"
+      ],
+      "family": "infra"
+    },
+    {
+      "id": "tischnas2",
+      "name": "TischNAS2 (DS916+)",
+      "type": "nas",
+      "ip": "192.168.10.5",
+      "ipType": "dhcp-reserved",
+      "hostname": "tischnas2.tixhon.be",
+      "mac": "00:11:32:6D:D9:09",
+      "specs": "DS916+ 6-bay, 8GB RAM",
+      "role": "Synology NAS principal",
+      "sshUser": "secureAdmin",
+      "purchasedAt": "",
+      "config": "",
+      "notes": "",
+      "actions": [
+        "shutdown",
+        "wol"
+      ],
+      "family": "infra"
+    },
+    {
+      "id": "tischnas3",
+      "name": "TischNAS3 (DS925+)",
+      "type": "nas",
+      "ip": "192.168.10.3",
+      "ipType": "dhcp-reserved",
+      "hostname": "tischnas3.tixhon.be",
+      "mac": "00:E0:4C:68:00:01",
+      "specs": "DS925+ 5-bay",
+      "role": "Synology NAS secondaire",
+      "sshUser": "secureAdmin",
+      "purchasedAt": "",
+      "config": "",
+      "notes": "MAC permaddr (adresse physique réelle du chipset RTL).",
+      "actions": [
+        "shutdown",
+        "wol"
+      ],
+      "family": "infra"
     },
     {
       "id": "cpl-pa7017p",
@@ -76,301 +109,83 @@
       "role": "Prise CPL (kit avec TL-WPA7617) — abri de jardin",
       "sshUser": null,
       "notes": "IP à confirmer.",
-      "actions": []
+      "actions": [],
+      "family": "network"
     },
     {
-      "id": "nhc2",
-      "name": "Niko Home Control II",
-      "type": "iot",
-      "ip": "192.168.10.22",
+      "id": "cpl-tplink",
+      "name": "CPL TP-Link (TL-WPA7617)",
+      "type": "ap",
+      "ip": "192.168.10.35",
       "ipType": "dhcp-reserved",
       "hostname": null,
-      "mac": "00:11:2A:22:53:38",
-      "specs": "Niko Home Control II — Connected Controller",
-      "role": "Domotique Niko — éclairage, prises, stores",
+      "mac": "D8:44:89:70:2A:AA",
+      "specs": "TP-Link TL-WPA7617 — CPL AV1000 + Wi-Fi AC1200",
+      "role": "Pont CPL / point d'accès Wi-Fi — chambre Elias",
       "sshUser": null,
       "notes": "",
-      "actions": []
+      "actions": [],
+      "family": "network"
     },
     {
-      "id": "homewizard-p1",
-      "name": "HomeWizard P1 Meter",
-      "type": "iot",
-      "ip": "192.168.10.23",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "5C:2F:AF:0B:5B:E2",
-      "specs": "HomeWizard Wi-Fi P1 Meter",
-      "role": "Lecture compteur électrique P1 (smart meter)",
-      "sshUser": null,
-      "notes": "IP à confirmer — visible en IPv6 seulement dans ARP Proxmox.",
-      "actions": []
-    },
-    {
-      "id": "smlight-slzb06",
-      "name": "SMLIGHT SLZB-06",
-      "type": "iot",
-      "ip": "192.168.10.53",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "30:83:98:16:76:73",
-      "specs": "SMLIGHT SLZB-06 — coordinateur Zigbee sur ethernet",
-      "role": "Coordinateur Zigbee (ethernet) — alternative ou backup Z2M",
-      "sshUser": null,
-      "notes": "IP à confirmer.",
-      "actions": []
-    },
-    {
-      "id": "tado-ac-1",
-      "name": "Tado AC Control 1",
-      "type": "iot",
-      "ip": "192.168.10.211",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "FC:F5:C4:77:FB:74",
-      "specs": "Tado Smart AC Control",
-      "role": "Thermostat/climatisation connectée",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "tado-ac-2",
-      "name": "Tado AC Control 2",
-      "type": "iot",
-      "ip": "192.168.10.212",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "0C:DC:7E:00:13:D0",
-      "specs": "Tado Smart AC Control",
-      "role": "Thermostat/climatisation connectée",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "eufy-camera-mezzanine",
-      "name": "Eufy Indoor Camera (Mezzanine)",
-      "type": "iot",
-      "ip": "192.168.10.215",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "8C:85:80:61:14:00",
-      "specs": "Eufy Indoor Camera",
-      "role": "Caméra intérieure — mezzanine",
-      "sshUser": null,
-      "notes": "IP à confirmer.",
-      "actions": []
-    },
-    {
-      "id": "meross-cuisine",
-      "name": "Meross SmartPlug (Cuisine)",
-      "type": "iot",
-      "ip": "192.168.10.26",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "48:E1:E9:31:FE:CF",
-      "specs": "Meross Smart Plug",
-      "role": "Prise connectée — cuisine",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "bosch-lavelinge",
-      "name": "Bosch Machine à laver",
-      "type": "iot",
-      "ip": "192.168.10.217",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "C8:D7:78:AE:59:A8",
-      "specs": "Bosch Machine à laver connectée",
-      "role": "Électroménager connecté",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "bosch-lavevaisselle",
-      "name": "Bosch Lave-vaisselle",
-      "type": "iot",
-      "ip": "192.168.10.216",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "C8:D7:78:6F:11:CE",
-      "specs": "Bosch Lave-vaisselle connecté",
-      "role": "Électroménager connecté",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "gigaset-phone",
-      "name": "Gigaset C530-IP",
-      "type": "iot",
-      "ip": "192.168.10.94",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "7C:2F:80:80:6A:73",
-      "specs": "Gigaset C530-IP — téléphone DECT/VoIP",
-      "role": "Téléphone fixe VoIP",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "lg-tv-c1",
-      "name": "TV LG C1",
-      "type": "iot",
-      "ip": "192.168.10.90",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "B0:37:95:1A:36:95",
-      "specs": "LG OLED C1",
-      "role": "Téléviseur connecté — salon",
-      "sshUser": null,
-      "notes": "IP à confirmer.",
-      "actions": []
-    },
-    {
-      "id": "appletv-salon",
-      "name": "Apple TV 4K (Salon)",
-      "type": "iot",
-      "ip": "192.168.10.93",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "F0:B3:EC:25:6D:2E",
-      "specs": "Apple TV 4K",
-      "role": "Streaming — salon",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "nintendo-switch",
-      "name": "Nintendo Switch",
-      "type": "iot",
-      "ip": "192.168.10.92",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "5C:0C:E6:28:2C:18",
-      "specs": "Nintendo Switch",
-      "role": "Console de jeu",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "eufy-camera-cuisine",
-      "name": "Eufy Indoor Camera (Cuisine)",
-      "type": "iot",
-      "ip": "192.168.10.219",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "8C:85:80:76:91:EE",
-      "specs": "Eufy Indoor Camera",
-      "role": "Caméra intérieure — cuisine (hors service)",
-      "sshUser": null,
-      "notes": "Ne fonctionne pas actuellement.",
-      "actions": []
-    },
-    {
-      "id": "eufy-doorbell",
-      "name": "Eufy Video Doorbell",
-      "type": "iot",
-      "ip": null,
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": null,
-      "specs": "Eufy Video Doorbell",
-      "role": "Sonnette vidéo — entrée",
-      "sshUser": null,
-      "notes": "MAC/IP à identifier.",
-      "actions": []
-    },
-    {
-      "id": "meross-2",
-      "name": "Meross SmartPlug #2",
-      "type": "iot",
-      "ip": "192.168.10.214",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "48:E1:E9:65:1E:56",
-      "specs": "Meross Smart Plug",
-      "role": "Prise connectée",
-      "sshUser": null,
-      "notes": "Emplacement à préciser.",
-      "actions": []
-    },
-    {
-      "id": "meross-3",
-      "name": "Meross SmartPlug #3",
-      "type": "iot",
-      "ip": null,
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": null,
-      "specs": "Meross Smart Plug",
-      "role": "Prise connectée",
-      "sshUser": null,
-      "notes": "MAC/IP à identifier.",
-      "actions": []
-    },
-    {
-      "id": "eve-plug",
-      "name": "Eve Energy (prise)",
-      "type": "iot",
-      "ip": null,
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": null,
-      "specs": "Eve Energy Smart Plug",
-      "role": "Prise connectée avec mesure de consommation",
-      "sshUser": null,
-      "notes": "MAC/IP à identifier.",
-      "actions": []
-    },
-    {
-      "id": "neato",
-      "name": "Neato (hors service)",
-      "type": "iot",
-      "ip": null,
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "0C:1C:57:9B:E6:88",
-      "specs": "Neato aspirateur robot",
-      "role": "Aspirateur robot — hors service (marque en faillite)",
-      "sshUser": null,
-      "notes": "Remplacé par Dreame. TL-WR802N (.33) servait de réseau dédié Neato.",
-      "actions": []
-    },
-    {
-      "id": "netatmo",
-      "name": "Netatmo (Station météo)",
-      "type": "iot",
-      "ip": "192.168.10.221",
+      "id": "deco-grenier",
+      "name": "Deco M4R (Grenier)",
+      "type": "ap",
+      "ip": "192.168.10.30",
       "ipType": "dhcp-reserved",
       "hostname": null,
-      "mac": "70:EE:50:7A:C5:74",
-      "specs": "Netatmo Weather Station",
-      "role": "Station météo connectée",
+      "mac": "D8:0D:17:C9:6D:98",
+      "specs": "TP-Link Deco M4R",
+      "role": "Point d'accès Wi-Fi — grenier",
       "sshUser": null,
-      "notes": "",
-      "actions": []
+      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
+      "actions": [],
+      "family": "network"
     },
     {
-      "id": "dreame-vacuum",
-      "name": "Dreame (Aspirateur robot laveur)",
-      "type": "iot",
-      "ip": "192.168.10.202",
-      "ipType": "dhcp",
+      "id": "deco-mezzanine",
+      "name": "Deco M4R (Mezzanine)",
+      "type": "ap",
+      "ip": "192.168.10.31",
+      "ipType": "dhcp-reserved",
       "hostname": null,
-      "mac": "00:AE:F7:0C:BD:36",
-      "specs": "Dreame — aspirateur/laveur robot",
-      "role": "Aspirateur robot laveur (remplace Neato)",
+      "mac": "D8:0D:17:C9:78:48",
+      "specs": "TP-Link Deco M4R",
+      "role": "Point d'accès Wi-Fi — mezzanine",
       "sshUser": null,
-      "notes": "Neato hors service — marque en faillite, app non fonctionnelle.",
-      "actions": []
+      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
+      "actions": [],
+      "family": "network"
+    },
+    {
+      "id": "deco-salon",
+      "name": "Deco M4R (Salon)",
+      "type": "ap",
+      "ip": "192.168.10.32",
+      "ipType": "dhcp-reserved",
+      "hostname": null,
+      "mac": "D8:0D:17:C9:7A:34",
+      "specs": "TP-Link Deco M4R",
+      "role": "Point d'accès Wi-Fi — salon",
+      "sshUser": null,
+      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
+      "actions": [],
+      "family": "network"
+    },
+    {
+      "id": "neato-router",
+      "name": "Routeur Neato (TL-WR802N)",
+      "type": "ap",
+      "ip": "192.168.10.33",
+      "ipType": "dhcp-reserved",
+      "hostname": null,
+      "mac": "6C:5A:B0:E4:93:6E",
+      "specs": "TP-Link TL-WR802N — nano routeur Wi-Fi N300",
+      "role": "Réseau dédié aspirateur robot Neato",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "network"
     },
     {
       "id": "dreame-mower",
@@ -384,7 +199,323 @@
       "role": "Tondeuse robot — jardin",
       "sshUser": null,
       "notes": "",
-      "actions": []
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "dreame-vacuum",
+      "name": "Dreame (Aspirateur robot laveur)",
+      "type": "iot",
+      "ip": "192.168.10.202",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "00:AE:F7:0C:BD:36",
+      "specs": "Dreame — aspirateur/laveur robot",
+      "role": "Aspirateur robot laveur (remplace Neato)",
+      "sshUser": null,
+      "notes": "Neato hors service — marque en faillite, app non fonctionnelle.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "eufy-camera-cuisine",
+      "name": "Eufy Indoor Camera (Cuisine)",
+      "type": "iot",
+      "ip": "192.168.10.219",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "8C:85:80:76:91:EE",
+      "specs": "Eufy Indoor Camera",
+      "role": "Caméra intérieure — cuisine (hors service)",
+      "sshUser": null,
+      "notes": "Ne fonctionne pas actuellement.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "eufy-camera-mezzanine",
+      "name": "Eufy Indoor Camera (Mezzanine)",
+      "type": "iot",
+      "ip": "192.168.10.215",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "8C:85:80:61:14:00",
+      "specs": "Eufy Indoor Camera",
+      "role": "Caméra intérieure — mezzanine",
+      "sshUser": null,
+      "notes": "IP à confirmer.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "eufy-doorbell",
+      "name": "Eufy Video Doorbell",
+      "type": "iot",
+      "ip": null,
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": null,
+      "specs": "Eufy Video Doorbell",
+      "role": "Sonnette vidéo — entrée",
+      "sshUser": null,
+      "notes": "MAC/IP à identifier.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "eve-plug",
+      "name": "Eve Energy (prise)",
+      "type": "iot",
+      "ip": null,
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": null,
+      "specs": "Eve Energy Smart Plug",
+      "role": "Prise connectée avec mesure de consommation",
+      "sshUser": null,
+      "notes": "MAC/IP à identifier.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "homewizard-p1",
+      "name": "HomeWizard P1 Meter",
+      "type": "iot",
+      "ip": "192.168.10.23",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "5C:2F:AF:0B:5B:E2",
+      "specs": "HomeWizard Wi-Fi P1 Meter",
+      "role": "Lecture compteur électrique P1 (smart meter)",
+      "sshUser": null,
+      "notes": "IP à confirmer — visible en IPv6 seulement dans ARP Proxmox.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "meross-2",
+      "name": "Meross SmartPlug #2",
+      "type": "iot",
+      "ip": "192.168.10.214",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "48:E1:E9:65:1E:56",
+      "specs": "Meross Smart Plug",
+      "role": "Prise connectée",
+      "sshUser": null,
+      "notes": "Emplacement à préciser.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "meross-3",
+      "name": "Meross SmartPlug #3",
+      "type": "iot",
+      "ip": null,
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": null,
+      "specs": "Meross Smart Plug",
+      "role": "Prise connectée",
+      "sshUser": null,
+      "notes": "MAC/IP à identifier.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "meross-cuisine",
+      "name": "Meross SmartPlug (Cuisine)",
+      "type": "iot",
+      "ip": "192.168.10.26",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "48:E1:E9:31:FE:CF",
+      "specs": "Meross Smart Plug",
+      "role": "Prise connectée — cuisine",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "neato",
+      "name": "Neato (hors service)",
+      "type": "iot",
+      "ip": null,
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "0C:1C:57:9B:E6:88",
+      "specs": "Neato aspirateur robot",
+      "role": "Aspirateur robot — hors service (marque en faillite)",
+      "sshUser": null,
+      "notes": "Remplacé par Dreame. TL-WR802N (.33) servait de réseau dédié Neato.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "netatmo",
+      "name": "Netatmo (Station météo)",
+      "type": "iot",
+      "ip": "192.168.10.221",
+      "ipType": "dhcp-reserved",
+      "hostname": null,
+      "mac": "70:EE:50:7A:C5:74",
+      "specs": "Netatmo Weather Station",
+      "role": "Station météo connectée",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "nhc2",
+      "name": "Niko Home Control II",
+      "type": "iot",
+      "ip": "192.168.10.22",
+      "ipType": "dhcp-reserved",
+      "hostname": null,
+      "mac": "00:11:2A:22:53:38",
+      "specs": "Niko Home Control II — Connected Controller",
+      "role": "Domotique Niko — éclairage, prises, stores",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "smlight-slzb06",
+      "name": "SMLIGHT SLZB-06",
+      "type": "iot",
+      "ip": "192.168.10.53",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "30:83:98:16:76:73",
+      "specs": "SMLIGHT SLZB-06 — coordinateur Zigbee sur ethernet",
+      "role": "Coordinateur Zigbee (ethernet) — alternative ou backup Z2M",
+      "sshUser": null,
+      "notes": "IP à confirmer.",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "tado-ac-1",
+      "name": "Tado AC Control 1",
+      "type": "iot",
+      "ip": "192.168.10.211",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "FC:F5:C4:77:FB:74",
+      "specs": "Tado Smart AC Control",
+      "role": "Thermostat/climatisation connectée",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "tado-ac-2",
+      "name": "Tado AC Control 2",
+      "type": "iot",
+      "ip": "192.168.10.212",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "0C:DC:7E:00:13:D0",
+      "specs": "Tado Smart AC Control",
+      "role": "Thermostat/climatisation connectée",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "iot"
+    },
+    {
+      "id": "bosch-lavelinge",
+      "name": "Bosch Machine à laver",
+      "type": "iot",
+      "ip": "192.168.10.217",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "C8:D7:78:AE:59:A8",
+      "specs": "Bosch Machine à laver connectée",
+      "role": "Électroménager connecté",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "appliances"
+    },
+    {
+      "id": "bosch-lavevaisselle",
+      "name": "Bosch Lave-vaisselle",
+      "type": "iot",
+      "ip": "192.168.10.216",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "C8:D7:78:6F:11:CE",
+      "specs": "Bosch Lave-vaisselle connecté",
+      "role": "Électroménager connecté",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "appliances"
+    },
+    {
+      "id": "appletv-salon",
+      "name": "Apple TV 4K (Salon)",
+      "type": "iot",
+      "ip": "192.168.10.93",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "F0:B3:EC:25:6D:2E",
+      "specs": "Apple TV 4K",
+      "role": "Streaming — salon",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "media"
+    },
+    {
+      "id": "gigaset-phone",
+      "name": "Gigaset C530-IP",
+      "type": "iot",
+      "ip": "192.168.10.94",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "7C:2F:80:80:6A:73",
+      "specs": "Gigaset C530-IP — téléphone DECT/VoIP",
+      "role": "Téléphone fixe VoIP",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "media"
+    },
+    {
+      "id": "lg-tv-c1",
+      "name": "TV LG C1",
+      "type": "iot",
+      "ip": "192.168.10.90",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "B0:37:95:1A:36:95",
+      "specs": "LG OLED C1",
+      "role": "Téléviseur connecté — salon",
+      "sshUser": null,
+      "notes": "IP à confirmer.",
+      "actions": [],
+      "family": "media"
+    },
+    {
+      "id": "nintendo-switch",
+      "name": "Nintendo Switch",
+      "type": "iot",
+      "ip": "192.168.10.92",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "5C:0C:E6:28:2C:18",
+      "specs": "Nintendo Switch",
+      "role": "Console de jeu",
+      "sshUser": null,
+      "notes": "",
+      "actions": [],
+      "family": "media"
     },
     {
       "id": "philips-soundbar",
@@ -398,38 +529,10 @@
       "role": "Barre de son connectée — salon",
       "sshUser": null,
       "notes": "",
-      "actions": []
+      "actions": [],
+      "family": "media"
     },
     {
-      "id": "macbook-celine",
-      "name": "MacBook Pro 13\" (Céline)",
-      "type": "client",
-      "ip": "192.168.10.227",
-      "ipType": "dhcp",
-      "hostname": "macbookpro",
-      "mac": "5E:35:DC:B1:37:58",
-      "specs": "Apple MacBook Pro 13\"",
-      "role": "PC portable — Céline",
-      "sshUser": null,
-      "notes": "MAC possiblement randomisée (Wi-Fi).",
-      "actions": []
-    },
-    {
-      "id": "mac-unknown",
-      "name": "Mac (inconnu)",
-      "type": "client",
-      "ip": "192.168.10.224",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "6E:67:41:25:7F:D9",
-      "specs": "Apple Mac — modèle inconnu",
-      "role": "PC Apple — propriétaire à identifier",
-      "sshUser": null,
-      "notes": "MAC randomisée (Wi-Fi). Modèle et propriétaire à confirmer.",
-      "actions": []
-    },
-    {
-
       "id": "ipad-5gen",
       "name": "iPad 5e gen (9.7\")",
       "type": "client",
@@ -441,10 +544,10 @@
       "role": "Tablette Apple",
       "sshUser": null,
       "notes": "S/N : F9GTT2SHHLFC. Bloqué sur iOS 16 (fin de support). MAC randomisée (Wi-Fi).",
-      "actions": []
+      "actions": [],
+      "family": "clients"
     },
     {
-
       "id": "ipad-air-13-m3",
       "name": "iPad Air 13\" M3 (Rudy)",
       "type": "client",
@@ -456,7 +559,23 @@
       "role": "Tablette Apple principale",
       "sshUser": null,
       "notes": "S/N : MWTV7FCXQL. MAC randomisée (Wi-Fi).",
-      "actions": []
+      "actions": [],
+      "family": "clients"
+    },
+    {
+      "id": "iphone-elias",
+      "name": "iPhone 14 Pro (Elias)",
+      "type": "client",
+      "ip": "192.168.10.231",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "DE:F0:14:39:BF:CD",
+      "specs": "Apple iPhone 14 Pro — MPXV3ZD/A — iOS 26.5",
+      "role": "Téléphone mobile — Elias",
+      "sshUser": null,
+      "notes": "S/N : CFCF4JY9PX. Ancien téléphone de Rudy. MAC randomisée (Wi-Fi).",
+      "actions": [],
+      "family": "clients"
     },
     {
       "id": "iphone-rudy",
@@ -470,6 +589,67 @@
       "role": "Téléphone mobile — Rudy",
       "sshUser": null,
       "notes": "S/N : MK2PQ0N2HW. MAC randomisée (Wi-Fi).",
+      "actions": [],
+      "family": "clients"
+    },
+    {
+      "id": "iphone-tristan",
+      "name": "iPhone Xs (Tristan)",
+      "type": "client",
+      "ip": "192.168.10.232",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "0A:2C:DB:47:C7:94",
+      "specs": "Apple iPhone Xs — MT9F2ZD/A — iOS 18.7.9",
+      "role": "Téléphone mobile — Tristan",
+      "sshUser": null,
+      "notes": "S/N : C39X61ATKPG2. Ancien téléphone de Rudy. MAC randomisée (Wi-Fi).",
+      "actions": [],
+      "family": "clients"
+    },
+    {
+      "id": "mac-unknown",
+      "name": "Mac (inconnu)",
+      "type": "client",
+      "ip": "192.168.10.224",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "6E:67:41:25:7F:D9",
+      "specs": "Apple Mac — modèle inconnu",
+      "role": "PC Apple — propriétaire à identifier",
+      "sshUser": null,
+      "notes": "MAC randomisée (Wi-Fi). Modèle et propriétaire à confirmer.",
+      "actions": [],
+      "family": "clients"
+    },
+    {
+      "id": "macbook-celine",
+      "name": "MacBook Pro 13\" (Céline)",
+      "type": "client",
+      "ip": "192.168.10.227",
+      "ipType": "dhcp",
+      "hostname": "macbookpro",
+      "mac": "5E:35:DC:B1:37:58",
+      "specs": "Apple MacBook Pro 13\"",
+      "role": "PC portable — Céline",
+      "sshUser": null,
+      "notes": "MAC possiblement randomisée (Wi-Fi).",
+      "actions": [],
+      "family": "clients"
+    },
+    {
+      "id": "macmini",
+      "family": "clients",
+      "name": "Mac Mini M2 (Rudy)",
+      "type": "client",
+      "ip": "192.168.10.98",
+      "ipType": "static",
+      "hostname": "dashboard.tixhon.be",
+      "mac": "5C:1B:F4:9D:CC:76",
+      "specs": "Apple Mac Mini M2",
+      "role": "Serveur homelab-dashboard (LaunchAgent)",
+      "sshUser": null,
+      "notes": "Ethernet: 5C:1B:F4:9D:CC:76 (.98). Wi-Fi: CE:56:4B:12:2C:A5 (IP variable).",
       "actions": []
     },
     {
@@ -484,123 +664,8 @@
       "role": "Téléphone mobile — Céline",
       "sshUser": null,
       "notes": "MAC randomisée (Wi-Fi). IP à confirmer.",
-      "actions": []
-    },
-    {
-      "id": "iphone-elias",
-      "name": "iPhone 14 Pro (Elias)",
-      "type": "client",
-      "ip": "192.168.10.231",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "DE:F0:14:39:BF:CD",
-      "specs": "Apple iPhone 14 Pro — MPXV3ZD/A — iOS 26.5",
-      "role": "Téléphone mobile — Elias",
-      "sshUser": null,
-      "notes": "S/N : CFCF4JY9PX. Ancien téléphone de Rudy. MAC randomisée (Wi-Fi).",
-      "actions": []
-    },
-    {
-
-      "id": "iphone-tristan",
-      "name": "iPhone Xs (Tristan)",
-      "type": "client",
-      "ip": "192.168.10.232",
-      "ipType": "dhcp",
-      "hostname": null,
-      "mac": "0A:2C:DB:47:C7:94",
-      "specs": "Apple iPhone Xs — MT9F2ZD/A — iOS 18.7.9",
-      "role": "Téléphone mobile — Tristan",
-      "sshUser": null,
-      "notes": "S/N : C39X61ATKPG2. Ancien téléphone de Rudy. MAC randomisée (Wi-Fi).",
-      "actions": []
-    },
-    {
-      "id": "neato-router",
-      "name": "Routeur Neato (TL-WR802N)",
-      "type": "ap",
-      "ip": "192.168.10.33",
-      "ipType": "dhcp-reserved",
-      "hostname": null,
-      "mac": "6C:5A:B0:E4:93:6E",
-      "specs": "TP-Link TL-WR802N — nano routeur Wi-Fi N300",
-      "role": "Réseau dédié aspirateur robot Neato",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "cpl-tplink",
-      "name": "CPL TP-Link (TL-WPA7617)",
-      "type": "ap",
-      "ip": "192.168.10.35",
-      "ipType": "dhcp-reserved",
-      "hostname": null,
-      "mac": "D8:44:89:70:2A:AA",
-      "specs": "TP-Link TL-WPA7617 — CPL AV1000 + Wi-Fi AC1200",
-      "role": "Pont CPL / point d'accès Wi-Fi — chambre Elias",
-      "sshUser": null,
-      "notes": "",
-      "actions": []
-    },
-    {
-      "id": "deco-salon",
-      "name": "Deco M4R (Salon)",
-      "type": "ap",
-      "ip": "192.168.10.32",
-      "ipType": "dhcp-reserved",
-      "hostname": null,
-      "mac": "D8:0D:17:C9:7A:34",
-      "specs": "TP-Link Deco M4R",
-      "role": "Point d'accès Wi-Fi — salon",
-      "sshUser": null,
-      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
-      "actions": []
-    },
-    {
-      "id": "deco-mezzanine",
-      "name": "Deco M4R (Mezzanine)",
-      "type": "ap",
-      "ip": "192.168.10.31",
-      "ipType": "dhcp-reserved",
-      "hostname": null,
-      "mac": "D8:0D:17:C9:78:48",
-      "specs": "TP-Link Deco M4R",
-      "role": "Point d'accès Wi-Fi — mezzanine",
-      "sshUser": null,
-      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
-      "actions": []
-    },
-    {
-      "id": "deco-grenier",
-      "name": "Deco M4R (Grenier)",
-      "type": "ap",
-      "ip": "192.168.10.30",
-      "ipType": "dhcp-reserved",
-      "hostname": null,
-      "mac": "D8:0D:17:C9:6D:98",
-      "specs": "TP-Link Deco M4R",
-      "role": "Point d'accès Wi-Fi — grenier",
-      "sshUser": null,
-      "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
-      "actions": []
-    },
-    {
-      "id": "haos",
-      "name": "Home Assistant (VM 100)",
-      "type": "server",
-      "ip": "192.168.10.10",
-      "ipType": "dhcp-reserved",
-      "hostname": "hass.tixhon.be",
-      "mac": "02:33:BE:33:4D:E0",
-      "port": 8123,
-      "specs": "VM 100 — 2 vCPU (host), 4GB RAM, 32GB SSD",
-      "role": "Domotique — Home Assistant OS 12.4",
-      "sshUser": null,
-      "purchasedAt": "",
-      "config": "",
-      "notes": "HAOS 12.4. CPU type=host (accès instructions natives). Discard+SSD activé. onboot=1.",
-      "actions": []
+      "actions": [],
+      "family": "clients"
     }
   ],
   "services": [
@@ -619,7 +684,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/adguard.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "npm",
@@ -636,7 +704,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/nginxproxymanager.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "prometheus",
@@ -653,7 +724,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/prometheus.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "grafana",
@@ -670,7 +744,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/grafana.sh",
       "notes": "LXC hostname = prometheus-blackbox-exporter mais contient Grafana.",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "alertmanager",
@@ -687,7 +764,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/alertmanager.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "mqtt",
@@ -704,7 +784,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/mqtt.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "z2m",
@@ -721,7 +804,10 @@
       "installedAt": "",
       "installScript": "https://github.com/tteck/Proxmox/raw/main/ct/zigbee2mqtt.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "influxdb",
@@ -738,7 +824,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/influxdb.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "rustdesk",
@@ -755,7 +844,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/rustdesk-server.sh",
       "notes": "Ports : 21115 TCP (hbbs), 21116 TCP/UDP, 21117 TCP (hbbr), 21118-21119 TCP.",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "cloudflared",
@@ -772,7 +864,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/cloudflared.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "vaultwarden",
@@ -789,7 +884,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/vaultwarden.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "blackbox-exporter",
@@ -806,7 +904,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/prometheus-blackbox-exporter.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     },
     {
       "id": "linkwarden",
@@ -823,7 +924,10 @@
       "installedAt": "",
       "installScript": "https://github.com/community-scripts/ProxmoxVE/raw/main/ct/linkwarden.sh",
       "notes": "",
-      "actions": ["start-lxc", "stop-lxc"]
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     }
   ]
 }
