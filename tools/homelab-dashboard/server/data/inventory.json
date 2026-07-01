@@ -65,7 +65,6 @@
       "actions": ["release-wan"]
     },
     {
-    {
       "id": "cpl-pa7017p",
       "name": "CPL TP-Link (TL-PA7017P)",
       "type": "ap",
@@ -430,7 +429,7 @@
       "actions": []
     },
     {
-    {
+
       "id": "ipad-5gen",
       "name": "iPad 5e gen (9.7\")",
       "type": "client",
@@ -445,7 +444,7 @@
       "actions": []
     },
     {
-    {
+
       "id": "ipad-air-13-m3",
       "name": "iPad Air 13\" M3 (Rudy)",
       "type": "client",
@@ -460,21 +459,33 @@
       "actions": []
     },
     {
-      "id": "ipad-2",
-      "name": "iPad Pro 13\" M3",
+      "id": "iphone-rudy",
+      "name": "iPhone 17 Pro Max (Rudy)",
+      "type": "client",
+      "ip": "192.168.10.208",
+      "ipType": "dhcp",
+      "hostname": null,
+      "mac": "52:A2:81:F2:97:8C",
+      "specs": "Apple iPhone 17 Pro Max — MFYP4ZD/A — iOS 26.5",
+      "role": "Téléphone mobile — Rudy",
+      "sshUser": null,
+      "notes": "S/N : MK2PQ0N2HW. MAC randomisée (Wi-Fi).",
+      "actions": []
+    },
+    {
+      "id": "samsung-a54-celine",
+      "name": "Samsung Galaxy A54 (Céline)",
       "type": "client",
       "ip": null,
       "ipType": "dhcp",
       "hostname": null,
-      "mac": null,
-      "specs": "Apple iPad Pro 13\" M3",
-      "role": "Tablette Apple — principal",
+      "mac": "AE:2C:40:3D:2F:0B",
+      "specs": "Samsung Galaxy A54",
+      "role": "Téléphone mobile — Céline",
       "sshUser": null,
-      "notes": "IP/MAC à identifier.",
+      "notes": "MAC randomisée (Wi-Fi). IP à confirmer.",
       "actions": []
     },
-    {
-    {
     {
       "id": "iphone-elias",
       "name": "iPhone 14 Pro (Elias)",
@@ -490,7 +501,7 @@
       "actions": []
     },
     {
-    {
+
       "id": "iphone-tristan",
       "name": "iPhone Xs (Tristan)",
       "type": "client",
