@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-07-01 (session 6)
+
+### Dashboard homelab — Page Réseau, AdGuard, HAOS metrics, prod Mac Mini
+
+- `server/routes/network.js` : nouvelle route `/api/network` — pfSense WAN + services + WireGuard + règles firewall, AdGuard stats + top blocked, NPM proxy hosts + SSL, tout en parallèle
+  Reason: page Réseau unifiée plutôt que pages isolées par service
+  Source: `fetchNetworkData`, `pf()`, `adguardAuth`
+
+- `client/src/pages/NetworkPage.jsx` : page Réseau — 4 sections (pfSense, AdGuard, Firewall rules, NPM) avec barres proportionnelles
+  Reason: remplacement de l'onglet AdGuard standalone incohérent
+  Source: `NetworkPage`, `SvcRow`, `SslDays`
+
+- `server/routes/network.js` : WireGuard status fix — dérivé de `vpn/wireguard/settings.enable + tunnel.enabled` au lieu du service map pfSense (retournait False à tort)
+  Reason: pfSense ne reporte pas WireGuard comme service classique
+  Source: `wgRunning`, `wgSettingsData`
+
+- `server/routes/status.js` : `getHaosMetrics()` — CPU/RAM HAOS via SSH Proxmox (`/proc/<pid>/status` VmRSS + `ps %cpu`)
+  Reason: HAOS n'a pas SSH ni node_exporter ; Proxmox expose le process QEMU
+  Source: `getHaosMetrics`
+
+- `server/data/inventory.json` : `port: 8123` sur haos — fix statut HAOS toujours offline (checké sur SSH port 22 inexistant)
+  Reason: HAOS expose HTTP sur 8123, pas SSH
+  Source: `checkPort(device.ip, device.port || 22)`
+
+- `client/src/pages/StatusPage.jsx` : badge gris + "…" avant le premier poll SSE (30s) ; boutons Start/Stop masqués tant que statut inconnu
+  Reason: éviter affichage rouge trompeur au chargement
+  Source: `badge(online)`, `st.online === undefined`
+
+- `server/index.js` + `.env` : dotenv, AdGuard + HAOS credentials ajoutés ; credentials NPM et pfSense externalisés
+  Reason: sortir tous les secrets du code source
+  Source: `dotenv.config()`
+
+- Déploiement prod Mac Mini : LaunchAgent `be.tixhon.homelab-dashboard.plist`, NPM proxy host `dashboard.tixhon.be → 192.168.10.98:8160`, AdGuard DNS rewrite
+  Reason: dashboard accessible depuis le LAN sans dev server
+
 ## 2026-06-28 (session 5)
 
 ### Dashboard homelab — inventaire complet + pfSense API v2
