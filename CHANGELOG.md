@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-07-25 (session 9)
+
+### TischNAS3 — revérification post-fix + correctif Readarr
+
+- `docs/network/tischnas3-servarr.md` : ajout section "Suivi post-fix" — confirmation que tous les servarr sont stables après les fixes de la session précédente (Readarr redescendu de 623 MB à 97 MB une fois le scan initial terminé)
+  Reason: valider que les corrections tiennent dans la durée
+  Source: `docker stats`, `/api/v3/health` sur Radarr/Sonarr/Readarr, `/api/v1/health` sur Prowlarr
+
+- Readarr : download client qBittorrent pointait vers l'ancien domaine `qbittorrent.tischhome.duckdns.org` (obsolète) au lieu de `qbittorrent.tixhon.be` (utilisé par Radarr/Sonarr) — causait `DownloadClientCheck: Unable to communicate with Qbittorrent (timeout)`
+  Reason: config héritée jamais migrée lors du changement de domaine
+  Source: `PUT /api/v1/downloadclient/1?forceSave=true`
+
+- Confirmé que les warnings "indexeurs indisponibles >6h" (TorrentDownload, World-torrent, C411, Torrent9) sur Radarr/Sonarr étaient du cache résiduel du nettoyage Prowlarr de la veille, pas une panne active (tous répondent HTTP 200 au test direct)
+
 ## 2026-07-24 (session 8)
 
 ### TischNAS3 — diagnostic et fix stack Docker Servarr (Radarr/Sonarr/Prowlarr/Bazarr/Readarr)

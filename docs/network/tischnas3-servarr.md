@@ -60,6 +60,11 @@ TVSHOWS/Brooklyn Nine-Nine/*/RARBG_DO_NOT_MIRROR.exe (×8, dummy RARBG, inoffens
 ```
 Conservés : les `.exe` sous `TRAINING/` (packages .NET de formation, cracks UML) — non liés à l'incident.
 
+**Suivi post-fix (2026-07-25)** — revérification complète après relance :
+- Tous les servarr up et stables (Radarr 128 MB, Sonarr 243 MB, Prowlarr 108 MB, Bazarr 56 MB, Readarr 97 MB — le pic de 620 MB était bien transitoire, lié au scan de bibliothèque après 7 semaines d'arrêt)
+- 4. **Readarr — download client sur un domaine obsolète** : le client qBittorrent de Readarr pointait vers `qbittorrent.tischhome.duckdns.org` (ancien domaine DuckDNS), alors que Radarr/Sonarr utilisent `qbittorrent.tixhon.be` (domaine actuel) — d'où l'erreur `DownloadClientCheck: Unable to communicate with Qbittorrent (timeout)`. Corrigé via `PUT /api/v1/downloadclient/1?forceSave=true`, connexion testée OK.
+- Les warnings "indexeurs indisponibles >6h" (TorrentDownload, World-torrent, C411, Torrent9) sur Radarr/Sonarr étaient du cache "long-term status" résiduel du nettoyage Prowlarr de la veille — tous répondent HTTP 200 au test direct, pas de panne réelle.
+
 ## Pistes d'optimisation RAM restantes (pas de upgrade hardware possible)
 
 - Si Jellyfin doit être relancé un jour : fixer une limite mémoire dure (`docker update --memory=1g jellyfin`) pour éviter un nouvel OOM global qui tue les autres conteneurs.
