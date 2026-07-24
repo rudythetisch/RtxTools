@@ -15,6 +15,7 @@ Collection of personal tools and scripts for home infrastructure management.
 |------------|-------------|
 | [[network/README\|network/home-assistant]] | Parental control timer system — HA + pfSense integration |
 | [[network/README\|network/pfsense]] | pfSense firewall commands and SSH setup |
+| [[network/tischnas3-servarr\|network/tischnas3-servarr]] | Stack Docker Servarr (Radarr/Sonarr/Prowlarr/...) sur TischNAS3 |
 | `scripts/guides/` | Setup guides: NUT UPS, SSH key setup |
 | `scripts/nipogi-shutdown.sh` | Shutdown NIPoGi server |
 | `scripts/synology-shutdown.sh` | Shutdown Synology NAS |

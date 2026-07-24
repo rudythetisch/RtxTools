@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-07-24 (session 8)
+
+### TischNAS3 — diagnostic et fix stack Docker Servarr (Radarr/Sonarr/Prowlarr/Bazarr/Readarr)
+
+- `docs/network/tischnas3-servarr.md` : nouvelle doc de référence — inventaire des conteneurs, historique de l'incident, procédures de fix
+  Reason: garder une trace des découvertes pour éviter de re-diagnostiquer les mêmes causes racines la prochaine fois
+  Source: investigation SSH + API Radarr/Sonarr/Prowlarr sur `192.168.10.3`
+
+- Diagnostic OOM killer récurrent : `jellyfin` tuait la RAM (3.8 Gi total, pas d'upgrade possible) et entraînait l'arrêt en cascade de `bazarr-rtx`, `readarr-rtx`, `jellyseerr` (exit 137)
+  Reason: root cause des "crashs récurrents" rapportés — confirmé via `/var/log/messages` (`Out of memory: Killed process jellyfin`)
+  Action: `jellyfin` + `jellyseerr` arrêtés et passés en restart policy `no` (pas de remplacement RAM disponible) ; `bazarr-rtx` et `readarr-rtx` relancés avec policy `unless-stopped`
+
+- Radarr : root folder cassé (`/downloads/KIDS/` inexistant, vrai dossier `KIDS-MOVIES`) — root folder recréé, 5 films et 3 collections avaient leur path individuel non migré, corrigés via API (`/api/v3/movie`, `/api/v3/collection`)
+  Reason: erreur de config héritée, bloquait tous les imports de films enfants
+  Source: `PUT /api/v3/movie/{id}`, `PUT /api/v3/collection/{id}`
+
+- Prowlarr : 3 indexeurs (`TheRARBG`, `NorTorrent`, `BitSearch`) supprimés — définitions retirées du dépôt Cardigann upstream (RARBG fermé depuis 2023), non recréables à l'identique
+  Reason: causait en partie le "No available indexers" de Sonarr
+  Source: `DELETE /api/v1/indexer/{id}`
+
+- Sonarr : boucle d'import infinie sur 5 fichiers `.scr`/`.exe` malveillants dans `_TORRENTCOMPLETE` (déguisés en épisodes Euphoria/House of the Dragon) — CPU sonarr bloqué à 37% en continu
+  Reason: fichiers supprimés du disque mais toujours référencés dans la queue Sonarr
+  Action: fichiers supprimés + queue nettoyée avec blocklist (`DELETE /api/v3/queue/{id}?removeFromClient=true&blocklist=true`), CPU redescendu à ~5%
+
 ## 2026-07-01 (session 7)
 
 ### Inventaire réseau — topologie physique + devices complets
