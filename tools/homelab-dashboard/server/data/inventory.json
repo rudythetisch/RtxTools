@@ -138,6 +138,7 @@
       "specs": "TP-Link Deco M4R",
       "role": "Point d'accès Wi-Fi — grenier",
       "sshUser": null,
+      "port": 80,
       "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
       "actions": [],
       "family": "network"
@@ -153,6 +154,7 @@
       "specs": "TP-Link Deco M4R",
       "role": "Point d'accès Wi-Fi — mezzanine",
       "sshUser": null,
+      "port": 80,
       "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
       "actions": [],
       "family": "network"
@@ -168,6 +170,7 @@
       "specs": "TP-Link Deco M4R",
       "role": "Point d'accès Wi-Fi — salon",
       "sshUser": null,
+      "port": 80,
       "notes": "Mesh Deco, alimenté en ethernet depuis le switch D-Link DGS-1100-24.",
       "actions": [],
       "family": "network"

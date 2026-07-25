@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-07-25 (session 18)
+
+### Homelab Dashboard — diagnostic dashboard vide (3 causes cumulées)
+
+- `docs/services.md` : nouvelle section "Homelab Dashboard" (hébergement, architecture, incident détaillé)
+  Reason: documenter un diagnostic multi-causes pour éviter de le refaire à chaque symptôme similaire
+  Source: session de debug via Claude in Chrome + accès direct au Mac Mini hôte
+
+- LXC 113 (TischNAS3) : `node_exporter` relancé manuellement (`nohup /usr/local/bin/node_exporter --web.listen-address=:9100 &`) — le process s'était arrêté (pas de service persistant), Prometheus ne scrapait plus TischNAS3 (`up=0`)
+  Reason: le dashboard affichait "—" pour TischNAS3 ; confirmé par `curl` direct sur Prometheus
+  Source: pas de fix durable — à faire : tâche persistante (DSM Task Scheduler au boot)
+
+- `tools/homelab-dashboard/server/data/inventory.json` : ajout `"port": 80` sur `deco-grenier`, `deco-mezzanine`, `deco-salon`
+  Reason: les 3 Deco M4R étaient marqués "Hors ligne" à tort — `checkPort()` teste le port 22 (SSH) par défaut, or ces routeurs n'exposent que le port 80 (confirmé `ECONNREFUSED` sur 22, succès sur 80)
+  Source: `server/routes/status.js` fonction `checkPort`
+
+- Root cause la plus significative (non résolue) : le process du dashboard lancé via LaunchAgent macOS (`be.tixhon.homelab-dashboard.plist`) échoue silencieusement sur **toutes** les connexions LAN (`net.Socket.connect` vers `192.168.10.x`), alors que le même code lancé manuellement en foreground fonctionne parfaitement — confirmé par test isolé (serveur Express de debug). Cause probable : permission macOS TCC "Réseau local" non accordée à un process headless lancé via `launchd`
+  Reason: explique pourquoi CPU/RAM/Disk restaient à "—" même après les deux fixes ci-dessus
+  Source: comparaison `launchctl load` vs `node server/index.js` en foreground, avec logs identiques sinon
+
 ## 2026-07-25 (session 17)
 
 ### Prometheus/Alertmanager — suppression alerte de test spammant Telegram

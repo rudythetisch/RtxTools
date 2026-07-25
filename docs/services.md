@@ -27,6 +27,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | WireGuard | VM 104 | — | via pfSense | pfSense-pkg-WireGuard 0.2.1 |
 | Vaultwarden | LXC 110 | 192.168.10.17 | https://vw.tixhon.be | Vaultwarden (Docker) |
 | Proxmox | node | 192.168.10.2 | https://192.168.10.2:8006 | Proxmox VE |
+| Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
 
 ---
 
@@ -230,3 +231,25 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 | 2026-07-25 | Suppression de `/etc/prometheus/rules/test.yml` (LXC 113) — règle `TestAlert` (`expr: vector(1)`) toujours active, spammait Telegram toutes les 4h (`repeat_interval` Alertmanager) |
 | 2026-06-27 | Kernel reboot → 6.8.12-30-pve, reboot=pci GRUB fix |
 | 2026-06-26 | 69 paquets sécurité, qemu-server 8.4.8, kernel épinglé |
+
+---
+
+## Homelab Dashboard
+
+**Rôle** : dashboard interne (statut infra, inventaire devices, actions rapides). Pas exposé sur internet — domaine `dashboard.tixhon.be` résolu uniquement en LAN via AdGuard (pas de DNS public), proxifié par NPM → `192.168.10.98:8160`.
+
+**Hébergement** : Mac Mini de Rudy (`192.168.10.98`), process Node/Express lancé via LaunchAgent macOS (`~/Library/LaunchAgents/be.tixhon.homelab-dashboard.plist`, `KeepAlive: true`), logs dans `/tmp/homelab-dashboard.log` / `.err`.
+
+**Architecture** : le serveur (`server/routes/status.js`) interroge en direct — SSH vers Proxmox (`root@192.168.10.2`) pour NIPoGi/HAOS/LXC (via `pct exec`), Prometheus (`192.168.10.184:9090`) pour les NAS via `node_exporter`, l'API pfSense pour le WAN — et pousse le résultat au client via SSE (`GET /api/status/stream`, poll 30s).
+
+**Incident (2026-07-25) — dashboard vide (CPU/RAM/Disk à "—" partout)** : trois causes distinctes cumulées, diagnostiquées via le navigateur (Claude in Chrome) + accès direct au Mac Mini (SSH `rudytixhon@192.168.10.98` + accès local, ce Mac étant aussi la machine hôte de cette session Claude Code) :
+
+1. **`node_exporter` arrêté sur TischNAS3** — processus tourné en tant que binaire lancé manuellement (pas un vrai service systemd/Task Scheduler persistant), s'est arrêté à un moment donné sans redémarrage auto. Relancé manuellement (`nohup /usr/local/bin/node_exporter --web.listen-address=:9100 &`), confirmé via Prometheus (`up{instance="TischNAS3"}` → `1`). **Non résolu de façon durable** — recommandé de créer une vraie tâche persistante (Task Scheduler DSM au boot) pour éviter la récidive.
+2. **Les 3 Deco M4R (Grenier/Mezzanine/Salon) marqués "Hors ligne"** — faux négatif : `checkPort()` teste le port 22 (SSH) par défaut quand `port` n'est pas défini dans `inventory.json`, or ces routeurs n'exposent pas de SSH (confirmé `ECONNREFUSED` sur 22, `succeeded` sur 80). Fix : ajout de `"port": 80` sur les 3 entrées `deco-*` dans `server/data/inventory.json` (pas de redémarrage nécessaire, le fichier est relu à chaque poll).
+3. **Bug macOS le plus sournois : permission "Réseau local" manquante pour le process LaunchAgent** — le même code (`checkPort` via `net.Socket`), lancé manuellement dans un terminal, réussit toutes les connexions LAN (`192.168.10.x`) ; lancé via `launchd` (LaunchAgent), **toutes les connexions échouent silencieusement** (`ECONNREFUSED`/timeout sur tout, y compris des cibles confirmées joignables au même instant via `nc`/`ssh` direct). Confirmé par test isolé (mini-serveur Express de debug) : succès en foreground, échec identique une fois passé par `launchd`. Cause probable : macOS TCC (Privacy & Security → Réseau local) n'accorde pas la permission à un process lancé en headless via LaunchAgent, contrairement à un process hérité d'une session Terminal déjà autorisée. **Non résolu** — nécessite une action utilisateur (redémarrage du Mac pour re-déclencher la popup d'autorisation système, ou ajout manuel dans Réglages Système → Confidentialité et sécurité → Réseau local).
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-07-25 | Incident dashboard vide : `node_exporter` relancé sur TischNAS3 (non persistant), `inventory.json` corrigé (port 80 sur les 3 Deco), permission macOS "Réseau local" identifiée comme cause racine du 3ᵉ symptôme (non résolue, nécessite reboot + action utilisateur) |
