@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-25 (session 17)
+
+### Prometheus/Alertmanager — suppression alerte de test spammant Telegram
+
+- LXC 113 (`prometheus`) : suppression de `/etc/prometheus/rules/test.yml` (règle `TestAlert`, `expr: vector(1)`) + `systemctl restart prometheus`
+  Reason: l'utilisateur recevait plusieurs notifications Telegram par jour ("TestAlert"/"Alerte de test") sans en connaître la source — la règle était toujours vraie (`vector(1)`) et se répétait via `repeat_interval: 4h` dans la config Alertmanager (LXC 111)
+  Source: `docs/services.md` section Proxmox VE
+
 ## 2026-07-25 (session 16)
 
 ### Home Assistant — retrait Cloudflare Access (app Android) + audit sécurité + config URLs

@@ -227,5 +227,6 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 | Date | Changement |
 |------|-----------|
+| 2026-07-25 | Suppression de `/etc/prometheus/rules/test.yml` (LXC 113) — règle `TestAlert` (`expr: vector(1)`) toujours active, spammait Telegram toutes les 4h (`repeat_interval` Alertmanager) |
 | 2026-06-27 | Kernel reboot → 6.8.12-30-pve, reboot=pci GRUB fix |
 | 2026-06-26 | 69 paquets sécurité, qemu-server 8.4.8, kernel épinglé |
