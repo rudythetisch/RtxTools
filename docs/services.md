@@ -10,6 +10,7 @@ Doc de référence pour les services principaux. Passer par Claude Code pour tou
 | AdGuard Home | LXC 103 | 192.168.10.12 | http://192.168.10.12:3000 | AdGuard Home |
 | Nginx Proxy Manager | LXC 105 | 192.168.10.11 | http://192.168.10.11:81 | NPM |
 | WireGuard | VM 104 | — | via pfSense | pfSense-pkg-WireGuard 0.2.1 |
+| Vaultwarden | LXC 110 | 192.168.10.17 | https://vw.tixhon.be | Vaultwarden (Docker) |
 | Proxmox | node | 192.168.10.2 | https://192.168.10.2:8006 | Proxmox VE |
 
 ---
@@ -109,6 +110,30 @@ Doc de référence pour les services principaux. Passer par Claude Code pour tou
 | Date | Changement |
 |------|-----------|
 | — | — |
+
+---
+
+## Vaultwarden
+
+**Rôle** : Gestionnaire de mots de passe self-hosted (implémentation Bitwarden-compatible), utilisé par toute la famille + plusieurs organisations partagées (FernelEvents, NAS & Co, IBA, Dumotisch, Saint-Nicolas Pontillas, Ecoledebierwart.be).
+
+**Hébergement** : LXC 110 sur NIPoGi (Proxmox), IP `192.168.10.17`, 4 vCPU / 6 Gi RAM.
+
+**Déploiement** : conteneur Docker `vaultwarden/server:latest` (migré depuis un binaire compilé + service systemd le 2026-07-25).
+- Data : `/opt/vaultwarden/data` (host, réutilisé tel quel lors de la migration) → `/data` (conteneur)
+- `SIGNUPS_ALLOWED=false` — inscriptions publiques désactivées
+- Panel admin accessible via token (voir mémoire Claude `vaultwarden-access`)
+
+**Accès** :
+- Web vault : https://vw.tixhon.be
+- SSH direct : `ssh root@192.168.10.17` (clé déjà déployée)
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-07-25 | Migration bare-metal (binaire v1.35.8, systemd) → Docker (`vaultwarden/server:latest`, v1.37.0). Cause : décalage de version entre le binaire (1.35.8) et le web-vault embarqué (2026.3.1) provoquant un `404` sur `/identity/accounts/prelogin/password`, bloquant la connexion desktop/extension (le web vault fonctionnait car same-origin). Snapshot Proxmox + backup tar pris avant migration. `SIGNUPS_ALLOWED=false` appliqué (inscriptions publiques découvertes ouvertes par défaut). |
+| 2026-07-25 | Conteneur Docker `vaultwarden-server-1` obsolète sur TischNAS3 arrêté définitivement (doublon, remplacé par ce LXC) |
 
 ---
 

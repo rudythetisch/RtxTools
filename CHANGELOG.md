@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-07-25 (session 12)
+
+### Vaultwarden — diagnostic bug login desktop/extension + migration Docker
+
+- `docs/services.md` : nouvelle section Vaultwarden — déploiement, accès, historique
+  Reason: service jusqu'ici non documenté malgré son usage critique (password manager familial + plusieurs organisations)
+  Source: LXC 110 sur NIPoGi, `docker inspect vaultwarden`
+
+- Diagnostic : "unexpected error" au login sur l'app desktop Mac et l'extension Chrome (web vault fonctionnel) — cause trouvée via les logs serveur : `POST /identity/accounts/prelogin/password` → `404 Not Found`. Le binaire Vaultwarden compilé (v1.35.8, bare-metal + systemd) n'implémentait pas cet endpoint attendu par les clients récents, alors que le web-vault embarqué (2026.3.1) était plus à jour que le binaire lui-même — un décalage de version invisible côté web vault (même origine, pas besoin de cet endpoint) mais bloquant pour les clients externes
+  Reason: isoler la cause exacte avant d'agir — confirmé non lié à un compte spécifique via un compte de test jetable qui reproduisait le même échec
+  Source: `journalctl`/logs vaultwarden, `strings /opt/vaultwarden/bin/vaultwarden`, comparaison versions `/api/config` vs footer web-vault
+
+- Migration de Vaultwarden depuis un déploiement bare-metal (binaire compilé Rust + service systemd) vers un conteneur Docker officiel (`vaultwarden/server:latest`, v1.37.0) — réutilisation des données existantes (`/opt/vaultwarden/data`) sans perte (comptes, coffres, organisations, clés RSA vérifiés intacts après migration)
+  Reason: élimine le risque de dérive de version binaire/web-vault à l'avenir, et simplifie radicalement les mises à jour (`docker pull` au lieu d'une compilation Rust de ~10-15 min)
+  Source: snapshot Proxmox `pre-vaultwarden-update-20260725` + backup tar pris avant toute manipulation ; ancien binaire conservé (`vaultwarden.bak-1.35.8`)
+
+- `SIGNUPS_ALLOWED=false` appliqué — les inscriptions publiques sur `vw.tixhon.be` étaient ouvertes par défaut (découvert en testant le diagnostic), désormais désactivées
+  Reason: éviter que n'importe qui connaissant l'URL puisse créer un compte sur l'instance
+
+- NPM : proxy host `vw.tixhon.be` (id=24) `forward_scheme` passé de `https` (cert auto-signé Rocket) à `http` (le conteneur Docker sert du HTTP en interne, TLS terminé par NPM)
+
+- TischNAS3 : conteneur Docker `vaultwarden-server-1` (doublon obsolète déjà arrêté lors d'une session précédente) confirmé non nécessaire, migration ne le concerne pas
+
 ## 2026-07-25 (session 11)
 
 ### Accès NPM/AdGuard/pfSense + correction entrées NPM Jellyfin/Jellyseerr
