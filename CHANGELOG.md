@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-07-25 (session 15)
+
+### Vaultwarden — retrait Cloudflare Access + durcissement panel admin
+
+- `docs/services.md` : section Vaultwarden mise à jour (sécurité panel admin) + section Cloudflare corrigée (`vw` n'a plus Access)
+  Reason: documenter le retour en arrière sur Access et les protections de remplacement mises en place
+  Source: mémoire Claude (`vaultwarden-access.md`, `cloudflare-access.md`)
+
+- Cloudflare Access retiré de `vw.tixhon.be` (app Access + service token supprimés) — incompatible avec l'app native Bitwarden (mobile/desktop) qui ne gère pas le challenge interactif email/OTP. Recherche communautaire confirmée (GitHub vaultwarden#3342) : mTLS ou service token sont les seules solutions, toutes deux indisponibles ici (plan Cloudflare sans mTLS, app Bitwarden sans champ service token). `hass.tixhon.be` garde Access (l'app HA gère bien la redirection)
+  Reason: usabilité prioritaire sur cette couche de défense en profondeur, le mot de passe maître Vaultwarden reste la protection principale
+  Source: `DELETE /accounts/{acct}/access/apps/{id}`, `DELETE /accounts/{acct}/access/service_tokens/{id}`
+
+- `ADMIN_TOKEN` Vaultwarden hashé en Argon2id (`argon2` CLI sur le LXC 110, conteneur recréé avec le hash) — supprime le warning "plain text ADMIN_TOKEN is insecure", testé pour confirmer que ni le login admin ni les comptes utilisateurs ne sont affectés
+  Reason: le token était stocké en clair dans les variables d'environnement du conteneur Docker
+  Source: `argon2 <salt> -id -m 19 -t 2 -p 1 -l 32 -e`, `docker run` avec le hash en `ADMIN_TOKEN`
+
+- `/admin` de Vaultwarden restreint au réseau local — bloqué (403) pour tout trafic passant par Cloudflare (détection du header `CF-Connecting-IP`, toujours présent sur le trafic Cloudflare, absent en LAN direct), accessible via LAN ou WireGuard uniquement
+  Reason: le panel admin était accessible publiquement depuis internet, protégé uniquement par le token — trouvé lors de l'audit sécurité de la session précédente
+  Source: NPM `advanced_config` sur le proxy host `vw.tixhon.be` (id=24), bloc `location /admin` avec `if ($http_cf_connecting_ip != "") { return 403; }`
+
 ## 2026-07-25 (session 14)
 
 ### Audit sécurité services exposés à internet (Cloudflare)

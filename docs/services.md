@@ -143,12 +143,18 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 - Web vault : https://vw.tixhon.be
 - SSH direct : `ssh root@192.168.10.17` (clé déjà déployée)
 
+**Sécurité panel admin (2026-07-25)** :
+- `ADMIN_TOKEN` stocké en Argon2id (hashé via `argon2` CLI, plus de warning "plain text ADMIN_TOKEN") — le hash n'affecte que le login admin, pas les comptes utilisateurs
+- `/admin` bloqué pour tout trafic externe (via NPM, détection du header `CF-Connecting-IP` ajouté systématiquement par Cloudflare) — accessible uniquement en LAN direct ou via WireGuard
+- Cloudflare Access testé sur `vw.tixhon.be` puis **retiré** : incompatible avec l'app native Bitwarden (mobile/desktop) qui ne gère pas le challenge interactif email/OTP ; mTLS indisponible sur le plan Cloudflare actuel ; service token impossible à configurer côté app (pas de champ dédié dans cette version). Protection assurée par : mot de passe maître + `/admin` restreint réseau. `hass.tixhon.be` garde sa protection Access (l'app companion HA gère bien la redirection, contrairement à Bitwarden).
+
 **Historique des changements** :
 
 | Date | Changement |
 |------|-----------|
 | 2026-07-25 | Migration bare-metal (binaire v1.35.8, systemd) → Docker (`vaultwarden/server:latest`, v1.37.0). Cause : décalage de version entre le binaire (1.35.8) et le web-vault embarqué (2026.3.1) provoquant un `404` sur `/identity/accounts/prelogin/password`, bloquant la connexion desktop/extension (le web vault fonctionnait car same-origin). Snapshot Proxmox + backup tar pris avant migration. `SIGNUPS_ALLOWED=false` appliqué (inscriptions publiques découvertes ouvertes par défaut). |
 | 2026-07-25 | Conteneur Docker `vaultwarden-server-1` obsolète sur TischNAS3 arrêté définitivement (doublon, remplacé par ce LXC) |
+| 2026-07-25 | Audit sécurité : `ADMIN_TOKEN` hashé, `/admin` restreint au LAN (bloqué en externe via header `CF-Connecting-IP`), Cloudflare Access testé puis retiré (incompatibilité app Bitwarden native) |
 
 ---
 
@@ -166,8 +172,8 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Domaine | Protection | Policy |
 |---|---|---|
 | `rtxtradingbot.tixhon.be` | ✅ Access (préexistant) | rudy.tixhon@gmail.com |
-| `vw.tixhon.be` | ✅ Access (ajouté 2026-07-25) | rudy.tixhon@gmail.com + celine.dumo@gmail.com |
 | `hass.tixhon.be` | ✅ Access (ajouté 2026-07-25) | rudy.tixhon@gmail.com + celine.dumo@gmail.com |
+| `vw.tixhon.be` | ❌ Retiré 2026-07-25 (incompatible app Bitwarden native) | — protection via `/admin` restreint réseau + mot de passe maître, voir section Vaultwarden |
 | `linkwarden.tixhon.be`, `homeplan.tixhon.be` | ❌ Aucune (auth applicative native seulement) | — |
 
 ⚠️ **Piège de test important** : depuis le LAN, AdGuard résout `*.tixhon.be` directement vers l'IP interne (split-horizon DNS) — **tout test depuis le réseau local contourne Cloudflare Access entièrement**, donnant une fausse impression que la protection ne fonctionne pas. Pour tester réellement : DNS-over-HTTPS externe (`curl https://cloudflare-dns.com/dns-query?name=...&type=A -H "accept: application/dns-json"`) puis `curl --resolve host:443:<ip-cloudflare>` — ou plus simple, tester en 4G/5G.
@@ -176,7 +182,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 
 | Date | Changement |
 |------|-----------|
-| 2026-07-25 | Audit sécurité complet : suppression de `deploy.tixhon.be` (DNS + route tunnel, backend 192.168.10.21:9000 injoignable et sans protection) ; ajout Access sur `vw`/`hass` ; mise à jour `cloudflared` (2025.2.1 → dernière version) |
+| 2026-07-25 | Audit sécurité complet : suppression de `deploy.tixhon.be` (DNS + route tunnel, backend 192.168.10.21:9000 injoignable et sans protection) ; Access ajouté puis retiré sur `vw` (incompatible app Bitwarden native, cf. section Vaultwarden) ; Access conservé sur `hass` ; mise à jour `cloudflared` (2025.2.1 → dernière version) |
 
 ---
 
