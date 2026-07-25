@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-07-25 (session 10)
+
+### Migration Jellyfin/Jellyseerr TischNAS3 → TischNAS2 + nettoyage vaultwarden doublon
+
+- `docs/network/tischnas3-servarr.md` : section "Migration Jellyfin/Jellyseerr vers TischNAS2" — procédure complète (export NFS, mount persistant, copie config, recréation conteneurs)
+  Reason: TischNAS3 (3.8 Gi RAM, matériel CPU le plus récent/puissant des 3 hosts pourtant) portait le plus gros consommateur RAM (Jellyfin) alors que TischNAS2 (7.7 Gi RAM) tournait quasi idle sans aucun conteneur Docker — répartition de charge incohérente identifiée en comparant les 3 hosts (NIPoGi/NAS2/NAS3)
+  Source: `mount -t nfs -o vers=3,rw,tcp`, `/etc/rc.local` (TischNAS2), `tar | ssh | tar`
+
+- Jellyfin + Jellyseerr recréés sur TischNAS2 (`192.168.10.5`) avec configs/bibliothèque/historique préservés (copie depuis `/volume1/docker/_Configs/{Jellyfin,Jellyseerr}` de NAS3), médias accédés via mount NFS sur `/volume1/DOWNLOADS` (export déjà actif sur NAS3, ouvert au LAN)
+  Reason: NAS2 a la RAM et le CPU dispo pour transcoder/héberger sans risque d'OOM ; réseau gigabit largement suffisant pour ce trafic (25-100 Mbps par flux vs ~125 Mo/s de lien réel)
+  Source: `docker run` avec mêmes UID/GID (1031/101, identiques sur les deux NAS), mêmes ports (8100/8920/1900/7359 et 5055)
+
+- TischNAS3 : conteneur `vaultwarden-server-1` (Docker) arrêté définitivement — doublon obsolète, remplacé depuis par le LXC `vaultwarden` sur NIPoGi
+  Reason: confusion possible entre deux instances Vaultwarden actives, seule celle de NIPoGi doit rester active
+  Source: `docker stop` + `docker update --restart=no`
+
 ## 2026-07-25 (session 9)
 
 ### TischNAS3 — revérification post-fix + correctif Readarr

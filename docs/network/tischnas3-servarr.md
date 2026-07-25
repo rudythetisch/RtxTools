@@ -2,6 +2,8 @@
 
 Doc de référence pour le stack Docker (Container Manager Synology) tournant sur TischNAS3 (`192.168.10.3`).
 
+> **2026-07-25** : Jellyfin et Jellyseerr ont été migrés vers TischNAS2 (`192.168.10.5`) — voir section [[#Migration Jellyfin/Jellyseerr vers TischNAS2]]. Ce doc ne les couvre plus que pour l'historique de l'incident.
+
 ## Contexte
 
 RAM du NAS très limitée : **3.8 Gi total**, pas d'extension possible (slot fixe). Toute optimisation doit passer par la réduction de charge des conteneurs, pas par du hardware.
@@ -17,8 +19,9 @@ RAM du NAS très limitée : **3.8 Gi total**, pas d'extension possible (slot fix
 | bazarr-rtx | Sous-titres | unless-stopped | ~25 MB |
 | qbittorrent-rtx | Client torrent | unless-stopped | ~20 MB |
 | flaresolverr-rtx | Bypass Cloudflare pour indexeurs | unless-stopped | ~4 MB |
-| jellyfin | Serveur média/transcoding | **no** (arrêté volontairement) | — |
-| jellyseerr | Requêtes médias (frontend Jellyfin) | **no** (arrêté volontairement) | — |
+| ~~jellyfin~~ | Migré vers TischNAS2 (2026-07-25) | — | — |
+| ~~jellyseerr~~ | Migré vers TischNAS2 (2026-07-25) | — | — |
+| ~~vaultwarden-server-1~~ | Doublon obsolète, remplacé par le LXC `vaultwarden` sur NIPoGi | **no** (arrêté) | — |
 | influxdb.syno.bak | À vérifier — nom suggère backup/doublon oublié | — | ~65 MB |
 
 Mounts clés : `/volume1/DOWNLOADS` (host) → `/downloads` (containers). Sous-dossiers : `MOVIES`, `KIDS-MOVIES`, `TVSHOWS`, `KIDS-TVSHOWS`, `_TORRENTCOMPLETE`, `_TORRENTINCOMPLETE`, `_TORRENTWATCH`, etc.
@@ -65,9 +68,23 @@ Conservés : les `.exe` sous `TRAINING/` (packages .NET de formation, cracks UML
 - 4. **Readarr — download client sur un domaine obsolète** : le client qBittorrent de Readarr pointait vers `qbittorrent.tischhome.duckdns.org` (ancien domaine DuckDNS), alors que Radarr/Sonarr utilisent `qbittorrent.tixhon.be` (domaine actuel) — d'où l'erreur `DownloadClientCheck: Unable to communicate with Qbittorrent (timeout)`. Corrigé via `PUT /api/v1/downloadclient/1?forceSave=true`, connexion testée OK.
 - Les warnings "indexeurs indisponibles >6h" (TorrentDownload, World-torrent, C411, Torrent9) sur Radarr/Sonarr étaient du cache "long-term status" résiduel du nettoyage Prowlarr de la veille — tous répondent HTTP 200 au test direct, pas de panne réelle.
 
+## Migration Jellyfin/Jellyseerr vers TischNAS2
+
+**Contexte** : répartition de charge incohérente entre les 3 hosts — TischNAS3 (3.8 Gi RAM, le moins généreux des trois) portait le plus gros consommateur RAM (Jellyfin), pendant que TischNAS2 (7.7 Gi RAM) tournait quasi idle sans aucun conteneur Docker. Comparaison CPU/RAM détaillée dans [[../index|docs/index]] (ou historique de session). Décision : déplacer Jellyfin + Jellyseerr vers TischNAS2, qui a largement la marge RAM/CPU pour les accueillir.
+
+**Mise en œuvre (2026-07-25)** :
+1. Export NFS `/volume1/DOWNLOADS` déjà actif sur TischNAS3 (`/etc/exports`, ouvert à tout le LAN, `all_squash` anonuid=1024/anongid=100)
+2. Montage sur TischNAS2 : `mount -t nfs -o vers=3,rw,tcp 192.168.10.3:/volume1/DOWNLOADS /volume1/nfs/tischnas3-downloads` (NFSv4 non supporté par ce Synology — `mount.nfs: Protocol not supported` — utiliser vers=3)
+3. Montage rendu persistant au boot via `/etc/rc.local` sur TischNAS2 (mkdir + mount, ajouté après la ligne `start-node-exporter.sh` existante)
+4. Configs copiées de NAS3 vers NAS2 via `tar -cf - -C <src> . | ssh nas2 tar -xf - -C <dst>` (pas besoin de sudo, dossiers en `777`) : `Jellyfin` (1.3 Go, bibliothèque + historique conservés), `Jellyseerr` (6.6 Mo)
+5. Conteneurs recréés sur TischNAS2 avec mêmes UID/GID (`secureAdmin` = 1031/101, identique sur les deux NAS — pas de remap nécessaire), mêmes ports (Jellyfin 8100/8920/1900/7359, Jellyseerr 5055), volumes pointant vers le mount NFS au lieu du disque local
+
+**Résultat** : Jellyfin a retrouvé sa médiathèque et son historique de visionnage sans perte (health check OK, guide TV rechargé). Jellyseerr opérationnel. Accès au contenu via LAN gigabit — non limitant pour du streaming (25-100 Mbps par flux vs ~125 Mo/s de bande passante réelle).
+
+**Point de vigilance** : dépendance croisée désormais introduite — si TischNAS3 est down/reboot, Jellyfin sur TischNAS2 perd l'accès aux fichiers (le mount NFS ne se re-résout pas tout seul sans reboot de NAS2 ou remount manuel).
+
 ## Pistes d'optimisation RAM restantes (pas de upgrade hardware possible)
 
-- Si Jellyfin doit être relancé un jour : fixer une limite mémoire dure (`docker update --memory=1g jellyfin`) pour éviter un nouvel OOM global qui tue les autres conteneurs.
 - Vérifier `influxdb.syno.bak` — nom suggère un conteneur de backup/doublon oublié, RAM récupérable si inutile.
 - `homebridge` (natif DSM, hors Docker, ~30 MB) — à garder seulement si utilisé.
 
