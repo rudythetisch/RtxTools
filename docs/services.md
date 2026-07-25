@@ -2,6 +2,21 @@
 
 Doc de référence pour les services principaux. Passer par Claude Code pour tout changement de config afin de maintenir un historique.
 
+## Accès dédiés agent Claude (2026-07-25)
+
+Pour toute opération de routine, l'agent utilise des comptes séparés du compte personnel de l'utilisateur (traçabilité + révocation granulaire) :
+
+| Service | Compte dédié | Restriction |
+|---|---|---|
+| TischNAS2 / TischNAS3 (SSH) | `claude` + clé `~/.ssh/claude-agent/id_ed25519` | sudo limité à `docker`, `df`, `free` |
+| Vaultwarden LXC (SSH) | `claude` (non-root) + même clé | sudo limité à `docker` |
+| Proxmox (API) | Token `root@pam!claude` | rôle `PVEAdmin` (pas de gestion utilisateurs/réseau système) |
+| pfSense (API) | Utilisateur `claude` | 128 privilèges API ciblés, pas de GUI |
+| NPM (API) | `claude-agent@tixhon.be` | rôle admin (pas plus granulaire dispo) |
+| AdGuard Home | — | impossible, logiciel mono-utilisateur |
+
+Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-access.md`, `pfsense-access.md`, `npm-adguard-access.md`), pas dans ce repo (pas de secrets en clair dans git).
+
 ## Vue d'ensemble
 
 | Service | VMID | IP | URL | Techno |

@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-07-25 (session 13)
+
+### Sécurité — comptes/clés dédiés pour l'agent Claude + nettoyage backups
+
+- `docs/services.md` : mention des comptes dédiés `claude` par service
+  Reason: jusqu'ici l'agent utilisait les identifiants personnels de l'utilisateur (SSH `secureAdmin`, token Proxmox root, login pfSense/NPM perso) — aucune traçabilité ni révocation granulaire possible
+  Source: mémoire Claude (`nas-access.md`, `vaultwarden-access.md`, `pfsense-access.md`, `npm-adguard-access.md`)
+
+- Génération d'une paire de clés SSH dédiée (`~/.ssh/claude-agent/id_ed25519`) et création d'un compte `claude` séparé avec sudo restreint (`docker`, `df`, `free` uniquement) sur TischNAS2, TischNAS3, et le LXC Vaultwarden (110)
+  Reason: limiter le rayon d'action de l'agent au strict nécessaire plutôt que sudo complet via le compte personnel
+  Source: `synouser --add` (Synology), `useradd` (Debian/Vaultwarden LXC), `/etc/sudoers.d/claude-agent`
+
+- Token API Proxmox `root@pam!claude` : `privsep` activé + rôle restreint à `PVEAdmin` (au lieu de l'héritage complet des droits root@pam) — retire la gestion utilisateurs/permissions/réseau système tout en gardant VM/LXC/storage/backups
+  Reason: le token avait `privsep=0`, héritant silencieusement de tous les droits root
+  Source: `PUT /access/users/root@pam/token/claude`, `pveum acl modify / -role PVEAdmin -token root@pam!claude`
+
+- pfSense : compte `claude` créé avec 128 privilèges API ciblés (system/status/firewall/interfaces/dns/dhcp/diagnostics), sans accès GUI ni VPN/HAProxy/BIND/FreeRADIUS (non utilisés)
+  Reason: séparer l'identité API de celle de rtixhon (677 privilèges complets, accès GUI inclus)
+  Source: `POST/PATCH /api/v2/user` — limite technique découverte : 128 entrées max par requête sur le champ `priv`
+
+- NPM : compte `claude-agent@tixhon.be` créé (rôle admin, NPM n'offre pas de granularité plus fine)
+
+- AdGuard Home : pas de compte dédié possible — logiciel mono-utilisateur, documenté comme limite connue
+
+- Home Assistant : 15 sauvegardes manuelles obsolètes supprimées (2024-2025, doublons de versions core pré-upgrade jamais nettoyés) — ~2.6 Go récupérés, une seule conservée comme filet de sécurité
+  Source: GUI HA via navigateur (`/config/backup`)
+
+- Proxmox : nettoyage de 17 backups orphelins (VM 116 "rtxbot", supprimée depuis) — ~75 Go récupérés sur le storage `syno-backup` (461 Go → 386 Go). Retention du storage explicitée (`keep-last=7,keep-daily=5,keep-weekly=4,keep-monthly=1`, remplace `keep-all=1`)
+  Reason: diagnostic initial erroné (comptage de fichiers ×3 par backup) a été corrigé en cours de route — la rétention active fonctionnait déjà correctement pour les VM/LXC existants
+  Source: `pvesm prune-backups`, `DELETE /nodes/proxmox/storage/syno-backup/content`
+
 ## 2026-07-25 (session 12)
 
 ### Vaultwarden — diagnostic bug login desktop/extension + migration Docker
