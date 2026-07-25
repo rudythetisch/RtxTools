@@ -27,16 +27,18 @@ Doc de référence pour les services principaux. Passer par Claude Code pour tou
 
 **Packages installés** :
 - WireGuard 0.2.1
-- pfSense-pkg-API 1.8.1 (REST API)
+- REST API package (mis à jour depuis pfSense-pkg-API v1.8.1 → v2, pfSense 2.8.1-RELEASE)
 
 **Procédures importantes** :
 - **WAN ne remonte pas après reboot** : Status > Interfaces → cocher "Send a gratuitous DHCP release packet" → Release WAN → Renew WAN. Si échec : reboot modem VOO.
 - **DynDNS** : 2 entrées configurées (DNS-O-Matic + Custom) sur l'interface WAN.
+- **API REST v2** : auth = **HTTP Basic Auth** sur chaque requête (`curl -u user:pass https://pfsense.tixhon.be/api/v2/...`), pas de body JSON `{"username":...}` (renvoie 401 systématiquement, même avec bonnes permissions — piège classique de ce package). Privilèges requis sur le compte : `WebCfg - All pages` + toutes les perms `REST API - ...` dans User Manager.
 
 **Historique des changements** :
 
 | Date | Changement |
 |------|-----------|
+| 2026-07-25 | Migration API v1 → v2 constatée (ancien CLIENT-ID/TOKEN obsolète), accès rétabli via Basic Auth |
 | 2026-06-27 | Installation pfSense-pkg-API v1.8.1, configuration API Token auth |
 
 ---
@@ -54,12 +56,14 @@ Doc de référence pour les services principaux. Passer par Claude Code pour tou
 **Config notable** :
 - pfSense forwarde le DNS vers AdGuard (192.168.10.12)
 - Upstream DNS : (à documenter)
+- Version installée : v0.107.52
+- Auth API : `POST /control/login` avec `{"name":...,"password":...}`, cookie de session ensuite
 
 **Historique des changements** :
 
 | Date | Changement |
 |------|-----------|
-| — | — |
+| 2026-07-25 | Accès API confirmé et documenté (login + cookie session) |
 
 ---
 
@@ -73,13 +77,17 @@ Doc de référence pour les services principaux. Passer par Claude Code pour tou
 - GUI : http://192.168.10.11:81
 - SSH : `ssh root@192.168.10.2 'pct exec 105 -- bash'`
 
-**Proxy hosts configurés** : (à documenter au prochain changement)
+**Proxy hosts configurés** : ~30 hosts sur `*.tixhon.be` (cert Let's Encrypt wildcard), incluant tous les services *arr, dashboard, monitoring, NAS, pfSense, jellyfin/jellyseerr, etc. — liste complète via API `GET /api/nginx/proxy-hosts`.
+
+**Config notable** :
+- Auth API : `POST /api/tokens` avec `{"identity":...,"secret":...}` → JWT (expire 1 jour)
+- Édition d'un proxy host : `PUT /api/nginx/proxy-hosts/{id}` — retirer `id`, `created_on`, `modified_on`, `owner_user_id`, `meta` du payload GET avant de le renvoyer (sinon 400 "additional properties")
 
 **Historique des changements** :
 
 | Date | Changement |
 |------|-----------|
-| — | — |
+| 2026-07-25 | `jellyfin.tixhon.be` et `jellyseerr.tixhon.be` repointés de TischNAS3 (192.168.10.3) vers TischNAS2 (192.168.10.5) suite à la migration des conteneurs, mêmes ports (8100/5055). Accès API confirmé et documenté. |
 
 ---
 

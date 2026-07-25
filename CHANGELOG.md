@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-07-25 (session 11)
+
+### Accès NPM/AdGuard/pfSense + correction entrées NPM Jellyfin/Jellyseerr
+
+- `docs/services.md` : sections pfSense, AdGuard, NPM mises à jour — accès API confirmés et documentés (méthodes d'auth, pièges)
+  Reason: étendre l'accès direct aux services d'infra (au-delà des NAS/Proxmox déjà couverts), demandé explicitement
+  Source: tests curl directs sur les 3 API
+
+- NPM : `jellyfin.tixhon.be` et `jellyseerr.tixhon.be` repointés de TischNAS3 vers TischNAS2 via `PUT /api/nginx/proxy-hosts/{29,27}` — ces entrées avaient été oubliées lors de la migration des conteneurs (session précédente)
+  Reason: les domaines publics pointaient encore vers l'ancien host après la migration Docker
+  Source: `GET/PUT /api/nginx/proxy-hosts/{id}`
+
+- pfSense : découverte que l'API REST v2 (migrée depuis la v1, ancien token obsolète) attend du **HTTP Basic Auth** sur chaque requête, pas un body JSON `{"username":...}` — cause des `401 AUTH_AUTHENTICATION_FAILED` malgré permissions correctes et mot de passe confirmé (login GUI OK). Confirmé via les logs pfSense (`authentication error for user 'unknown'` — le body JSON n'était jamais parsé).
+  Reason: éviter de reperdre du temps sur cette confusion lors d'une prochaine session
+  Source: `POST /api/v2/auth/jwt` avec Basic Auth, `GET /api/v2/system/version`
+
 ## 2026-07-25 (session 10)
 
 ### Migration Jellyfin/Jellyseerr TischNAS3 → TischNAS2 + nettoyage vaultwarden doublon
