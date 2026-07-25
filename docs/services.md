@@ -152,6 +152,34 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 
 ---
 
+## Cloudflare (Tunnel + Access)
+
+**Rôle** : expose sélectivement certains services vers internet sans ouvrir de port entrant — en complément du reverse proxy NPM (lui-même exposé via pfSense NAT 80/443 → 192.168.10.11, mais uniquement pour les domaines réellement présents en DNS public).
+
+**Architecture découverte (audit 2026-07-25)** :
+- Sur ~29 hosts configurés dans NPM, **seuls 6 domaines sont résolvables publiquement** (le reste — Proxmox, pfSense, NAS, AdGuard, etc. — n'existe qu'en DNS interne/AdGuard, donc pas exposé à internet malgré l'absence d'access-list NPM)
+- **Cloudflare Tunnel** (`cloudflared`, LXC 109 sur NIPoGi, tunnel `nipogi-homelab`) : connexion sortante uniquement, ingress rules gérées depuis le dashboard Cloudflare (pas de config.yml local)
+- Domaines tunnelés : `hass`, `vw`, `linkwarden` (→ NPM 192.168.10.11:80), `homeplan` (→ 192.168.10.98:3000), `rtxtradingbot` (→ 192.168.10.98:8000)
+
+**Cloudflare Access (Zero Trust)** — authentification par email OTP en amont du login applicatif :
+
+| Domaine | Protection | Policy |
+|---|---|---|
+| `rtxtradingbot.tixhon.be` | ✅ Access (préexistant) | rudy.tixhon@gmail.com |
+| `vw.tixhon.be` | ✅ Access (ajouté 2026-07-25) | rudy.tixhon@gmail.com + celine.dumo@gmail.com |
+| `hass.tixhon.be` | ✅ Access (ajouté 2026-07-25) | rudy.tixhon@gmail.com + celine.dumo@gmail.com |
+| `linkwarden.tixhon.be`, `homeplan.tixhon.be` | ❌ Aucune (auth applicative native seulement) | — |
+
+⚠️ **Piège de test important** : depuis le LAN, AdGuard résout `*.tixhon.be` directement vers l'IP interne (split-horizon DNS) — **tout test depuis le réseau local contourne Cloudflare Access entièrement**, donnant une fausse impression que la protection ne fonctionne pas. Pour tester réellement : DNS-over-HTTPS externe (`curl https://cloudflare-dns.com/dns-query?name=...&type=A -H "accept: application/dns-json"`) puis `curl --resolve host:443:<ip-cloudflare>` — ou plus simple, tester en 4G/5G.
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-07-25 | Audit sécurité complet : suppression de `deploy.tixhon.be` (DNS + route tunnel, backend 192.168.10.21:9000 injoignable et sans protection) ; ajout Access sur `vw`/`hass` ; mise à jour `cloudflared` (2025.2.1 → dernière version) |
+
+---
+
 ## Proxmox VE
 
 Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.

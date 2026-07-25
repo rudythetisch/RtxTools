@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-07-25 (session 14)
+
+### Audit sécurité services exposés à internet (Cloudflare)
+
+- `docs/services.md` : nouvelle section Cloudflare (Tunnel + Access) — architecture, domaines exposés, piège de test LAN vs externe
+  Reason: cartographier précisément la surface d'attaque réelle avant de corriger quoi que ce soit
+  Source: API Cloudflare (zones, DNS records, cfd_tunnel, access/apps) via token scoped en lecture puis écriture
+
+- Découverte que sur ~29 hosts NPM, seuls 6 domaines sont réellement résolvables publiquement (Cloudflare Tunnel) — le reste (Proxmox, pfSense, NAS, AdGuard...) n'existe qu'en DNS interne malgré l'absence d'access-list NPM, réduisant fortement la surface d'attaque réelle par rapport à l'impression initiale
+  Reason: éviter de sur-réagir à un faux problème (access_list_id=0 partout dans NPM semblait alarmant isolément)
+
+- `deploy.tixhon.be` supprimé (DNS + route ingress du tunnel) — backend `192.168.10.21:9000` injoignable (down/offline) et sans aucune protection (ni Cloudflare Access ni NPM, bypass direct)
+  Reason: service mort et non protégé, décision de l'utilisateur de le retirer plutôt que de le sécuriser
+  Source: `DELETE /zones/{zone}/dns_records/{id}`, `PUT /accounts/{acct}/cfd_tunnel/{tunnel}/configurations`
+
+- Cloudflare Access ajouté sur `vw.tixhon.be` (Vaultwarden) et `hass.tixhon.be` (Home Assistant) — authentification email OTP (rudy.tixhon@gmail.com + celine.dumo@gmail.com) en amont du login applicatif natif
+  Reason: ces deux services n'avaient qu'une seule couche d'authentification (applicative), pas de défense en profondeur
+  Source: `POST /accounts/{acct}/access/apps`
+
+- Diagnostic corrigé en cours de route : le test initial (curl/navigateur) laissait croire qu'Access ne fonctionnait pas du tout, y compris sur `rtxtradingbot` (préexistant et fonctionnel) — cause réelle : AdGuard résout `*.tixhon.be` en split-horizon vers l'IP interne pour les clients LAN, court-circuitant Cloudflare. Confirmé fonctionnel via résolution DNS-over-HTTPS externe + test réel en 4G/5G incognito.
+  Reason: éviter de casser une protection qui fonctionnait déjà sur la base d'un faux diagnostic
+
+- `cloudflared` (LXC 109) mis à jour (2025.2.1 → dernière version disponible)
+
 ## 2026-07-25 (session 13)
 
 ### Sécurité — comptes/clés dédiés pour l'agent Claude + nettoyage backups
