@@ -172,7 +172,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Domaine | Protection | Policy |
 |---|---|---|
 | `rtxtradingbot.tixhon.be` | ✅ Access (préexistant) | rudy.tixhon@gmail.com |
-| `hass.tixhon.be` | ✅ Access (ajouté 2026-07-25) | rudy.tixhon@gmail.com + celine.dumo@gmail.com |
+| `hass.tixhon.be` | ❌ Retiré 2026-07-25 (incompatible app companion Android) | — protection via login HA natif, voir section Home Assistant |
 | `vw.tixhon.be` | ❌ Retiré 2026-07-25 (incompatible app Bitwarden native) | — protection via `/admin` restreint réseau + mot de passe maître, voir section Vaultwarden |
 | `linkwarden.tixhon.be`, `homeplan.tixhon.be` | ❌ Aucune (auth applicative native seulement) | — |
 
@@ -182,7 +182,35 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 
 | Date | Changement |
 |------|-----------|
-| 2026-07-25 | Audit sécurité complet : suppression de `deploy.tixhon.be` (DNS + route tunnel, backend 192.168.10.21:9000 injoignable et sans protection) ; Access ajouté puis retiré sur `vw` (incompatible app Bitwarden native, cf. section Vaultwarden) ; Access conservé sur `hass` ; mise à jour `cloudflared` (2025.2.1 → dernière version) |
+| 2026-07-25 | Audit sécurité complet : suppression de `deploy.tixhon.be` (DNS + route tunnel, backend 192.168.10.21:9000 injoignable et sans protection) ; Access ajouté puis retiré sur `vw` (incompatible app Bitwarden native, cf. section Vaultwarden) ; Access ajouté puis retiré sur `hass` (incompatible app companion HA Android, cf. section Home Assistant) ; mise à jour `cloudflared` (2025.2.1 → dernière version) |
+
+---
+
+## Home Assistant
+
+**Rôle** : domotique, automatisations (parental control internet via pfSense, voir `docs/network/`).
+
+**Hébergement** : VM 100 (`haos12.4`, Home Assistant OS) sur Proxmox (nipogi), IP `192.168.10.10:8123`.
+
+**Accès** :
+- Web/app : https://hass.tixhon.be (via Cloudflare Tunnel → NPM `192.168.10.11:80` → `192.168.10.10:8123`)
+- Pas d'add-on SSH activé (port 22 fermé) — pas d'accès shell direct à la VM
+
+**Cloudflare Access (2026-07-25) — testé puis retiré** : Access (email OTP) fonctionnait très bien sur iPhone (l'app iOS ouvre une session web externe pour le challenge) mais **incompatible avec l'app companion Android** (`2026.6.5-full` testée) — erreur générique "Impossible de se connecter", aucune requête n'atteignant même Cloudflare (confirmé absence totale dans les logs Access). Cause confirmée par la communauté HA : les apps mobiles ne gèrent nativement que mTLS pour bypasser Access, pas de champ Client ID/Secret contrairement à ce qui avait été supposé initialement. mTLS indisponible sur notre plan Cloudflare (même limitation que pour Vaultwarden). Retiré, protection = login HA natif (username/password).
+
+**Sécurité (audit 2026-07-25)** :
+- Version 2026.7.2, à jour
+- 2FA (TOTP) disponible par utilisateur (Réglages → Personnes → Sécurité) mais **pas de mode "forcé" côté admin** — limitation native de Home Assistant (pas de fonctionnalité pour imposer la MFA à tous les comptes), donc à activer manuellement par chaque utilisateur
+- `internal_url` / `external_url` étaient à `null` — configurés via l'API websocket (`config/core/update`) : `internal_url: http://192.168.10.10:8123`, `external_url: https://hass.tixhon.be`
+- Composant `cloud` (Nabu Casa) chargé mais aucune entité `remote_ui` active — pas de second point d'exposition externe en parallèle du Tunnel
+- HACS installé (intégrations communautaires) — surface d'attaque supply-chain à garder en tête, pas d'action immédiate
+- 2 comptes utilisateurs (`rtixhon`, `celine`), pas de compte fantôme
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-07-25 | Cloudflare Access ajouté puis retiré (incompatible app companion Android) ; audit sécurité (2FA non forçable nativement, `internal_url`/`external_url` configurés, Nabu Casa non actif) |
 
 ---
 

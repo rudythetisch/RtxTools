@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-07-25 (session 16)
+
+### Home Assistant — retrait Cloudflare Access (app Android) + audit sécurité + config URLs
+
+- `docs/services.md` : nouvelle section "Home Assistant" (hébergement, accès, historique) + tableau Cloudflare Access mis à jour (`hass` retiré)
+  Reason: documenter la découverte que l'app companion Android est incompatible avec Cloudflare Access, contrairement à iOS
+  Source: mémoire Claude (`cloudflare-access.md`)
+
+- Cloudflare Access retiré de `hass.tixhon.be` (app Access supprimée) — l'app HA Android échouait silencieusement (aucune requête n'atteignant Cloudflare, confirmé par l'absence de logs Access), alors que Chrome et l'app iOS passaient le challenge OTP sans problème. Recherche communautaire confirmée : les apps mobiles HA ne supportent que mTLS pour bypasser Access (pas de champ Client ID/Secret), et mTLS est indisponible sur notre plan Cloudflare (même limitation que Vaultwarden)
+  Reason: usabilité pour Céline (app Android) prioritaire sur cette couche de défense en profondeur, le login HA natif reste la protection principale
+  Source: `DELETE /accounts/{acct}/access/apps/{id}`, logs `GET /accounts/{acct}/access/logs/access_requests`
+
+- Audit sécurité Home Assistant : version à jour (2026.7.2), pas de 2FA forçable nativement (limitation connue de HA, à activer manuellement par utilisateur), composant Nabu Casa Cloud chargé mais inactif (pas de second point d'exposition), HACS présent (risque supply-chain à surveiller), pas d'add-on SSH actif
+  Reason: demande explicite de l'utilisateur après le retrait d'Access sur `hass`
+  Source: `GET /api/config`, `GET /api/states` (VM 100 `haos12.4`, `192.168.10.10:8123`)
+
+- `internal_url`/`external_url` configurés côté Home Assistant (étaient à `null`) : `http://192.168.10.10:8123` / `https://hass.tixhon.be`
+  Reason: demande explicite de l'utilisateur, améliore la génération de liens dans les notifications/companion app
+  Source: commande websocket `config/core/update`
+
 ## 2026-07-25 (session 15)
 
 ### Vaultwarden — retrait Cloudflare Access + durcissement panel admin
