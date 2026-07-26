@@ -204,9 +204,10 @@ router.get('/stream', (req, res) => {
         const lxcMetrics = lxcIds.length ? await refreshAllLxcMetrics(lxcIds) : {};
 
         await Promise.all(inventory.services.map(async (service) => {
-          const portToCheck = service.port || 80;
-          const online = await checkPort(service.ip, portToCheck, 3000);
           const metrics = service.lxcId ? (lxcMetrics[service.lxcId] || { cpu: null, mem: null }) : { cpu: null, mem: null };
+          const online = service.port
+            ? await checkPort(service.ip, service.port, 3000)
+            : metrics.cpu != null;
           results.services[service.id] = { online, ...metrics };
         }));
       })(),
