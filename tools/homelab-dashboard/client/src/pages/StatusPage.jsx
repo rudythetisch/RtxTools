@@ -212,48 +212,59 @@ export default function StatusPage() {
         </div>
       ))}
 
-      <div style={s.section}>SERVICES LXC</div>
-      <div style={s.grid}>
-        {inventory.services.map(service => {
-          const st = serviceStatus(service.id);
-          return (
-            <div key={service.id} style={s.card}>
-              <div style={s.cardHeader}>
-                <div style={s.badge(st.online)} />
-                <div>
-                  <div style={s.name}>📦 {service.name}</div>
-                  <div style={s.ip}>
-                    {service.hostname ? (
-                      <a href={`https://${service.hostname}`} target="_blank" rel="noreferrer"
-                        style={{ color: '#475569', textDecoration: 'none' }}>{service.hostname}</a>
-                    ) : `${service.ip}:${service.port}`}
-                    {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
-                  </div>
-                  {service.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{service.ip}:{service.port}</div>}
-                </div>
-              </div>
-              <MetricBar label="CPU" value={st.cpu} />
-              <MetricBar label="RAM" value={st.mem} />
-              {service.url && (
-                <div style={{ marginTop: 8 }}>
-                  <a href={service.url} target="_blank" rel="noreferrer"
-                    style={{ fontSize: 11, color: '#7c83ff', textDecoration: 'none' }}>
-                    Ouvrir →
-                  </a>
-                </div>
-              )}
-              <div style={s.actions}>
-                {service.lxcId && st.online === false && (
-                  <ActionButton label="Start" endpoint={`/api/actions/lxc/${service.lxcId}/start`} />
-                )}
-                {service.lxcId && st.online === true && (
-                  <ActionButton label="Stop" endpoint={`/api/actions/lxc/${service.lxcId}/stop`} confirm />
-                )}
-              </div>
-            </div>
-          );
-        })}
+      {renderServiceSection('SERVICES LXC', inventory.services.filter(s2 => s2.lxcId), serviceStatus)}
+      {renderServiceSection('SERVICES DOCKER (NAS)', inventory.services.filter(s2 => !s2.lxcId && s2.dockerContainer), serviceStatus)}
+    </div>
+  );
+}
+
+function renderServiceCard(service, st) {
+  return (
+    <div key={service.id} style={s.card}>
+      <div style={s.cardHeader}>
+        <div style={s.badge(st.online)} />
+        <div>
+          <div style={s.name}>📦 {service.name}</div>
+          <div style={s.ip}>
+            {service.hostname ? (
+              <a href={`https://${service.hostname}`} target="_blank" rel="noreferrer"
+                style={{ color: '#475569', textDecoration: 'none' }}>{service.hostname}</a>
+            ) : `${service.ip}:${service.port}`}
+            {' · '}{st.online === undefined ? '…' : st.online ? 'En ligne' : 'Hors ligne'}
+          </div>
+          {service.hostname && <div style={{ ...s.ip, fontSize: 10 }}>{service.ip}:{service.port}</div>}
+        </div>
+      </div>
+      <MetricBar label="CPU" value={st.cpu} />
+      <MetricBar label="RAM" value={st.mem} />
+      {service.url && (
+        <div style={{ marginTop: 8 }}>
+          <a href={service.url} target="_blank" rel="noreferrer"
+            style={{ fontSize: 11, color: '#7c83ff', textDecoration: 'none' }}>
+            Ouvrir →
+          </a>
+        </div>
+      )}
+      <div style={s.actions}>
+        {service.lxcId && st.online === false && (
+          <ActionButton label="Start" endpoint={`/api/actions/lxc/${service.lxcId}/start`} />
+        )}
+        {service.lxcId && st.online === true && (
+          <ActionButton label="Stop" endpoint={`/api/actions/lxc/${service.lxcId}/stop`} confirm />
+        )}
       </div>
     </div>
+  );
+}
+
+function renderServiceSection(title, services, serviceStatus) {
+  if (!services.length) return null;
+  return (
+    <>
+      <div style={s.section}>{title}</div>
+      <div style={s.grid}>
+        {services.map(service => renderServiceCard(service, serviceStatus(service.id)))}
+      </div>
+    </>
   );
 }
