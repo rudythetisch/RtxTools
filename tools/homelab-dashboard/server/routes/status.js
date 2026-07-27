@@ -129,6 +129,27 @@ async function getPfSenseStatus() {
   }
 }
 
+const CLAUDE_AGENT_KEY = path.join(require('os').homedir(), '.ssh/claude-agent/id_ed25519');
+
+async function getDockerContainerMetrics(ip, container) {
+  return new Promise((resolve) => {
+    execFile('ssh', [
+      '-i', CLAUDE_AGENT_KEY,
+      '-o', 'StrictHostKeyChecking=no',
+      '-o', 'ConnectTimeout=5',
+      `claude@${ip}`,
+      `sudo /usr/local/bin/docker stats --no-stream --format '{{.CPUPerc}}\t{{.MemPerc}}' ${container}`,
+    ], { timeout: 10000 }, (err, stdout) => {
+      if (err || !stdout.trim()) return resolve({ cpu: null, mem: null });
+      const [cpu, mem] = stdout.trim().split('\t');
+      resolve({
+        cpu: cpu ? parseFloat(cpu.replace('%', '')).toFixed(1) : null,
+        mem: mem ? parseFloat(mem.replace('%', '')).toFixed(1) : null,
+      });
+    });
+  });
+}
+
 let lxcMetricsCache = {};
 
 async function refreshAllLxcMetrics(lxcIds) {
@@ -204,7 +225,11 @@ router.get('/stream', (req, res) => {
         const lxcMetrics = lxcIds.length ? await refreshAllLxcMetrics(lxcIds) : {};
 
         await Promise.all(inventory.services.map(async (service) => {
-          const metrics = service.lxcId ? (lxcMetrics[service.lxcId] || { cpu: null, mem: null }) : { cpu: null, mem: null };
+          const metrics = service.lxcId
+            ? (lxcMetrics[service.lxcId] || { cpu: null, mem: null })
+            : service.dockerContainer
+              ? await getDockerContainerMetrics(service.ip, service.dockerContainer)
+              : { cpu: null, mem: null };
           const online = service.port
             ? await checkPort(service.ip, service.port, 3000)
             : metrics.cpu != null;
