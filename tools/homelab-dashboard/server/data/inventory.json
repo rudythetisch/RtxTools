@@ -931,6 +931,22 @@
         "start-lxc",
         "stop-lxc"
       ]
+    },
+    {
+      "id": "komga",
+      "name": "Komga",
+      "ip": "192.168.10.3",
+      "ipType": "static",
+      "hostname": null,
+      "mac": null,
+      "port": 25600,
+      "url": "http://192.168.10.3:25600",
+      "role": "Serveur de lecture BD/comics (Docker sur TischNAS3)",
+      "version": "",
+      "installedAt": "",
+      "installScript": "",
+      "notes": "Docker sur TischNAS3 (pas un LXC Proxmox) — arrêté 4 semaines sans que ça soit détecté, ajouté au dashboard le 2026-07-27",
+      "actions": []
     }
   ]
 }
