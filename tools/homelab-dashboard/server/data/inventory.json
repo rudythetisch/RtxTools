@@ -1084,6 +1084,26 @@
       "notes": "Migré de TischNAS3 vers TischNAS2 le 2026-07-25",
       "actions": [],
       "dockerContainer": "jellyseerr"
+    },
+    {
+      "id": "pocketid",
+      "name": "Pocket ID",
+      "lxcId": 104,
+      "ip": "192.168.10.188",
+      "ipType": "dhcp-reserved",
+      "hostname": "id.tixhon.be",
+      "mac": "BC:24:11:AC:7C:BB",
+      "port": 1411,
+      "url": "https://id.tixhon.be",
+      "role": "Fournisseur OIDC (SSO passkey)",
+      "version": "2.11.0",
+      "installedAt": "2026-07-28",
+      "installScript": "",
+      "notes": "Installé manuellement (binaire officiel + systemd) — le script community-scripts dépend de leur framework interne, pas réutilisable tel quel en SSH",
+      "actions": [
+        "start-lxc",
+        "stop-lxc"
+      ]
     }
   ]
 }
