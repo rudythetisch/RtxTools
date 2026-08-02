@@ -255,7 +255,7 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 | Grafana (LXC 107) | `https://grafana.tixhon.be/login/generic_oauth` | ✅ testé |
 | Linkwarden (LXC 114) | `https://linkwarden.tixhon.be/api/v1/auth/callback/authentik` | ✅ testé |
 | Komga (Docker TischNAS3) | `https://komga.tixhon.be/login/oauth2/code/pocketid` | ✅ testé |
-| Vaultwarden (LXC 110) | `https://vw.tixhon.be/identity/connect/oidc-signin` | ❌ client créé côté Pocket ID, config app en pause (nécessite recréation du conteneur Docker) |
+| Vaultwarden (LXC 110) | `https://vw.tixhon.be/identity/connect/oidc-signin` | ❌ écarté définitivement — risque de dépendance circulaire (la passkey Pocket ID est stockée dans Vaultwarden ; un SSO obligatoire dessus pourrait provoquer un verrouillage total). Client OIDC créé côté Pocket ID mais restera inutilisé, mot de passe maître reste l'unique login Vaultwarden |
 
 **Services écartés (pas de support OIDC réaliste)** : AdGuard Home, NPM, stack Servarr (Sonarr/Radarr/Prowlarr/Bazarr/Readarr/qBittorrent), Home Assistant, pfSense, Prometheus/Alertmanager/Blackbox, MQTT/Zigbee2MQTT, RustDesk Server, Jellyseerr, Jellyfin (plugin communautaire tiers instable, écarté).
 
@@ -268,7 +268,7 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 | Date | Changement |
 |------|-----------|
-| 2026-08-02 | Komga configuré et testé de bout en bout (callback corrigé, PKCE désactivé, `email_verified` forcé à `true` via API) |
+| 2026-08-02 | Komga configuré et testé de bout en bout (callback corrigé, PKCE désactivé, `email_verified` forcé à `true` via API) ; Vaultwarden écarté définitivement (risque de dépendance circulaire passkey/vault) ; fallback auth locale vérifié manuellement sur Grafana/Linkwarden/Komga |
 | 2026-07-28/29 | Installation initiale (LXC 104, binaire + systemd), exposition publique, clients OIDC créés pour Grafana/Linkwarden/Komga/Vaultwarden, Grafana et Linkwarden testés de bout en bout |
 
 ---

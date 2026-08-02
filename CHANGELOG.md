@@ -24,6 +24,14 @@
   Reason: centraliser la doc SSO qui n'existait qu'en mémoire Claude jusqu'ici
   Source: mémoire Claude (`pocketid-access.md`)
 
+- Décision : Vaultwarden **écarté définitivement** du périmètre SSO Pocket ID (client OIDC laissé créé mais inutilisé côté Pocket ID)
+  Reason: risque de dépendance circulaire — la passkey WebAuthn utilisée pour se connecter à Pocket ID est stockée dans Bitwarden/Vaultwarden ; si Vaultwarden exigeait lui-même le SSO Pocket ID, un verrouillage total serait possible (besoin d'être dans le vault pour en sortir la clé qui l'ouvre)
+  Source: discussion utilisateur, confirmé en session
+
+- Fallback auth locale vérifié manuellement par l'utilisateur sur Grafana, Linkwarden et Komga (login hors SSO fonctionnel sur les trois)
+  Reason: s'assurer qu'une panne Pocket ID ne bloque pas l'accès aux services intégrés
+  Source: tests manuels en session
+
 ## 2026-07-25 (session 18)
 
 ### Homelab Dashboard — diagnostic dashboard vide (3 causes cumulées)
