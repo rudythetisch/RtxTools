@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-02 (session 20)
+
+### Pocket ID — SSO Grafana et Linkwarden réellement testés de bout en bout (bugs corrigés)
+
+En rejouant les tests SSO déjà marqués "testés" dans le plan initial, les logins Grafana et Linkwarden échouaient en réalité — le test précédent n'avait validé que la redirection OAuth initiale, pas un login complet.
+
+- Grafana (LXC 107, `/etc/grafana/grafana.ini`) : `oauth_allow_insecure_email_lookup = true` ajouté dans `[auth]`
+  Reason: sans ce flag (protection anti-CVE ajoutée par défaut depuis Grafana 9/10), Grafana refuse de lier un compte OAuth à un utilisateur local existant par email et échoue avec `"User sync failed" / user not found`
+  Source: `journalctl -u grafana-server`, logs `user.sync`
+
+- Groupe Pocket ID `grafana-admin` créé, utilisateur `rtixhon` assigné ; `groups_attribute_path = groups` ajouté dans `grafana.ini`
+  Reason: sans groupe correspondant, `role_attribute_path` retombe sur `Viewer`, et Grafana refuse de rétrograder le seul admin de l'org (`"cannot remove last organization admin"`) ; sans `groups_attribute_path`, Grafana ignore le claim `groups` du token même présent
+  Source: `docs/services.md` section Pocket ID
+
+- `role_attribute_path` corrigé pour utiliser des guillemets simples (`'grafana-admin'`) au lieu de doubles
+  Reason: en JMESPath, les guillemets doubles sont des identifiants, pas des littéraux — l'expression échouait silencieusement et retombait toujours sur `Viewer`
+  Source: test direct + doc JMESPath
+
+- `login_attribute_path = preferred_username` ajouté dans `grafana.ini`, champ `login` du compte restauré à `rtixhon` en base (`grafana.db`)
+  Reason: sans ce réglage, chaque connexion SSO écrasait le `login` local avec l'email OAuth, cassant le fallback mot de passe (`rtixhon` devenait injoignable)
+  Source: `sqlite3`/`python3 sqlite3` direct sur `/var/lib/grafana/grafana.db`
+
+- Linkwarden (LXC 114, `/opt/linkwarden/.env`) : `NEXTAUTH_URL` corrigé de `https://linkwarden.tixhon.be` vers `https://linkwarden.tixhon.be/api/v1/auth`, callback Pocket ID remis à `/api/v1/auth/callback/authentik`
+  Reason: Linkwarden v2 a déplacé ses routes API sous `/api/v1/` mais NextAuth continuait d'annoncer un callback sans ce préfixe, provoquant un vrai 404 malgré un callback IdP pourtant cohérent avec ce qu'annonçait l'app
+  Source: [doc officielle migration Linkwarden v2](https://github.com/linkwarden/docs/blob/main/docs/self-hosting/upgrading/to-linkwarden-v2.md)
+
 ## 2026-08-02 (session 19)
 
 ### Pocket ID — Komga configuré et testé de bout en bout + inventaire dashboard
