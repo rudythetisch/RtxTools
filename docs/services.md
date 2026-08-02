@@ -28,6 +28,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Vaultwarden | LXC 110 | 192.168.10.17 | https://vw.tixhon.be | Vaultwarden (Docker) |
 | Proxmox | node | 192.168.10.2 | https://192.168.10.2:8006 | Proxmox VE |
 | Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
+| Pocket ID | LXC 104 | 192.168.10.188 | https://id.tixhon.be | Pocket ID v2.11.0 (binaire + systemd) |
 
 ---
 
@@ -231,6 +232,44 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 | 2026-07-25 | Suppression de `/etc/prometheus/rules/test.yml` (LXC 113) — règle `TestAlert` (`expr: vector(1)`) toujours active, spammait Telegram toutes les 4h (`repeat_interval` Alertmanager) |
 | 2026-06-27 | Kernel reboot → 6.8.12-30-pve, reboot=pci GRUB fix |
 | 2026-06-26 | 69 paquets sécurité, qemu-server 8.4.8, kernel épinglé |
+
+---
+
+## Pocket ID (SSO)
+
+**Rôle** : fournisseur d'identité OIDC/OAuth2 self-hosted basé sur les passkeys (WebAuthn), utilisé pour centraliser l'authentification des services qui supportent OIDC nativement. **Ce n'est pas un reverse-proxy à la Authelia/Cloudflare Access** — seules les apps qui parlent OIDC nativement peuvent être protégées ainsi.
+
+**Hébergement** : LXC 104 sur Proxmox (nipogi), Debian 13, IP réservée DHCP `192.168.10.188`, port 1411.
+
+**Installation** : binaire officiel + systemd (`pocketid.service`) — le script `community-scripts/ProxmoxVE` dépend de leur framework interne, pas réutilisable tel quel en SSH standalone.
+
+**Accès** :
+- Web : https://id.tixhon.be (NPM → 192.168.10.188:1411 → Cloudflare Tunnel `nipogi-homelab` → DNS proxied)
+- Auth admin : passkey (WebAuthn), pas de mot de passe
+- API : clé API générée dans Settings → Admin → API Keys, header `X-API-KEY` (pas `Authorization: Bearer`)
+
+**Services intégrés (clients OIDC)** :
+
+| Service | Callback | Statut |
+|---|---|---|
+| Grafana (LXC 107) | `https://grafana.tixhon.be/login/generic_oauth` | ✅ testé |
+| Linkwarden (LXC 114) | `https://linkwarden.tixhon.be/api/v1/auth/callback/authentik` | ✅ testé |
+| Komga (Docker TischNAS3) | `https://komga.tixhon.be/login/oauth2/code/pocketid` | ✅ testé |
+| Vaultwarden (LXC 110) | `https://vw.tixhon.be/identity/connect/oidc-signin` | ❌ client créé côté Pocket ID, config app en pause (nécessite recréation du conteneur Docker) |
+
+**Services écartés (pas de support OIDC réaliste)** : AdGuard Home, NPM, stack Servarr (Sonarr/Radarr/Prowlarr/Bazarr/Readarr/qBittorrent), Home Assistant, pfSense, Prometheus/Alertmanager/Blackbox, MQTT/Zigbee2MQTT, RustDesk Server, Jellyseerr, Jellyfin (plugin communautaire tiers instable, écarté).
+
+**Pièges rencontrés** :
+- **Linkwarden** : pas de provider OIDC "générique/custom" — NextAuth utilise le provider `AuthentikProvider`, callback `/api/v1/auth/callback/authentik` (pas `/custom`).
+- **Grafana/NPM** : `ssl_forced=true` sur un proxy host NPM devant un service qui ne force pas HTTPS lui-même crée une boucle de redirection infinie derrière le Cloudflare Tunnel. Toujours `ssl_forced=false` pour les services derrière le tunnel.
+- **Komga** (Spring Security/Kotlin) : le vrai callback OAuth2 est `/login/oauth2/code/{registrationId}`, configuré dans `application.yml` (pas de variables d'env) monté depuis `/volume1/docker/_Configs/Komga` sur TischNAS3. Deux blocages additionnels : (1) PKCE doit être **désactivé** côté client Pocket ID pour les clients confidentiels (avec secret) comme Komga, sinon `invalid_request` ("code_challenge missing") ; (2) Komga exige `email_verified: true`, or Pocket ID renvoie `false` par défaut (pas de vérification email via passkey) — fix : activer "E-mails vérifiés par défaut" (Config app → E-mail) puis forcer `emailVerified: true` sur l'utilisateur existant via `PUT /api/users/{id}` (le toggle seul n'agit que sur les futurs changements d'email, pas rétroactivement).
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-08-02 | Komga configuré et testé de bout en bout (callback corrigé, PKCE désactivé, `email_verified` forcé à `true` via API) |
+| 2026-07-28/29 | Installation initiale (LXC 104, binaire + systemd), exposition publique, clients OIDC créés pour Grafana/Linkwarden/Komga/Vaultwarden, Grafana et Linkwarden testés de bout en bout |
 
 ---
 

@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-08-02 (session 19)
+
+### Pocket ID — Komga configuré et testé de bout en bout + inventaire dashboard
+
+- `tools/homelab-dashboard/server/data/inventory.json` : ajout de l'entrée `pocketid` (LXC 104, id.tixhon.be)
+  Reason: suivi CPU/mem sur le dashboard homelab, même mécanisme que les autres services
+  Source: commit `0b29764`
+
+- Client OIDC Komga (Pocket ID) : callback corrigé `/oidc/callback` → `/login/oauth2/code/pocketid` (vrai chemin Spring Security, découvert via `komga.org/docs/installation/oauth2`), PKCE désactivé, secret client régénéré
+  Reason: le callback initial n'avait jamais été vérifié contre la doc réelle Komga ; PKCE actif provoquait une erreur `invalid_request` ("code_challenge missing") car Komga est un client confidentiel qui n'envoie pas de PKCE
+  Source: `docs/services.md` section "Pocket ID (SSO)"
+
+- `/config/application.yml` créé dans le conteneur Docker Komga (TischNAS3, monté depuis `/volume1/docker/_Configs/Komga`) avec la config `spring.security.oauth2.client` pointant vers Pocket ID
+  Reason: Komga se configure par fichier YAML, pas par variables d'env — aucun fichier n'existait avant
+  Source: doc officielle Komga OAuth2
+
+- Config Pocket ID : "E-mails vérifiés par défaut" activé (Config app → E-mail) + `emailVerified: true` forcé sur l'utilisateur admin via `PUT /api/users/{id}`
+  Reason: Komga rejette les connexions OIDC avec `ERR_1026` si le claim `email_verified` n'est pas `true` ; Pocket ID renvoie `false` par défaut (pas de vérification email, auth par passkey uniquement) et le toggle seul n'agit que sur les futurs changements d'email, pas rétroactivement
+  Source: `github.com/gotson/komga/blob/master/ERRORCODES.md`, code source `UserController`/`UserCreateDto` de Pocket ID
+
+- `docs/services.md` : nouvelle section "Pocket ID (SSO)" (hébergement, clients OIDC, pièges Linkwarden/Grafana/Komga)
+  Reason: centraliser la doc SSO qui n'existait qu'en mémoire Claude jusqu'ici
+  Source: mémoire Claude (`pocketid-access.md`)
+
 ## 2026-07-25 (session 18)
 
 ### Homelab Dashboard — diagnostic dashboard vide (3 causes cumulées)
