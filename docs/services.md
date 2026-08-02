@@ -235,6 +235,45 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 ---
 
+## Servarr (Sonarr/Radarr/Prowlarr/Bazarr/Readarr/qBittorrent)
+
+**Rôle** : stack de gestion médias (séries, films, indexers, sous-titres, livres, torrents).
+
+**Hébergement** : Docker Compose sur TischNAS3 (192.168.10.3), projet `servarr`, fichier `/volume1/docker/SERVARR/compose.yaml`. **Pas des conteneurs `docker run` isolés** — toujours passer par `docker compose` pour ne pas casser la gestion centralisée.
+
+**Accès SSH** : compte `claude` (`~/.ssh/claude-agent/id_ed25519`), sudo restreint à `docker`/`df`/`free` — cf. mémoire `nas-access.md`. Le binaire doit être invoqué par son chemin complet : `sudo /usr/local/bin/docker compose ...` (un simple `sudo docker` échoue, la règle NOPASSWD sudoers est liée au path exact).
+
+**Commande de mise à jour** : `cd /volume1/docker/SERVARR && sudo /usr/local/bin/docker compose pull <service> && sudo /usr/local/bin/docker compose up -d <service>` — un service à la fois, jamais tous en même temps pour un saut de version majeur.
+
+**Versions (2026-08-02)** :
+
+| Service | Port | Version |
+|---|---|---|
+| Sonarr | 8989 | v4.0.19.2979 |
+| Radarr | 7878 | v6.3.0.10514 |
+| Prowlarr | 9696 | v2.5.2.5491 |
+| Bazarr | 6767 | v1.6.0 |
+| qBittorrent | 8080 | v5.2.3 |
+| Readarr | 8787 | 0.3.32 (tag `develop`, **non mis à jour** — voir pièges) |
+| FlareSolverr | 8191 | 3.5.0 |
+
+**Pièges rencontrés** :
+- **Toutes les images étaient restées figées depuis 2024-08-31** malgré le tag `:latest` — `docker compose up -d` sans `pull` ne récupère jamais une nouvelle image, il faut explicitement `pull` avant.
+- **`sudo docker compose pull` échoue parfois avec `toomanyrequests: retry-after ...`** (rate-limit du registry `lscr.io`) — dans ce cas `docker compose up -d` recrée quand même le conteneur mais avec l'**ancienne image en cache**, sans erreur visible autre que le pull raté. Toujours vérifier après coup avec `docker inspect <container> --format '{{.Config.Image}} {{.Created}}'` et comparer la version affichée dans l'UI/les logs, pas seulement le succès de la commande.
+- **Readarr (`lscr.io/linuxserver/readarr:develop`) : `no matching manifest for linux/amd64 in the manifest list entries`** — le tag `develop` n'a pas toujours de build `linux/amd64` publié côté registre (upstream, intermittent). `docker compose up -d` recrée alors le conteneur avec l'ancienne image, sans casser le service. Retester périodiquement (`docker compose pull readarr`), pas de fix côté NAS possible.
+- **qBittorrent : warning Sonarr/Radarr "Download client places downloads in the root folder ... You should not download to a root folder."** — nouveau health check introduit par Sonarr v4/Radarr v6, absent des anciennes versions. Cause : `categories.json` de qBittorrent avait les catégories `TVSHOWS`/`MOVIES` avec `save_path` pointé **directement** sur les root folders (`/downloads/TVSHOWS`, `/downloads/MOVIES`), au lieu de passer par un dossier intermédiaire. Fix appliqué : `save_path` de ces deux catégories changé vers `/downloads/_TORRENTCOMPLETE/TVSHOWS` et `/downloads/_TORRENTCOMPLETE/MOVIES` (dossiers créés avec `chown 1031:101`, UID/GID du conteneur), en s'alignant sur le pattern déjà utilisé pour la catégorie `BDZ`. Édition faite conteneur arrêté (qBittorrent verrouille `categories.json` en cours d'exécution).
+- **Bazarr : démarrage silencieux ~90s après un saut de version important** (1.4.3→1.6.0, 2 ans d'écart) — le conteneur répond `Up` et les logs s'arrêtent après `INFO (scheduler:78)` sans qu'aucune requête HTTP n'aboutisse (`HTTP 000`). `docker top` montre le process principal à 40-47% CPU, actif (pas figé) : reconstruction interne (index/cache) en cours. Attendre plutôt que redémarrer — un `docker restart` reproduit juste le même délai depuis le début.
+- **Conteneur orphelin `lidarr-rtx`** détecté par `docker compose` (`Found orphan containers`) à chaque `up -d` — existe sur le NAS mais absent du `compose.yaml` actuel. Non touché, à investiguer si utile encore.
+- **Backup avant upgrade** : pas de droits d'écriture directs dans `/volume1/docker/SERVARR` avec le compte `claude` (dossier appartient à `secureAdmin`/`root`) — contourné avec un conteneur `alpine` jetable monté sur le dossier (`docker run --rm -v ... alpine tar czf ...`), qui tourne en root à l'intérieur du conteneur.
+
+**Historique des changements** :
+
+| Date | Changement |
+|------|-----------|
+| 2026-08-02 | Mise à jour complète (sauf Readarr) : Sonarr 3→v4, Radarr 4→v6, Prowlarr 1.21→v2.5, Bazarr 1.4→v1.6, qBittorrent 4.5→v5.2 (migrations DB OK, aucune régression). Fix qBittorrent `categories.json` (root folder warning Sonarr/Radarr). Backup complet des configs avant upgrade. FlareSolverr mis à jour manuellement 3.3.12→3.5.0 (hors compose) le même jour, resync au `up -d`. Readarr non mis à jour — pas de manifest `linux/amd64` disponible pour le tag `develop` (retenté sans succès, problème amont) |
+
+---
+
 ## Pocket ID (SSO)
 
 **Rôle** : fournisseur d'identité OIDC/OAuth2 self-hosted basé sur les passkeys (WebAuthn), utilisé pour centraliser l'authentification des services qui supportent OIDC nativement. **Ce n'est pas un reverse-proxy à la Authelia/Cloudflare Access** — seules les apps qui parlent OIDC nativement peuvent être protégées ainsi.

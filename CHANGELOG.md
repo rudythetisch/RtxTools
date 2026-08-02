@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-02 (session 21)
+
+### Servarr — mise à jour complète de la stack (TischNAS3, ~2 ans de retard)
+
+Toutes les images tournaient en tag `:latest`/`:develop` mais n'avaient pas été recréées depuis 2024-08-31. Mise à jour un service à la fois, backup complet des configs avant de commencer.
+
+- Sonarr 3.0.10.1567 → v4.0.19.2979, Radarr 4.3.2.6857 → v6.3.0.10514, Prowlarr 1.21.2.4649 → v2.5.2.5491, Bazarr 1.4.3 → v1.6.0, qBittorrent 4.5.2 → v5.2.3
+  Reason: rattrapage de retard demandé par l'utilisateur, sauts majeurs (v3→v4, v4→v6, v1→v2) avec migrations DB automatiques (FluentMigrator/SQLite), toutes validées sans erreur dans les logs
+  Source: `docker logs <container>`, migrations DB confirmées + endpoints HTTP répondant après chaque update
+
+- Backup complet des configs (`sonarr/radarr/prowlarr/qbittorrent/readarr/bazarr`) avant toute modification, via conteneur `alpine` jetable monté sur `/volume1/docker/SERVARR`
+  Reason: le compte `claude` n'a pas les droits d'écriture directs dans ce dossier (appartient à `secureAdmin`/`root`) ; contourné en lançant `tar` dans un conteneur qui tourne en root côté volume monté
+  Source: `/volume1/docker/SERVARR/_backups/servarr-config-backup-20260802-165310.tar.gz`
+
+- `sudo docker` échoue avec "a password is required" malgré le sudoers NOPASSWD du compte `claude`
+  Reason: la règle sudoers est liée au chemin exact du binaire (`/usr/local/bin/docker`), pas au nom `docker` résolu via `$PATH` — toujours invoquer `sudo /usr/local/bin/docker compose ...`
+  Source: `sudo -n -l` sur TischNAS3
+
+- qBittorrent : `categories.json` corrigé — `save_path` des catégories `TVSHOWS`/`MOVIES` changé de `/downloads/TVSHOWS`/`/downloads/MOVIES` vers `/downloads/_TORRENTCOMPLETE/TVSHOWS`/`/downloads/_TORRENTCOMPLETE/MOVIES`
+  Reason: Sonarr v4/Radarr v6 introduisent un nouveau health check qui signale un download client écrivant directement dans un root folder de la librairie ; les deux catégories contournaient les dossiers `_TORRENTCOMPLETE`/`_TORRENTINCOMPLETE` déjà en place pour les autres catégories (ex. `BDZ`)
+  Source: warning UI Sonarr/Radarr rapporté par l'utilisateur après validation manuelle du SSO/login
+
+- Readarr (tag `develop`) non mis à jour : `no matching manifest for linux/amd64 in the manifest list entries`
+  Reason: absence intermittente de build `linux/amd64` publié par le registry pour ce tag précis (upstream, hors de contrôle côté NAS) — conteneur recréé automatiquement sur l'ancienne image sans casser le service, retenté sans succès une seconde fois le même jour
+  Source: sortie `docker compose pull readarr`
+
+- Piège découvert : un `docker compose pull` en échec silencieux (ex. `toomanyrequests` rate-limit registry) n'empêche pas `docker compose up -d` de recréer le conteneur avec l'**ancienne image en cache**, sans erreur visible
+  Reason: `up -d` ne vérifie pas que le pull a réussi ; vérifier systématiquement après coup avec `docker inspect <container> --format '{{.Config.Image}} {{.Created}}'`
+  Source: reproduit sur Radarr (premier pull raté, image recréée avec l'ancienne version malgré `Started`)
+
 ## 2026-08-02 (session 20)
 
 ### Pocket ID — SSO Grafana et Linkwarden réellement testés de bout en bout (bugs corrigés)
