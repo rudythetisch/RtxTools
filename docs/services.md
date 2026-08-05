@@ -372,3 +372,40 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 - Vérifier/activer "Reprise en cas de panne de courant" dans DSM sur TischNAS2 (Panneau de configuration → Matériel et alimentation)
 - Auditer les autres conteneurs Docker hors-compose sur TischNAS3 (Heimdall, Shiori) pour une politique de redémarrage manquante similaire à Komga
 - UPS à surveiller/remplacer — n'a pas tenu la charge complète de TischNAS3 pendant un arrêt propre
+
+---
+
+## Nouvelle coupure du 2026-08-05 ~08:00 + micro-coupures Wi-Fi consécutives
+
+**Contexte** : coupure de courant distincte de celle documentée ci-dessus, survenue le même jour peu après la mise en place des scripts NUT/arrêt automatique UPS (donc pas encore actifs au moment de cette coupure — voir [[#Configuration de la surveillance de l'UPS avec NUT]]).
+
+**Détection** : confirmée via les logs kernel/journalctl sur les 3 machines et l'historique des tâches Proxmox (API token `root@pam!claude`, node réel `proxmox` et non `nipogi`) :
+
+| Machine | Redémarrage constaté | Type d'arrêt |
+|---|---|---|
+| TischNAS3 | ~08:28 | Non-propre |
+| NIPoGi (hôte Proxmox) | ~08:41 | Non-propre — `journal corrupted or uncleanly shut down` dans les logs kernel, confirmant une coupure brutale (pas un reboot volontaire) |
+| TischNAS2 | ~08:42 | Non-propre |
+| pfSense (VM 104, démarrée par le `startall` automatique de Proxmox) | ~08:52 | — (WAN/LAN indisponibles ~1 min pendant son boot) |
+
+- **NIPoGi a redémarré tout seul** cette fois (visible dans les tâches Proxmox : `startall` automatique à 08:41, sans intervention manuelle ni déclenchement du script WoL `wol-nipogi` côté Mac Mini) — contrairement à l'épisode précédent.
+- Le script d'arrêt automatique UPS ne s'est pas déclenché (`/var/log/ups-shutdown.log` absent) : normal, il n'existait pas encore à ce moment-là (écrit dans les ~2h30 qui ont suivi, voir commit `29793c0`).
+- Message kernel `EDAC igen6 MC0: HANDLING IBECC MEMORY ERROR` observé au boot sur NIPoGi — **faux positif inoffensif**, compteurs réels (`ce_count`/`ue_count` dans `/sys/devices/system/edac/`) à 0, artefact connu du driver `igen6_edac` sur ce type de mini-PC (Alder Lake-N), pas un vrai défaut mémoire.
+- Redémarrage de pfSense → coupure WAN/LAN de ~1 min → a fait sauter une session RustDesk active à ce moment.
+
+**Micro-coupures Wi-Fi post-incident (plusieurs épisodes d'~1 min, ressenties surtout à l'extérieur)** :
+
+Root cause identifiée : **le point d'accès CPL (courant porteur, `http://192.168.10.35/`) du jardin/abri diffusait le même SSID `TischDecoNetwork` que le mesh Deco intérieur**, sans faire réellement partie du mesh (confirmé via l'API locale Deco — seuls 3 nœuds réels dans le mesh : `Living Room`/master à `192.168.10.32`, `En haut` à `192.168.10.31`, `Tout en haut` à `192.168.10.30`). Un SSID identique sans coordination mesh (pas de roaming 802.11k/v/r entre les deux systèmes) fait que le client reste accroché au signal Deco intérieur affaibli au lieu de basculer vers le CPL, d'où les coupures en bordure de couverture (proche du jardin).
+
+**Correctif appliqué (2026-08-05)** : SSID du CPL séparé en `TischJardin` (2,4GHz) et `TischJardin5ghz` (5GHz), distinct de `TischDecoNetwork` utilisé en intérieur. Roaming automatique perdu entre les deux réseaux (connexion manuelle nécessaire dehors), mais élimine l'ambiguïté qui causait les micro-coupures. CPL également redémarré. **À confirmer dans la durée** — stable au moment de la rédaction (~20-30 min sans coupure après le changement de SSID).
+
+**Topologie réseau Wi-Fi (pour référence)** :
+
+| SSID | Bande | Appareil(s) | Zone |
+|---|---|---|---|
+| `TischDecoNetwork` | 2,4+5GHz (auto) | 3x Deco M4R en mesh (`192.168.10.30`/`.31`/`.32`) | Intérieur |
+| `TischJardin` | 2,4GHz | CPL/powerline (`192.168.10.35`, admin web natif TP-Link, pas le protocole Deco) | Extérieur/jardin |
+| `TischJardin5ghz` | 5GHz | idem | Extérieur/jardin |
+
+**Accès API Deco** (utile pour diagnostic futur) : package Python `tplink-deco-api` (PyPI), login local via `DecoClient(ip, "admin", "<mdp du compte TP-Link ID>")` sur n'importe quel nœud du mesh (retourne la liste complète des 3 nœuds si on interroge le master `192.168.10.32`). Pas de venv Python 3.14 pour ce package — `cryptography` échoue à compiler (nécessite `rustup target add x86_64-apple-darwin`) ; utiliser `uv venv --python 3.12` à la place, wheels précompilées disponibles.
+**API pfSense (`claude`)** : privilège `api-v2-status-logs-system-get` ajouté le 2026-08-05 (compte à 128 privilèges max, une entrée peu utile a été retirée pour faire de la place) pour permettre la lecture des logs système en diagnostic (`GET /api/v2/status/logs/system`).

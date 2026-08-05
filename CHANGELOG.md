@@ -26,6 +26,30 @@ Coupure de courant, UPS insuffisant (TischNAS3 coupé en plein arrêt propre). R
   Reason: fichier concerné = log interne d'un conteneur Docker (`@docker/containers/.../log.db`), pas de données utilisateur ; auto-guéri par Container Manager qui a recréé les conteneurs affectés
   Source: `btrfs inspect-internal inode-resolve <ino> /volume1`
 
+### Nouvelle coupure ~08:00 + micro-coupures Wi-Fi consécutives (SSID CPL jardin dupliqué)
+
+Coupure de courant distincte de celle ci-dessus, survenue le même jour juste avant la mise en place des scripts NUT (donc pas encore actifs). RustDesk a sauté suite au redémarrage de pfSense. Plusieurs micro-coupures Wi-Fi (~1 min, 5-6 fois) constatées ensuite en extérieur.
+
+- NIPoGi, TischNAS2, TischNAS3 et pfSense (VM 104) tous redémarrés de façon non-propre entre ~08:28 et ~08:52
+  Reason: nouvelle coupure de courant confirmée via `journalctl -b -1`/`-b 0` sur NIPoGi (`system.journal corrupted or uncleanly shut down`) et l'historique des tâches Proxmox (`startall` automatique à 08:41) — NIPoGi a redémarré seul cette fois, sans besoin du contournement WoL
+  Source: `journalctl -k -b 0`, API Proxmox `/nodes/proxmox/tasks` (token `root@pam!claude`)
+
+- Message kernel `EDAC igen6 MC0: HANDLING IBECC MEMORY ERROR` au boot NIPoGi — vérifié inoffensif, faux positif du driver
+  Reason: `ce_count`/`ue_count` réels à 0 dans `/sys/devices/system/edac/` — artefact connu du driver `igen6_edac` sur mini-PC Alder Lake-N, pas une vraie erreur mémoire
+  Source: `journalctl -k -b 0 | grep -i edac`, `/sys/devices/system/edac/mc/mc0/*count`
+
+- Root cause micro-coupures Wi-Fi identifiée : le point d'accès CPL du jardin (`192.168.10.35`) diffusait le même SSID `TischDecoNetwork` que le mesh Deco intérieur, sans en faire réellement partie (pas de roaming 802.11k/v/r coordonné)
+  Reason: confirmé via l'API locale Deco (package `tplink-deco-api`) — seuls 3 nœuds réels dans le mesh (`192.168.10.30`/`.31`/`.32`), le CPL n'y figure pas ; un SSID dupliqué sans coordination fait que le client reste accroché au signal Deco affaibli au lieu de basculer
+  Source: `DecoClient.get_device_list()` interrogé sur le nœud master (`192.168.10.32`)
+
+- SSID du CPL jardin séparé en `TischJardin` (2,4GHz) et `TischJardin5ghz` (5GHz), distinct de `TischDecoNetwork`
+  Reason: élimine l'ambiguïté de roaming entre les deux systèmes non coordonnés — stable ~20-30 min après le changement au moment de la rédaction, à confirmer dans la durée
+  Source: changement fait manuellement par l'utilisateur via l'admin web du CPL (`http://192.168.10.35/`)
+
+- Privilège API pfSense `api-v2-status-logs-system-get` ajouté au compte `claude` (limite de 128 privilèges déjà atteinte, une entrée peu utile retirée pour faire de la place)
+  Reason: nécessaire pour diagnostiquer l'incident via `GET /api/v2/status/logs/system`, absent du périmètre initial du compte
+  Source: `PATCH /api/v2/user` (id=4) via le compte `rtixhon`
+
 ## 2026-08-02 (session 21)
 
 ### Servarr — mise à jour complète de la stack (TischNAS3, ~2 ans de retard)
