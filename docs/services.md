@@ -325,6 +325,11 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 **Architecture** : le serveur (`server/routes/status.js`) interroge en direct — SSH vers Proxmox (`root@192.168.10.2`) pour NIPoGi/HAOS/LXC (via `pct exec`), Prometheus (`192.168.10.184:9090`) pour les NAS via `node_exporter`, l'API pfSense pour le WAN — et pousse le résultat au client via SSE (`GET /api/status/stream`, poll 30s).
 
+**Wake-on-LAN automatique de NIPoGi au boot (`wol-nipogi`, 2026-08-05)** : NIPoGi n'a pas "Restore on AC Power Loss" activé au BIOS (nécessiterait un reboot physique pour le configurer, évité à la demande de l'utilisateur suite à la coupure du 2026-08-05 — voir post-mortem plus bas). Contournement : le Mac Mini, lui, redémarre automatiquement après coupure — un LaunchDaemon système envoie donc un paquet WoL à NIPoGi dès que le Mac Mini boote, réveillant NIPoGi en cascade.
+- Script : `/usr/local/bin/wol-nipogi.sh` — attend 20s (le temps que le réseau remonte), envoie le paquet magique à `68:1D:EF:43:4D:05`, réessaie 10s plus tard
+- LaunchDaemon : `/Library/LaunchDaemons/be.tixhon.wol-nipogi.plist` (`RunAtLoad`, tourne au niveau système avant même la session utilisateur)
+- Logs : `/tmp/wol-nipogi.log`
+
 **Incident (2026-07-25) — dashboard vide (CPU/RAM/Disk à "—" partout)** : trois causes distinctes cumulées, diagnostiquées via le navigateur (Claude in Chrome) + accès direct au Mac Mini (SSH `rudytixhon@192.168.10.98` + accès local, ce Mac étant aussi la machine hôte de cette session Claude Code) :
 
 1. **`node_exporter` arrêté sur TischNAS3** — processus tourné en tant que binaire lancé manuellement (pas un vrai service systemd/Task Scheduler persistant), s'est arrêté à un moment donné sans redémarrage auto. Relancé manuellement (`nohup /usr/local/bin/node_exporter --web.listen-address=:9100 &`), confirmé via Prometheus (`up{instance="TischNAS3"}` → `1`). **Non résolu de façon durable** — recommandé de créer une vraie tâche persistante (Task Scheduler DSM au boot) pour éviter la récidive.
@@ -336,3 +341,34 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 | Date | Changement |
 |------|-----------|
 | 2026-07-25 | Incident dashboard vide : `node_exporter` relancé sur TischNAS3 (non persistant), `inventory.json` corrigé (port 80 sur les 3 Deco), permission macOS "Réseau local" identifiée comme cause racine du 3ᵉ symptôme (non résolue, nécessite reboot + action utilisateur) |
+
+---
+
+## Coupure électrique du 2026-08-05 — post-mortem
+
+**Contexte** : coupure de courant, UPS insuffisant (TischNAS3 a coupé en plein arrêt propre). TischNAS2 arrêté proprement à temps par l'utilisateur. NIPoGi et Mac Mini coupés abruptement.
+
+**Chronologie reconstituée** (via logs SSH/journalctl/DSM sur chaque machine) :
+
+| Heure | Événement |
+|---|---|
+| ~07:36 | NIPoGi (donc pfSense + AdGuard, hébergés dessus) encore actif — dernier log avant coupure |
+| ? → ~08:27 | Coupure électrique (durée exacte inconnue) |
+| ~08:27 | Courant revenu — TischNAS3 et le Mac Mini redémarrent **automatiquement** (réglage "reprise après coupure" actif sur les deux) |
+| 08:41 | NIPoGi et TischNAS2 redémarrés **manuellement** par l'utilisateur (~14 min après le retour du courant) |
+| 08:43 | AdGuard (LXC 103 sur NIPoGi, DNS du réseau) de retour |
+| ~08:51 | pfSense (VM 115 sur NIPoGi, routage/DHCP) enfin opérationnel — soit **~24 min** après le retour du courant |
+
+**Cause de la longue indisponibilité Wi-Fi** : ce n'était pas les bornes Deco elles-mêmes qui étaient lentes — elles ne pouvaient rien faire tant que pfSense (DHCP/routage) et AdGuard (DNS) n'étaient pas revenus, et les deux tournent sur NIPoGi. Contrairement à TischNAS3 et au Mac Mini, **NIPoGi n'a pas de réglage "Restore on AC Power Loss" actif au niveau BIOS**, donc il est resté éteint jusqu'à intervention manuelle.
+
+**Dégâts constatés et réparés** :
+- **TischNAS2** : horloge système repartie à `2015-01-01` au boot (pile/condensateur RTC vidé après coupure totale prolongée), corrigée 17 min plus tard via NTP. Aucun impact fonctionnel constaté cette fois, mais signe que la coupure a été assez longue pour vider la réserve RTC.
+- **TischNAS3** : corruption BTRFS détectée au boot (`ran out of all copies` sur un inode) — vérifié via `btrfs inspect-internal inode-resolve` : fichier de log interne d'un conteneur Docker (`@docker/containers/.../log.db`), pas de données utilisateur. Auto-guéri par Container Manager (conteneurs concernés recréés automatiquement). 4 autres inodes signalés en erreur dans les logs n'existaient déjà plus au moment de la vérification (fichiers temporaires déjà nettoyés).
+- **Komga (TischNAS3)** : a planté au démarrage (`UnknownHostException: id.tixhon.be`) — tentait de contacter Pocket ID pour l'OIDC avant que le DNS/réseau soit stable. **N'avait aucune politique de redémarrage** (`restart: no`, conteneur historique hors du compose SERVARR) → resté hors service ~1h15 sans que personne le sache. Corrigé : relancé + passé en `restart: unless-stopped`.
+
+**Action prise pour la prochaine fois** : plutôt que de modifier le BIOS de NIPoGi (nécessite un reboot, l'utilisateur préfère éviter), un contournement a été mis en place côté Mac Mini — voir section [[#Homelab Dashboard]] ci-dessous, `wol-nipogi`. Le Mac Mini redémarre déjà automatiquement après coupure ; il envoie désormais un paquet Wake-on-LAN à NIPoGi (`68:1D:EF:43:4D:05`) 20s et 30s après son propre démarrage, réveillant NIPoGi en cascade sans jamais toucher son BIOS.
+
+**Reste à faire (non traité dans ce post-mortem)** :
+- Vérifier/activer "Reprise en cas de panne de courant" dans DSM sur TischNAS2 (Panneau de configuration → Matériel et alimentation)
+- Auditer les autres conteneurs Docker hors-compose sur TischNAS3 (Heimdall, Shiori) pour une politique de redémarrage manquante similaire à Komga
+- UPS à surveiller/remplacer — n'a pas tenu la charge complète de TischNAS3 pendant un arrêt propre

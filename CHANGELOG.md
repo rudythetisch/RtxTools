@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-05 (session 22)
+
+### Post-mortem coupure électrique — NIPoGi ne redémarre pas automatiquement après coupure
+
+Coupure de courant, UPS insuffisant (TischNAS3 coupé en plein arrêt propre). Reconstruction de la chronologie via logs SSH/journalctl/DSM sur chaque machine, identification de la cause de l'indisponibilité Wi-Fi prolongée (~24 min après retour du courant).
+
+- NIPoGi (hôte de pfSense + AdGuard) n'a pas "Restore on AC Power Loss" activé au BIOS, contrairement à TischNAS3 et au Mac Mini qui redémarrent automatiquement
+  Reason: cause racine de la longue indisponibilité réseau — pfSense (DHCP/routage) et AdGuard (DNS) sont restés éteints jusqu'à intervention manuelle de l'utilisateur (~14 min après retour du courant) + temps de boot en cascade (~10 min de plus)
+  Source: comparaison des timestamps de boot (`uptime -s`) entre NIPoGi, TischNAS2/3, Mac Mini, et de l'uptime pfSense via `/api/v2/status/system`
+
+- LaunchDaemon `wol-nipogi` ajouté sur le Mac Mini — envoie un paquet Wake-on-LAN à NIPoGi (`68:1D:EF:43:4D:05`) au démarrage du Mac Mini
+  Reason: contournement du BIOS de NIPoGi sans reboot (refusé par l'utilisateur) — le Mac Mini redémarre déjà tout seul après coupure, donc on chaîne un réveil de NIPoGi dessus plutôt que de configurer le BIOS
+  Source: `/usr/local/bin/wol-nipogi.sh` + `/Library/LaunchDaemons/be.tixhon.wol-nipogi.plist`, installés manuellement par l'utilisateur (sudo)
+
+- Komga (TischNAS3) resté hors service ~1h15 après la coupure sans que personne le sache
+  Reason: crash au démarrage (`UnknownHostException: id.tixhon.be`, tentative de contact Pocket ID pour l'OIDC avant que le DNS soit stable) combiné à l'absence totale de politique de redémarrage Docker (`restart: no`) — conteneur historique hors du compose SERVARR
+  Source: `docker logs Komga`, `docker inspect Komga --format '{{.HostConfig.RestartPolicy}}'` → corrigé en `unless-stopped`
+
+- TischNAS2 : horloge système repartie à `2015-01-01` au boot après la coupure, corrigée 17 min plus tard via NTP
+  Reason: pile/condensateur RTC vidé après une coupure totale assez longue — sans impact fonctionnel constaté cette fois, mais signale que la réserve RTC a été épuisée
+  Source: `/var/log/messages` — `chronyd: System clock was stepped by 365841682.616420 seconds`
+
+- TischNAS3 : corruption BTRFS détectée au boot (`ran out of all copies`) sur un inode — vérifié inoffensif
+  Reason: fichier concerné = log interne d'un conteneur Docker (`@docker/containers/.../log.db`), pas de données utilisateur ; auto-guéri par Container Manager qui a recréé les conteneurs affectés
+  Source: `btrfs inspect-internal inode-resolve <ino> /volume1`
+
 ## 2026-08-02 (session 21)
 
 ### Servarr — mise à jour complète de la stack (TischNAS3, ~2 ans de retard)
