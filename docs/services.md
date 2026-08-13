@@ -409,3 +409,20 @@ Root cause identifiée : **le point d'accès CPL (courant porteur, `http://192.1
 
 **Accès API Deco** (utile pour diagnostic futur) : package Python `tplink-deco-api` (PyPI), login local via `DecoClient(ip, "admin", "<mdp du compte TP-Link ID>")` sur n'importe quel nœud du mesh (retourne la liste complète des 3 nœuds si on interroge le master `192.168.10.32`). Pas de venv Python 3.14 pour ce package — `cryptography` échoue à compiler (nécessite `rustup target add x86_64-apple-darwin`) ; utiliser `uv venv --python 3.12` à la place, wheels précompilées disponibles.
 **API pfSense (`claude`)** : privilège `api-v2-status-logs-system-get` ajouté le 2026-08-05 (compte à 128 privilèges max, une entrée peu utile a été retirée pour faire de la place) pour permettre la lecture des logs système en diagnostic (`GET /api/v2/status/logs/system`).
+
+## Migration Wi-Fi envisagée : Deco → UniFi + VLAN (2026-08-13, investigation, pas encore déployé)
+
+**Motivation** : les Deco M4R (grand public) ne supportent pas le mapping SSID→VLAN, ce qui empêche de séparer IoT/invités/LAN principal en Wi-Fi malgré un switch (D-Link DGS-1100-24) qui supporte le 802.1Q complet (tagged/untagged par port, VID 1-4094 — vérifié dans la doc constructeur). Le passage à des AP UniFi réglerait ce point et améliorerait aussi le roaming (802.11k/v/r natif), pertinent après l'épisode de micro-coupures Wi-Fi ci-dessus.
+
+**Décision prise** : UniFi plutôt que TP-Link Omada (Omada ~30-50% moins cher mais UniFi préféré par l'utilisateur pour l'écosystème).
+
+**Couverture envisagée (3 AP → potentiellement 3, à confirmer par un test)** :
+- RDC (salon) + étage (mezzanine) : **1 seul AP central** pourrait suffire — la maison a un escalier ouvert et une mezzanine entre les deux niveaux (pas de dalle béton pleine), donc atténuation RF beaucoup plus faible qu'un plancher fermé. Stratégie recommandée : acheter les 2 AP salon+mezzanine quand même, activer uniquement le central en test, garder le second en réserve si des zones faibles apparaissent — trivial à ajouter au même SSID/VLAN après coup.
+- Grenier (2ᵉ étage, isolé) : reste un AP dédié, pas de changement.
+- Extérieur/jardin : reste sur le CPL + SSID `TischJardin`/`TischJardin5ghz` existant (voir ci-dessus) — UniFi ne couvre pas nativement l'extérieur sauf ajout futur d'un AP outdoor filaire (nécessiterait de tirer un câble Ethernet jusqu'à l'abri de jardin, non fait actuellement).
+
+**Matériel identifié** : TP-Link Omada EAP670 écarté au profit d'UniFi — modèles UniFi Wi-Fi 6 (U6-Lite ~99$, U6-Pro ~179$) équivalents en fonctionnalités VLAN/roaming.
+
+**Contrôleur UniFi** : à héberger en LXC Proxmox via le script `community-scripts` **Unifi OS Server** (`ct/unifi-os-server.sh`, port 11443, x86-64/ARM64, maintenu activement — dernière MAJ du script le 2026-08-13). Prochain VMID libre au moment de l'investigation : **116** (suivant pocketid 104, linkwarden 114) ; IP suggérée en suivant la convention `.18x` : **192.168.10.189** (après linkwarden `.187`, pocketid `.188`). Dimensionnement largement suffisant pour 3 AP : 2 vCPU / 2GB RAM / 8GB disque.
+
+**Statut** : investigation uniquement, **rien déployé** — LXC contrôleur pas encore provisionné, matériel pas encore acheté. Prochaine étape quand l'utilisateur commande les AP : provisionner le LXC 116, adopter les AP dans le contrôleur, créer les VLANs (IoT/Guest/LAN) sur le switch + interfaces VLAN pfSense + règles firewall par VLAN.

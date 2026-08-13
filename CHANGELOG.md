@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-13 (session 23)
+
+### Fix rtxtradingbot.tixhon.be (502) + investigation migration Wi-Fi UniFi/VLAN
+
+- `docs/services.md`: fix NPM proxy host `rtxtradingbot.tixhon.be` (id 37) — `forward_port` mis à jour de 8000 vers 8731, le service ayant changé de port côté app sans mise à jour du proxy
+  Reason: 502 en public alors que le service tournait bien en local sur le Mac Mini (`192.168.10.98:8731`), pas trouvé dans Proxmox/Docker NAS car il tourne en process local hors infra virtualisée
+  Source: NPM proxy-hosts API, mémoire `npm-adguard-access.md`
+
+- `docs/services.md`: nouvelle section "Migration Wi-Fi envisagée : Deco → UniFi + VLAN" — investigation suite à une demande de VLAN IoT/Guest bloquée par les Deco M4R (pas de mapping SSID→VLAN)
+  Reason: switch D-Link DGS-1100-24 supporte le 802.1Q complet mais les AP actuels ne le supportent pas
+  Source: doc constructeur D-Link, recherche comparative TP-Link Omada vs UniFi, script `community-scripts` `ct/unifi-os-server.sh`
+
+- Aucun déploiement effectué — investigation uniquement, LXC contrôleur UniFi (VMID 116 identifié) pas provisionné, matériel pas acheté
+
 ## 2026-08-05 (session 22)
 
 ### Post-mortem coupure électrique — NIPoGi ne redémarre pas automatiquement après coupure
