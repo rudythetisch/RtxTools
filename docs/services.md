@@ -29,6 +29,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Proxmox | node | 192.168.10.2 | https://192.168.10.2:8006 | Proxmox VE |
 | Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
 | Pocket ID | LXC 104 | 192.168.10.188 | https://id.tixhon.be | Pocket ID v2.11.0 (binaire + systemd) |
+| FMF Compta | Mac Mini | 192.168.10.98:8734 | https://fmfcompta.tixhon.be (LAN only) | Next.js (launchd) |
 
 ---
 
@@ -167,7 +168,9 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 **Architecture découverte (audit 2026-07-25)** :
 - Sur ~29 hosts configurés dans NPM, **seuls 6 domaines sont résolvables publiquement** (le reste — Proxmox, pfSense, NAS, AdGuard, etc. — n'existe qu'en DNS interne/AdGuard, donc pas exposé à internet malgré l'absence d'access-list NPM)
 - **Cloudflare Tunnel** (`cloudflared`, LXC 109 sur NIPoGi, tunnel `nipogi-homelab`) : connexion sortante uniquement, ingress rules gérées depuis le dashboard Cloudflare (pas de config.yml local)
-- Domaines tunnelés : `hass`, `vw`, `linkwarden` (→ NPM 192.168.10.11:80), `homeplan` (→ 192.168.10.98:3000), `rtxtradingbot` (→ 192.168.10.98:8000)
+- Domaines tunnelés : `hass`, `vw`, `linkwarden`, `id`, `komga`, `bar`, `fmfcompta`, `homeplan`, `rtxtradingbot` — **tous via NPM 192.168.10.11:80** depuis le 2026-08-21 (convention : aucun ingress ne doit pointer en direct sur un host applicatif, voir incident ci-dessous)
+
+**Incident (2026-08-21) — homeplan.tixhon.be affichait le contenu de fmfcompta** : conflit de port côté app (les deux tournaient sur le port 3000 du Mac Mini à un moment donné), et l'ingress tunnel pour `homeplan`/`rtxtradingbot` pointait alors en direct sur le Mac Mini plutôt que via NPM — corriger uniquement NPM n'avait donc eu aucun effet sur l'accès public tant que l'ingress tunnel restait sur l'ancien port. Root cause détaillée par la session fernelevents-docs : process Next.js "dev" orphelin de compta squattant le port 3000 depuis plusieurs jours. Fix : homeplan déplacé sur le port 8710 (launchd `be.tixhon.homeplan`), et **tous** les domaines du tunnel basculés pour passer par NPM uniformément (plus de route directe vers un host applicatif) — un seul endroit à corriger désormais en cas de changement de port.
 
 **Cloudflare Access (Zero Trust)** — authentification par email OTP en amont du login applicatif :
 
