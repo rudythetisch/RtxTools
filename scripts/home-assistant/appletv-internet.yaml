@@ -24,6 +24,9 @@ rest_command:
     method: post
     username: !secret pfsense_ha_user
     password: !secret pfsense_ha_password
+    # Sans ces deux lignes, HA envoie application/octet-stream → 415, filtre jamais rechargé
+    content_type: "application/json"
+    payload: "{}"
   # Coupe les connexions déjà ouvertes (sinon un stream en cours continue)
   pfsense_appletv_kill_states:
     url: "https://pfsense.tixhon.be/api/v2/firewall/states?source__startswith=192.168.10.93:&limit=0"

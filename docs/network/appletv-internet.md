@@ -28,9 +28,13 @@ L'état affiché vient toujours de pfSense : si la règle est basculée depuis l
 - **Compte API** `ha-appletv`, avec 6 privilèges seulement : `firewall-rules-get`, `firewall-rule-get`, `firewall-rule-patch`, `firewall-apply-post`, `firewall-states-get`, `firewall-states-delete`.
 - HA passe par `https://pfsense.tixhon.be` (NPM, certificat valide) : l'API n'est pas servie en HTTPS sur `192.168.10.1`.
 
+### Piège : `rest_command` sans `content_type` → 415
+
+Sans `content_type`, un `rest_command` HA sans payload envoie `application/octet-stream`. L'API pfSense répond alors `415 CONTENT_HANDLER_CANNOT_DECODE_CONTENT` et ne recharge rien. HA ne remonte pas d'erreur si on ne lit pas la réponse. C'était la vraie cause des coupures et rétablissements sans effet du 2026-10-09. Correctif : `content_type: application/json` + `payload: "{}"` sur `pfsense_apply`. Le script vérifie maintenant `apply.status`.
+
 ### Piège : l'apply est asynchrone
 
-`POST /firewall/apply` répond en ~100 ms (`applied: true`), mais pfSense recharge le filtre en arrière-plan. pf ne bloque que les **nouvelles** connexions. Si on coupe les connexions avant que la règle soit chargée, l'Apple TV se reconnecte aussitôt et ses nouvelles connexions survivent au blocage. Le 2026-10-09, au premier essai, le stream Prime Video a continué pour cette raison, et le rechargement n'avait toujours pas eu lieu 3 min plus tard. D'où les pauses et le second apply dans le script.
+`POST /firewall/apply` répond en ~100 ms (`applied: true`), mais pfSense recharge le filtre en arrière-plan. pf ne bloque que les **nouvelles** connexions : si on coupe les connexions avant que la règle soit chargée, l'Apple TV se reconnecte et ses nouvelles connexions survivent au blocage. D'où la pause de 5 s avant la coupure, puis le second passage 10 s plus tard.
 
 Diagnostic : `pfctl -sr | grep Apple` (Diagnostics > Command Prompt) doit montrer la règle quand elle est active. On peut aussi vérifier la date de `/tmp/rules.debug`.
 
