@@ -60,4 +60,4 @@ Un stream en cours peut continuer 1 à 2 minutes sur le tampon de lecture même 
 
 ## Historique
 
-La règle `block_kids_inet` (alias `KID_DEVICES`) d'un ancien plan de contrôle parental n'a jamais fonctionné : SSH vers pfSense bloqué depuis le LAN, rien déployé dans HA. Elle a été réutilisée pour cette règle Apple TV, à la même position. Le 2026-10-09, on a supprimé l'alias `KID_DEVICES` (il contenait par erreur le Mac Mini `.98`), la règle désactivée `block_old_ipad` et les fichiers de l'ancien plan (récupérables dans l'historique git).
+La règle `block_kids_inet` (alias `KID_DEVICES`) d'un ancien plan de contrôle parental n'a jamais fonctionné : SSH vers pfSense bloqué depuis le LAN, rien déployé dans HA. Elle a été réutilisée pour cette règle Apple TV, à la même position. Le 2026-10-09, on a supprimé l'alias `KID_DEVICES` (il contenait par erreur le Mac Mini `.98`), la règle désactivée `block_old_ipad` et les fichiers de l'ancien plan (récupérables dans l'historique git). Les comptes pfSense `homeassistant` et `hass_scripter`, membres du groupe admins avec une clé SSH et jamais utilisés depuis janvier selon les logs d'auth, ont aussi été supprimés.
