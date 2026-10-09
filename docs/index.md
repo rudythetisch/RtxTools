@@ -13,8 +13,7 @@ Collection of personal tools and scripts for home infrastructure management.
 
 | Script set | Description |
 |------------|-------------|
-| [[network/README\|network/home-assistant]] | Parental control timer system — HA + pfSense integration |
-| [[network/README\|network/pfsense]] | pfSense firewall commands and SSH setup |
+| [[network/appletv-internet\|network/appletv-internet]] | Coupure Internet + minuteur temps d'écran de l'Apple TV (HA + pfSense) |
 | [[network/tischnas3-servarr\|network/tischnas3-servarr]] | Stack Docker Servarr (Radarr/Sonarr/Prowlarr/...) sur TischNAS3 |
 | `scripts/guides/` | Setup guides: NUT UPS, SSH key setup |
 | `scripts/nipogi-shutdown.sh` | Shutdown NIPoGi server |
@@ -31,4 +30,4 @@ Collection of personal tools and scripts for home infrastructure management.
 
 Tools are self-contained under `tools/<toolname>/`. Prerequisites: `uv` (`brew install uv`).
 
-Scripts under `scripts/` are standalone — see each folder's README or `installation-guide.md`.
+Scripts under `scripts/` are standalone — see the matching page in `docs/`.

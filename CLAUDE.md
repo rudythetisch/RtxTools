@@ -8,14 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 RtxTools/
 ├── docs/                      Markdown documentation (sync to Obsidian)
 │   ├── rtxcopy/               rtxcopy docs
-│   └── network/               Network scripts docs (parental control, pfSense)
+│   └── network/               Network docs (Apple TV Internet cut-off, Servarr)
 ├── scripts/                   Standalone scripts (no build system)
-│   ├── home-assistant/        HA automations, config, dashboard, scripts
-│   ├── pfsense/               pfSense firewall commands + SSH setup
+│   ├── home-assistant/        HA YAML snippets (Apple TV Internet cut-off via pfSense API)
 │   ├── guides/                Setup guides (NUT UPS, SSH keys)
 │   ├── nipogi-shutdown.sh     Shutdown script for NIPoGi server
-│   ├── synology-shutdown.sh   Shutdown script for Synology NAS
-│   └── installation-guide.md
+│   └── synology-shutdown.sh   Shutdown script for Synology NAS
 ├── shared/rtxlib/             Future shared lib (empty for now)
 └── tools/
     ├── rtxcopy/               File-copy TUI tool (Python + Textual)

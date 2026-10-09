@@ -64,16 +64,7 @@ npm start              # or ./start-server.sh
 
 ### home-assistant
 
-YAML configuration for a parental-control timer automation:
-- `automations.yaml` — start/stop kids screen-time timer, toggle pfSense firewall rules via SSH
-- `scripts.yaml` — HA script definitions
-- `dashboard.yaml` — Lovelace dashboard
-- `configuration.yaml` — HA configuration snippets
-
-### pfsense
-
-- `firewall-commands.md` — pfSense shell commands for managing firewall rules
-- `setup-ssh-access.sh` — SSH key setup for pfSense access from Home Assistant
+- `appletv-internet.yaml` — `rest_command` + REST sensor to cut the Apple TV's Internet access via the pfSense REST API (see `docs/network/appletv-internet.md`)
 
 ### guides
 
