@@ -1,5 +1,7 @@
 # Parental Control Timer System - Architecture Plan
 
+> **Abandonné (2026-10-09)** : jamais fonctionnel (SSH pfSense bloqué depuis le LAN, rien déployé dans HA). La règle `block_kids_inet` a été réutilisée pour la coupure de l'Apple TV, voir [[appletv-internet]].
+
 ## Overview
 A Home Assistant-integrated timer system that blocks internet access for children's devices after a specified duration, triggered from mobile app.
 
