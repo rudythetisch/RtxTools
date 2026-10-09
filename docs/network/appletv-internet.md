@@ -20,6 +20,19 @@ Dashboard HA (Accueil → Actions rapides → "Apple TV")
 
 L'état affiché vient toujours de pfSense : si la règle est basculée depuis la GUI pfSense, HA le reflète en moins d'une minute.
 
+## Minuteur (temps d'écran)
+
+Carte « Temps d'écran Apple TV » sur le dashboard Accueil : boutons 10 min / 15 min / 30 min / 1 h / 1 h 30 / 2 h, et « Couper ».
+
+- `script.appletv_minuteur` (champ `minutes`) : ouvre Internet si c'est coupé, puis lance `timer.temps_ecran_apple_tv` (`restore: true`, survit à un redémarrage de HA). Relancer une durée remplace la précédente.
+- Automation `appletv_avertissement_5min` : déclenchée au démarrage du minuteur, attend jusqu'à 5 min de la fin (au lieu d'un trigger template `now()`, réévalué seulement chaque minute), puis affiche une alerte « Plus que 5 minutes ! » sur la TV LG.
+- Automation `appletv_temps_ecoule` : sur `timer.finished`, coupe Internet, affiche une alerte sur la TV et notifie l'iPhone de Rudy.
+- Automation `appletv_coupure_manuelle` : une coupure manuelle (bouton) annule le minuteur en cours.
+
+**Messages sur la TV** : `notify.lg_webos_tv_oled65c11lb` (toast) et `system.notifications/createToast` ne s'affichent **pas** quand l'entrée HDMI de l'Apple TV est à l'écran. Seule une alerte passe, via `webostv.command`, commande `system.notifications/createAlert` avec un bouton OK. Elle reste à l'écran jusqu'à ce qu'on appuie sur OK (télécommande LG).
+
+Tout est créé via l'API/UI de HA, pas dans le YAML. Testé le 2026-10-09 avec un minuteur de 2 min.
+
 ## pfSense
 
 - **Règle** (LAN) : `block` IPv4, source `192.168.10.93`, destination `!lan`, log activé, description `Bloquer Internet Apple TV (pilotée par Home Assistant)`. Placée avant `Default allow LAN`. Désactivée = Internet autorisé.
