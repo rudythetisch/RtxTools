@@ -1,0 +1,53 @@
+# Coupure Internet par appareil (Apple TV, Switch, iPad, iPhones) via pfSense
+# À coller dans /config/configuration.yaml (Studio Code Server) À LA PLACE de l'ancien
+# bloc Apple TV (rest_command pfsense_appletv_* + rest "Règle pfSense Apple TV"),
+# puis Outils de développement → YAML → recharger "Commandes REST" et "Entités REST".
+#
+# Secrets (inchangés) dans /config/secrets.yaml :
+#   pfsense_ha_user: ha-appletv
+#   pfsense_ha_password: <mot de passe du compte pfSense ha-appletv>
+#
+# Principe : une règle pfSense permanente bloque tout ce qui est dans l'alias
+# INTERNET_BLOQUE ; HA ajoute/retire l'IP d'un appareil dans l'alias.
+# script.internet_appareil, les switch.internet_*, le minuteur et le dashboard
+# sont créés dans l'UI de HA — voir docs/network/internet-appareils.md.
+
+rest_command:
+  pfsense_alias_set:
+    url: "https://pfsense.tixhon.be/api/v2/firewall/alias"
+    method: patch
+    username: !secret pfsense_ha_user
+    password: !secret pfsense_ha_password
+    content_type: "application/json"
+    payload: '{"id": {{ alias_id }}, "address": {{ addresses | tojson }}}'
+  pfsense_apply:
+    url: "https://pfsense.tixhon.be/api/v2/firewall/apply"
+    method: post
+    username: !secret pfsense_ha_user
+    password: !secret pfsense_ha_password
+    # Sans ces deux lignes, HA envoie application/octet-stream → 415, filtre jamais rechargé
+    content_type: "application/json"
+    payload: "{}"
+  # Coupe les connexions déjà ouvertes d'une IP (sinon un stream/une partie en cours continue)
+  pfsense_kill_states:
+    url: "https://pfsense.tixhon.be/api/v2/firewall/states?source__startswith={{ ip }}:&limit=0"
+    method: delete
+    username: !secret pfsense_ha_user
+    password: !secret pfsense_ha_password
+
+rest:
+  - resource: "https://pfsense.tixhon.be/api/v2/firewall/aliases?name=INTERNET_BLOQUE"
+    authentication: basic
+    username: !secret pfsense_ha_user
+    password: !secret pfsense_ha_password
+    scan_interval: 60
+    sensor:
+      - name: "Appareils Internet coupé"
+        unique_id: pfsense_internet_bloque
+        icon: mdi:wifi-off
+        # nombre d'appareils coupés ; l'attribut `address` liste leurs IP, `id` sert au PATCH
+        value_template: "{{ value_json.data[0].address | length }}"
+        json_attributes_path: "$.data[0]"
+        json_attributes:
+          - id
+          - address

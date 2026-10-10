@@ -64,7 +64,7 @@ npm start              # or ./start-server.sh
 
 ### home-assistant
 
-- `appletv-internet.yaml` — `rest_command` + REST sensor to cut the Apple TV's Internet access via the pfSense REST API (see `docs/network/appletv-internet.md`)
+- `internet-appareils.yaml` — `rest_command` + REST sensor to cut Internet per device (Apple TV, Switch, iPad, iPhones) via the pfSense REST API (see `docs/network/internet-appareils.md`)
 
 ### guides
 

@@ -13,7 +13,7 @@ Collection of personal tools and scripts for home infrastructure management.
 
 | Script set | Description |
 |------------|-------------|
-| [[network/appletv-internet\|network/appletv-internet]] | Coupure Internet + minuteur temps d'écran de l'Apple TV (HA + pfSense) |
+| [[network/internet-appareils\|network/internet-appareils]] | Coupure Internet par appareil (Apple TV, Switch, iPad, iPhones) + minuteur Apple TV (HA + pfSense) |
 | [[network/tischnas3-servarr\|network/tischnas3-servarr]] | Stack Docker Servarr (Radarr/Sonarr/Prowlarr/...) sur TischNAS3 |
 | `scripts/guides/` | Setup guides: NUT UPS, SSH key setup |
 | `scripts/nipogi-shutdown.sh` | Shutdown NIPoGi server |

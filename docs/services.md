@@ -193,7 +193,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 
 ## Home Assistant
 
-**Rôle** : domotique, automatisations (coupure Internet + temps d'écran de l'Apple TV via pfSense, voir [[network/appletv-internet]]).
+**Rôle** : domotique, automatisations (coupure Internet par appareil + temps d'écran Apple TV via pfSense, voir [[network/internet-appareils]]).
 
 **Hébergement** : VM 100 (`haos12.4`, Home Assistant OS) sur Proxmox (nipogi), IP `192.168.10.10:8123`.
 

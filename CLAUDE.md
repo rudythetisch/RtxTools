@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 RtxTools/
 ├── docs/                      Markdown documentation (sync to Obsidian)
 │   ├── rtxcopy/               rtxcopy docs
-│   └── network/               Network docs (Apple TV Internet cut-off, Servarr)
+│   └── network/               Network docs (per-device Internet cut-off, Servarr)
 ├── scripts/                   Standalone scripts (no build system)
-│   ├── home-assistant/        HA YAML snippets (Apple TV Internet cut-off via pfSense API)
+│   ├── home-assistant/        HA YAML snippets (per-device Internet cut-off via pfSense API)
 │   ├── guides/                Setup guides (NUT UPS, SSH keys)
 │   ├── nipogi-shutdown.sh     Shutdown script for NIPoGi server
 │   └── synology-shutdown.sh   Shutdown script for Synology NAS
