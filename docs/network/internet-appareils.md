@@ -26,11 +26,11 @@ Les appareils coupés gardent l'accès au LAN (AirPlay, HomeKit, médias locaux)
 
 ```
 Dashboard HA (Accueil) → switch.internet_<appareil>   (helpers template, créés dans l'UI)
-  → script.internet_appareil (ip, bloquer)            mode queued : les appareils sont traités un par un
+  → script.internet_appareil (ip, bloquer)            ip = une IP ou plusieurs (« a,b,c » ou liste) ; mode queued
       1. rafraîchit sensor.appareils_internet_coupe et calcule la nouvelle liste d'IP
       2. rest_command.pfsense_alias_set     PATCH de l'alias INTERNET_BLOQUE (vérifie status 200)
       3. rest_command.pfsense_apply         recharge le filtre (vérifie status 200)
-      4. au blocage seulement : pause 5 s → rest_command.pfsense_kill_states(ip), pause 10 s → kill à nouveau
+      4. au blocage seulement : pause 5 s → rest_command.pfsense_kill_states pour chaque IP, pause 10 s → kill à nouveau
       5. rafraîchit le capteur
   ← sensor.appareils_internet_coupe (rest, toutes les 60 s) : nombre d'appareils coupés, attributs `id` et `address`
   ← chaque switch : on = l'IP n'est PAS dans `address`
@@ -38,15 +38,26 @@ Dashboard HA (Accueil) → switch.internet_<appareil>   (helpers template, cré�
 
 `script.appletv_internet` (champ `bloquer`) est un raccourci vers `script.internet_appareil` avec l'IP .93. Il est utilisé par le switch Apple TV et par le minuteur.
 
-## Dashboard (vue Accueil)
+## Dashboard
 
-- **Actions rapides → « Apple TV »** : bascule Internet de l'Apple TV.
-- **Temps d'écran Apple TV** : minuteur, voir plus bas.
-- **Internet des enfants** : un bouton par appareil (iPhone Elias, iPhone Tristan, iPad Cyril, Switch), plus « Tout couper » et « Tout rétablir ». Comme les appareils sont traités un par un, « Tout couper » prend environ 1 min.
+- **Accueil → Actions rapides → « Apple TV »** : bascule Internet de l'Apple TV.
+- **Accueil → carte « Temps d'écran »** (compacte) : une tuile par appareil (Apple TV, iPhone Elias, iPhone Tristan, iPad Cyril, Switch). Elle affiche l'état : vert = Internet OK, violet = minuteur en cours avec « ⏱ jusqu'à HH:MM », rouge = coupé. Toucher une tuile ouvre la sous-vue. En bas : « Tout couper », « Tout rétablir », « Minuteurs ».
+- **Sous-vue `/lovelace/temps-ecran`** : une carte par appareil. Toucher la tuile bascule Internet (avec confirmation). Les puces 10 min / 15 min / 30 min / 1 h / 1 h 30 / 2 h lancent un minuteur, « Couper » coupe tout de suite.
+- « Tout couper » / « Tout rétablir » appellent directement `script.internet_appareil` avec les 5 IP : un seul PATCH + apply pour tous (~17 s pour couper, ~1 s pour rétablir). Les tuiles, elles, passent par les switches, un appareil à la fois.
+- Pourquoi pas des appels en parallèle : le PATCH remplace toute la liste de l'alias. Deux scripts lancés en même temps liraient la même liste de départ et le second écraserait le premier. D'où le mode `queued` et le passage groupé pour « Tout ».
+
+## Minuteurs des enfants
+
+- `timer.temps_ecran_<appareil>` pour `iphone_elias`, `iphone_tristan`, `ipad_cyril`, `switch` (`restore: true`).
+- `script.minuteur_appareil` (champs `appareil`, `minutes`) : ouvre Internet si c'est coupé, puis lance le minuteur de l'appareil.
+- Automation `enfants_temps_ecoule` : à la fin d'un minuteur, coupe l'appareil et notifie l'iPhone de Rudy, plus l'iPad de Cyril quand c'est lui.
+- Automation `enfants_avertissement_5min` : « Plus que 5 minutes ! » sur les appareils qui ont l'app HA. Pour l'instant seul l'iPad de Cyril l'a (`notify.mobile_app_ipad_gen_5`). Pour les iPhones, il faudrait y installer l'app HA, puis ajouter un trigger et une cible dans l'automation.
+- Automation `enfants_coupure_manuelle` : une coupure manuelle annule le minuteur de l'appareil.
+- Testé le 2026-10-10 avec 1 min sur l'iPad de Cyril : coupure automatique à la fin (29 → 0 connexion).
 
 ## Minuteur (temps d'écran Apple TV)
 
-Carte « Temps d'écran Apple TV » : boutons 10 min / 15 min / 30 min / 1 h / 1 h 30 / 2 h, et « Couper ».
+Mêmes boutons que les autres appareils, dans la sous-vue « Temps d'écran ». L'Apple TV garde ses propres automations, à cause des alertes sur la TV LG :
 
 - `script.appletv_minuteur` (champ `minutes`) : ouvre Internet si c'est coupé, puis lance `timer.temps_ecran_apple_tv` (`restore: true`, survit à un redémarrage de HA). Relancer une durée remplace la précédente.
 - Automation `appletv_avertissement_5min` : déclenchée au démarrage du minuteur, attend jusqu'à 5 min de la fin, puis affiche une alerte « Plus que 5 minutes ! » sur la TV LG. On utilise une attente plutôt qu'un trigger template `now()`, qui n'est réévalué qu'une fois par minute.
