@@ -86,6 +86,18 @@ Sans `content_type`, un `rest_command` HA sans payload envoie `application/octet
 
 Un stream en cours peut continuer 1 à 2 minutes sur le tampon de lecture même quand le blocage fonctionne. Pour vérifier, avancer dans le film.
 
+### Piège : DNS de secours du superviseur HA
+
+Le 2026-10-12, le minuteur de 30 min de l'iPhone de Tristan n'a rien coupé. Depuis 18:25, HA n'arrivait plus à résoudre `pfsense.tixhon.be` : le capteur `rest` était `unavailable`, et le script s'arrêtait sur la condition `alias_id is number`, sans aucune erreur visible.
+
+Cause probable : le DNS interne du superviseur (CoreDNS) a basculé une fois sur son DNS de secours (Cloudflare, `fallback: true`). Cloudflare ne connaît pas ce nom interne, qui n'existe que dans la réécriture AdGuard. La réponse « nom inconnu » est alors restée en cache, côté CoreDNS et côté HA.
+
+Correctifs :
+- DNS de secours désactivé (`supervisor /dns/options {"fallback": false}`) : HA n'interroge plus qu'AdGuard (`192.168.10.12`).
+- `script.internet_appareil` envoie une notification « ⚠️ Coupure Internet en échec » sur l'iPhone de Rudy quand pfSense est injoignable ou que le PATCH ou l'apply échoue, au lieu de s'arrêter en silence.
+
+Dépannage : redémarrer le DNS du superviseur (`supervisor /dns/restart`), puis `rest.reload`.
+
 ## Home Assistant
 
 - YAML (`rest_command` + sensor `rest`) : [scripts/home-assistant/internet-appareils.yaml](../../scripts/home-assistant/internet-appareils.yaml), en fin de `/config/configuration.yaml`. Secrets `pfsense_ha_user` / `pfsense_ha_password` dans `secrets.yaml`.
