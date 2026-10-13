@@ -26,6 +26,7 @@ Collection of personal tools and scripts for home infrastructure management.
 - **TischNAS3** — `192.168.10.3` (Synology NAS)
 - **Proxmox node** — `192.168.10.2` — voir [[proxmox/README]]
 - **Services** (pfSense, AdGuard, NPM, WireGuard) — voir [[services]]
+- **Projets futurs** (disque TischNAS2, OPNsense, RAM TischNAS3, Wi-Fi UniFi + VLAN…) — voir [[projets-futurs]]
 
 ## Setup
 
