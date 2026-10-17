@@ -55,6 +55,14 @@ Requires Python ≥ 3.11 and `uv` (`brew install uv`).
 - TischNAS3: `192.168.10.3`
 - Proxmox node: `192.168.10.2`
 
+## Workflow git
+
+Le repo est utilisé avec Claude Code CLI depuis deux machines (Mac et Mac mini) qui poussent toutes deux sur `main`.
+
+- `git pull --rebase` en début de session et avant chaque push (historique linéaire, pas de merge commits)
+- `git push` régulier, après chaque commit ou lot de commits terminé; ne pas laisser de commits non poussés
+- En cas de conflit au rebase: résoudre sans force-push et prévenir l'utilisateur
+
 ## Documentation
 
 `docs/` contains Markdown files intended for Obsidian sync. Use standard Markdown (no frontmatter required). Wikilinks (`[[file]]`) are fine for cross-references within `docs/`.
