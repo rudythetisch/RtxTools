@@ -42,7 +42,7 @@ docker compose logs -f daemon
 
 Sans configuration, le daemon scanne le sous-réseau `192.168.10.0/24` (ARP, ports, empreinte des services). Pour enrichir la carte :
 
-- **Switch D-Link DGS-1100-24** : activer SNMP (lecture seule, communauté autre que `public`) et LLDP → quel appareil sur quel port.
+- **Switch D-Link DGS-1100-24** : révision A1 **sans SNMP ni LLDP**, pas de carte physique possible. Correspondance ports ↔ appareils relevée à la main dans [[network/switch]].
 - **pfSense** : Services → SNMP → table ARP et interfaces.
 - **Docker des autres machines** (TischNAS3, LXC Docker) : via un daemon Scanopy supplémentaire sur la machine, ou son socket Docker.
 - **Deco TP-Link** : ni SNMP ni LLDP, les clients Wi-Fi apparaissent sans leur borne. Sera résolu avec UniFi (voir [[projets-futurs#Wi-Fi UniFi + VLAN]]), que Scanopy sait interroger.
@@ -55,5 +55,5 @@ Scanopy nomme les machines d'après leur nom d'hôte ou le service détecté, et
 
 Non découverts au premier scan :
 
-- **Switch D-Link `.20`** : ne répond ni au ping ni en HTTP, et n'apparaît pas dans la table ARP de pfSense. Son IP de gestion n'est sans doute pas `.20` (IP par défaut D-Link : `10.90.90.90`). À retrouver avant d'activer SNMP/LLDP.
+- **Switch D-Link `.20`** : était resté sur son IP d'usine `10.90.90.90`, passé en `192.168.10.20` le 2026-10-19 (voir [[network/switch]]).
 - iPhone de Tristan `.97`, LG C1 `.90`, Redmi `.95`, rtxtradingbot `.21` : en veille ou éteints pendant le scan.
