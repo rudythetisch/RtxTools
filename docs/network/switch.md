@@ -27,7 +27,7 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 06 | Gigaset C5310-IP |
 | 07 | Mezzanine, bureau de Céline : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
 | 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato ; **inutile** depuis la disparition de Neato, à débrancher) |
-| 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base, réservation `.35`). L'autre bout (TL-WPA7617) est dans l'**abri de jardin** ; derrière lui, `.212` = robot tondeuse **Dreame A1 Pro** (MAC `10:06:48:a2:7c:05`, SSH Dropbear 2019) |
+| 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base, réservation `.35`). L'autre bout (TL-WPA7617) est dans l'**abri de jardin** ; derrière lui, `.212` = robot tondeuse **Dreame A1 Pro**, réservé en `.28` (MAC `10:06:48:a2:7c:05`, SSH Dropbear 2019) |
 | 12 | TischNAS3 |
 | 17 | **NIPoGi** (adaptateur USB LAN `vmbr1`) : Proxmox, pfSense LAN, Home Assistant, tous les LXC |
 | 18 | TischNAS2 |

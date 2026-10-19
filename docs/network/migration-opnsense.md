@@ -78,7 +78,7 @@ Relevé via l'API le 2026-10-13.
 - Plage dynamique `192.168.10.200–250`, DNS distribué `192.168.10.12`, passerelle `192.168.10.1`.
 - Sur OPNsense, utiliser le service DHCP par défaut de la version installée (Dnsmasq sur les installations récentes), avec les mêmes paramètres.
 - IP fixes configurées sur les machines elles-mêmes (pas de réservation) : `.2` Proxmox, `.3` TischNAS3, `.5` TischNAS2, `.10` Home Assistant, `.11` NPM, `.12` AdGuard, `.13` homefinance-db, `.18` Scanopy.
-- **32 réservations** :
+- **34 réservations** :
 
 | IP | MAC | Hostname | Description |
 |---|---|---|---|
@@ -90,12 +90,14 @@ Relevé via l'API le 2026-10-13.
 | 192.168.10.21 | `bc:24:11:81:c5:fc` | rtxtradingbot | rtxtradingbot |
 | 192.168.10.22 | `00:11:2a:22:53:38` |  | Niko Home Control 2 (NHC2) |
 | 192.168.10.23 | `5c:2f:af:0b:5b:e2` |  | HomeWizard P1 meter |
-| 192.168.10.26 | `48:e1:e9:31:fe:cf` |  | Eufy Camera (Cuisine) |
+| 192.168.10.26 | `48:e1:e9:31:fe:cf` |  | Prise Meross MSS210 (caméra Eufy Cuisine) |
+| 192.168.10.27 | `00:ae:f7:0c:bd:36` |  | Dreame Aqua Roller Ultra (aspirateur laveur) |
+| 192.168.10.28 | `10:06:48:a2:7c:05` |  | Dreame A1 Pro (robot tondeuse, abri de jardin) |
 | 192.168.10.30 | `d8:0d:17:c9:6d:98` |  | TP-LINK Deco M4R (Grenier) |
 | 192.168.10.31 | `d8:0d:17:c9:78:48` |  | TP-LINK Deco M4R (Etage 1) |
 | 192.168.10.32 | `d8:0d:17:c9:7a:34` |  | TP-LINK Deco M4R (Salon) |
 | 192.168.10.33 | `6c:5a:b0:e4:93:6e` |  | TP-LINK TL-WR802N (Neato) |
-| 192.168.10.35 | `d8:44:89:70:2a:aa` |  | TP-LINK CPL 1 (Salon) |
+| 192.168.10.35 | `d8:44:89:70:2a:aa` |  | TP-LINK CPL (mezzanine, vers abri de jardin) |
 | 192.168.10.53 | `30:83:98:16:76:73` |  | SMLIGHT SLZB-06M |
 | 192.168.10.90 | `b0:37:95:1a:36:95` |  | LG C1 |
 | 192.168.10.92 | `5c:0c:e6:28:2c:18` |  | Nintendo Switch |
