@@ -77,7 +77,7 @@ Relevé via l'API le 2026-10-13.
 
 - Plage dynamique `192.168.10.200–250`, DNS distribué `192.168.10.12`, passerelle `192.168.10.1`.
 - Sur OPNsense, utiliser le service DHCP par défaut de la version installée (Dnsmasq sur les installations récentes), avec les mêmes paramètres.
-- IP fixes configurées sur les machines elles-mêmes (pas de réservation) : `.2` Proxmox, `.3` TischNAS3, `.5` TischNAS2, `.10` Home Assistant, `.11` NPM, `.12` AdGuard.
+- IP fixes configurées sur les machines elles-mêmes (pas de réservation) : `.2` Proxmox, `.3` TischNAS3, `.5` TischNAS2, `.10` Home Assistant, `.11` NPM, `.12` AdGuard, `.13` homefinance-db, `.18` Scanopy.
 - **32 réservations** :
 
 | IP | MAC | Hostname | Description |

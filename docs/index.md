@@ -15,6 +15,7 @@ Collection of personal tools and scripts for home infrastructure management.
 |------------|-------------|
 | [[network/internet-appareils\|network/internet-appareils]] | Coupure Internet par appareil (Apple TV, Switch, iPad, iPhones) + minuteur Apple TV (HA + pfSense) |
 | [[network/migration-opnsense\|network/migration-opnsense]] | Plan de migration pfSense (VM) → OPNsense sur appliance dédiée : inventaire, bascule, retour arrière |
+| [[network/scanopy\|network/scanopy]] | Scanopy (LXC 117, `.18`) : cartographie automatique du réseau |
 | [[network/tischnas3-servarr\|network/tischnas3-servarr]] | Stack Docker Servarr (Radarr/Sonarr/Prowlarr/...) sur TischNAS3 |
 | `scripts/guides/` | Setup guides: NUT UPS, SSH key setup |
 | `scripts/nipogi-shutdown.sh` | Shutdown NIPoGi server |
