@@ -46,3 +46,14 @@ Sans configuration, le daemon scanne le sous-réseau `192.168.10.0/24` (ARP, por
 - **pfSense** : Services → SNMP → table ARP et interfaces.
 - **Docker des autres machines** (TischNAS3, LXC Docker) : via un daemon Scanopy supplémentaire sur la machine, ou son socket Docker.
 - **Deco TP-Link** : ni SNMP ni LLDP, les clients Wi-Fi apparaissent sans leur borne. Sera résolu avec UniFi (voir [[projets-futurs#Wi-Fi UniFi + VLAN]]), que Scanopy sait interroger.
+
+## Noms des machines
+
+Scanopy nomme les machines d'après leur nom d'hôte ou le service détecté, et ne lit pas les réservations DHCP de pfSense : beaucoup apparaissaient sous leur seule IP. Le 2026-10-19, 38 machines ont été renommées via l'API (`PUT /api/hosts/{id}` avec `name`, en recopiant les autres champs ; ports, IP et services sont conservés quand on ne les envoie pas). Convention : nom de la réservation DHCP, suivi de l'ID Proxmox pour les VM et LXC, par exemple `MQTT (LXC 101)`.
+
+À la découverte suivante, une machine nouvelle reprend un nom automatique : la renommer dans l'interface (ou via l'API avec une clé en écriture).
+
+Non découverts au premier scan :
+
+- **Switch D-Link `.20`** : ne répond ni au ping ni en HTTP, et n'apparaît pas dans la table ARP de pfSense. Son IP de gestion n'est sans doute pas `.20` (IP par défaut D-Link : `10.90.90.90`). À retrouver avant d'activer SNMP/LLDP.
+- iPhone de Tristan `.97`, LG C1 `.90`, Redmi `.95`, rtxtradingbot `.21` : en veille ou éteints pendant le scan.
