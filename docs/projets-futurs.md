@@ -60,7 +60,7 @@ Ordre conseillé : **disque TischNAS2 → OPNsense → RAM TischNAS3 → NIPoGi 
   - **OPNsense d'abord** : il fera le routage et les règles entre VLAN.
   - **Switch** : le D-Link DGS-1100-24 gère le 802.1Q, aucun achat nécessaire.
   - **Bornes** : par exemple 3× **U7 Lite** (Wi-Fi 7) ou **U6+** (Wi-Fi 6), à chiffrer.
-  - **Alimentation PoE** : les bornes UniFi doivent être alimentées par le câble réseau (PoE). Le DGS-1100-24 n'en fournit pas (voir [[network/switch]]). Il faudra donc des injecteurs PoE ou un petit switch PoE.
+  - **Alimentation PoE** : les bornes UniFi doivent être alimentées par le câble réseau (PoE). Le DGS-1100-24 n'en fournit pas, mais le **TL-SG1005P** déjà en place dans le rack (4 ports PoE+, ~65 W, un port pris par le SLZB-06M) suffit pour 3 bornes. Les câbles des prises concernées doivent alors partir de ce switch au patch panel. Il est non administrable : vérifier qu'il laisse passer les VLAN tagués (voir [[network/switch]]).
   - **Contrôleur** : l'application UniFi Network peut tourner gratuitement dans un LXC Proxmox. Pas besoin d'une passerelle UniFi, puisque c'est OPNsense qui route.
 - **Bonus** : le blocage Internet des enfants (aujourd'hui IP par IP, voir [[network/internet-appareils]]) pourra viser tout le VLAN enfants d'un coup. Les adresses Wi-Fi « rotatives » d'iOS ne pourront plus y échapper.
 - **À décider** : les modèles de bornes, le PoE, le CPL (base sur la mezzanine, TL-WPA7617 dans l'abri de jardin : garder, ou remplacer par une borne UniFi extérieure). Le TL-WR802N (ex-Neato) sert d'abord au [VLAN IoT pilote](#vlan-iot-pilote-tl-wr802n).

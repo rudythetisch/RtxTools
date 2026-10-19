@@ -32,10 +32,22 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 17 | **NIPoGi** (adaptateur USB LAN `vmbr1`) : Proxmox, pfSense LAN, Home Assistant, tous les LXC |
 | 18 | TischNAS2 |
 | 19 | **Deco M4R Grenier** + Mac mini (Ethernet et Wi-Fi), clim Smart AC, `.208`, `.245` |
+| 22 | **Switch PoE TP-Link TL-SG1005P** (voir plus bas) → SLZB-06M (`.53`, coordinateur Zigbee, alimenté en PoE). Absent du relevé MAC (5 entrées non affichées par le switch) |
 | 23 | Niko Home Control 2 |
 | 24 | eufy HomeBase 2 |
 
 La Nintendo Switch (Ethernet, prise murale) n'apparaissait pas : éteinte au moment du relevé.
+
+## Switch PoE TP-Link TL-SG1005P
+
+| Élément | Valeur |
+|---|---|
+| Modèle | TP-Link TL-SG1005P : 5 ports Gigabit dont 4 **PoE+** (802.3at), budget ~65 W, **non administrable** (pas d'IP, pas de VLAN configurable) |
+| Emplacement | Buanderie, posé dans le rack |
+| Raccordement | Port 22 du D-Link et port 22 du patch panel |
+| Alimente | SLZB-06M (antenne/coordinateur Zigbee, `.53`) |
+
+Pour UniFi : de quoi alimenter 3 bornes (U7 Lite ~13 W, U6+ < 10 W). Étant non administrable, il laisse en principe passer les trames VLAN taguées sans les modifier (à confirmer par un test) : une borne branchée dessus recevrait les VLAN du port du D-Link en amont.
 
 ## Prises murales connues
 
