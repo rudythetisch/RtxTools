@@ -24,6 +24,7 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 |---|---|
 | 01 | **Deco M4R Salon** + ses clients Wi-Fi (HomePod Cuisine, P1 meter, iPad Cyril, aspirateur laveur Dreame Aqua Roller Ultra, Meross caméra Cuisine, BSH, station météo, Salon (2)…) |
 | 04 | Apple TV 4K (Salon) |
+| 05 | **Inconnu** : lien actif en 100 Mb/s (LED, 2026-10-19) mais aucune MAC au relevé. Candidat : Nintendo Switch (éteinte au relevé) |
 | 06 | Gigaset C5310-IP |
 | 07 | Mezzanine, bureau de Céline : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
 | 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato ; gardé pour le [[projets-futurs#VLAN IoT pilote (TL-WR802N)|VLAN IoT pilote]]) |
@@ -37,6 +38,12 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 24 | eufy HomeBase 2 |
 
 La Nintendo Switch (Ethernet, prise murale) n'apparaissait pas : éteinte au moment du relevé.
+
+**Vitesse des liens (LED en façade, 2026-10-19)** : 14 ports actifs.
+
+- **1 Gb/s** (vert) : 1, 4, 7, 11, 12, 17, 18, 19, 22.
+- **100 Mb/s** (orange) : 5, 6 (Gigaset), 8 (TL-WR802N), 23 (Niko), 24 (HomeBase Eufy). Normal pour ces appareils, limités à 100 Mb/s.
+- Éteints : 2, 3, 9, 10, 13–16, 20, 21. Le port 17 (NIPoGi) est bien en Gigabit malgré l'adaptateur USB.
 
 ## Switch PoE TP-Link TL-SG1005P
 
