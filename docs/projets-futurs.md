@@ -10,10 +10,11 @@ Changements prévus mais pas encore réalisés. Une fois un projet terminé, le 
 | 🟠 Moyenne | [OPNsense sur appliance dédiée](#opnsense-sur-appliance-dédiée) | Plan rédigé, matériel à commander | ~356 € | — |
 | 🟠 Moyenne | [RAM TischNAS3](#ram-tischnas3) | Choix entre 2 options ECC | ~221–344 € | — |
 | 🟢 Basse | [Wi-Fi UniFi + VLAN](#wi-fi-unifi--vlan) | Idée, à chiffrer | À chiffrer | OPNsense |
+| 🟢 Basse | [VLAN IoT pilote (TL-WR802N)](#vlan-iot-pilote-tl-wr802n) | Idée, matériel déjà là | 0 € | OPNsense |
 | 🟢 Basse | [NIPoGi : LAN sur la carte réseau intégrée](#nipogi--lan-sur-la-carte-réseau-intégrée) | Après OPNsense | 0 € | OPNsense |
 | ⚪ Optionnel | [Tailscale](#tailscale) | Pour apprendre, aucune urgence | 0 € | — |
 
-Ordre conseillé : **disque TischNAS2 → OPNsense → RAM TischNAS3 → NIPoGi → UniFi + VLAN**.
+Ordre conseillé : **disque TischNAS2 → OPNsense → RAM TischNAS3 → NIPoGi → VLAN IoT pilote → UniFi + VLAN**.
 
 ---
 
@@ -62,7 +63,20 @@ Ordre conseillé : **disque TischNAS2 → OPNsense → RAM TischNAS3 → NIPoGi 
   - **Alimentation PoE** : les bornes UniFi doivent être alimentées par le câble réseau (PoE). Le DGS-1100-24 n'en fournit pas (voir [[network/switch]]). Il faudra donc des injecteurs PoE ou un petit switch PoE.
   - **Contrôleur** : l'application UniFi Network peut tourner gratuitement dans un LXC Proxmox. Pas besoin d'une passerelle UniFi, puisque c'est OPNsense qui route.
 - **Bonus** : le blocage Internet des enfants (aujourd'hui IP par IP, voir [[network/internet-appareils]]) pourra viser tout le VLAN enfants d'un coup. Les adresses Wi-Fi « rotatives » d'iOS ne pourront plus y échapper.
-- **À décider** : les modèles de bornes, le PoE, le CPL (base sur la mezzanine, TL-WPA7617 dans l'abri de jardin : garder, ou remplacer par une borne UniFi extérieure) (le TL-WR802N du Neato est à débrancher : Neato n'existe plus).
+- **À décider** : les modèles de bornes, le PoE, le CPL (base sur la mezzanine, TL-WPA7617 dans l'abri de jardin : garder, ou remplacer par une borne UniFi extérieure). Le TL-WR802N (ex-Neato) sert d'abord au [VLAN IoT pilote](#vlan-iot-pilote-tl-wr802n).
+
+## VLAN IoT pilote (TL-WR802N)
+
+- **Idée** : réutiliser le TL-WR802N (`.33`, ex-Wi-Fi du Neato, port 08 du switch, prise côté Expedit) pour un premier VLAN, avant d'acheter les UniFi. Gratuit, et un bon banc d'essai.
+- **Principe** : port 08 du switch en **non tagué** dans le VLAN 40 (PVID 40). Tout ce qui se connecte au Wi-Fi du TL-WR802N se retrouve alors dans ce VLAN, sans que la borne gère elle-même les VLAN.
+- **Mise en place** :
+  1. TL-WR802N en **mode Point d'accès** (pas routeur : sinon NAT, appareils invisibles derrière une seule IP). SSID dédié, par exemple `Tisch-IoT`.
+  2. Switch : créer le VLAN 40, port 08 non tagué + PVID 40, port 17 (NIPoGi / routeur) **tagué** VLAN 40.
+  3. OPNsense : interface VLAN 40 `192.168.40.1/24`, DHCP, DNS vers AdGuard, règles « Internet oui, LAN non » (sauf exceptions utiles, par exemple Home Assistant → objets).
+  4. Migrer quelques objets 2,4 GHz (prises Meross, Dreame, clim) sur `Tisch-IoT`, vérifier dans Scanopy et Home Assistant.
+- **Après OPNsense seulement** : passer des VLAN tagués par l'adaptateur USB `cdc_ncm` de la VM pfSense actuelle est risqué.
+- **Limites** : Wi-Fi 4, 2,4 GHz seul, 300 Mb/s, portée limitée depuis la mezzanine, un seul VLAN, firmware plus mis à jour. Suffisant pour des objets connectés, pas pour les enfants.
+- **Ensuite** : ce VLAN 40 sera repris tel quel par les bornes UniFi (voir le tableau du projet UniFi).
 
 ## NIPoGi : LAN sur la carte réseau intégrée
 
