@@ -22,12 +22,12 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 
 | Port | Ce qui est derrière |
 |---|---|
-| 01 | **Deco M4R Salon** + ses clients Wi-Fi (HomePod Cuisine, P1 meter, iPad Cyril, Dreame, Meross caméra Cuisine, BSH, station météo, Salon (2)…) |
+| 01 | **Deco M4R Salon** + ses clients Wi-Fi (HomePod Cuisine, P1 meter, iPad Cyril, aspirateur laveur Dreame Aqua Roller Ultra, Meross caméra Cuisine, BSH, station météo, Salon (2)…) |
 | 04 | Apple TV 4K (Salon) |
 | 06 | Gigaset C5310-IP |
 | 07 | Mezzanine, bureau de Céline : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
-| 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato) |
-| 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base ; la réservation `.35` le dit « Salon », à corriger). L'autre bout (TL-WPA7617) est dans l'**abri de jardin** ; derrière lui, `.212` = appareil **Dreame** (MAC `10:06:48:a2:7c:05`, SSH Dropbear 2019), probablement le robot tondeuse |
+| 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato ; **inutile** depuis la disparition de Neato, à débrancher) |
+| 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base, réservation `.35`). L'autre bout (TL-WPA7617) est dans l'**abri de jardin** ; derrière lui, `.212` = robot tondeuse **Dreame A1 Pro** (MAC `10:06:48:a2:7c:05`, SSH Dropbear 2019) |
 | 12 | TischNAS3 |
 | 17 | **NIPoGi** (adaptateur USB LAN `vmbr1`) : Proxmox, pfSense LAN, Home Assistant, tous les LXC |
 | 18 | TischNAS2 |
