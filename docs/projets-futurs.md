@@ -47,15 +47,22 @@ Ordre conseillé : **disque TischNAS2 → OPNsense → RAM TischNAS3 → NIPoGi 
 ## Wi-Fi UniFi + VLAN
 
 - **Objectif** : remplacer les 3 TP-Link Deco M4R (Grenier `.30`, Étage `.31`, Salon `.32`) par des bornes **UniFi** qui gèrent les **VLAN**. Chaque réseau Wi-Fi peut alors être isolé sur son propre sous-réseau.
+- **Rappel du principe** : un VLAN découpe le switch en plusieurs réseaux isolés ; pour passer de l'un à l'autre, il faut passer par OPNsense et ses règles. Un port **non tagué** (« access », avec un PVID) met un appareil simple dans un seul VLAN ; un port **tagué** (« trunk ») transporte plusieurs VLAN étiquetés 802.1Q entre équipements qui les comprennent (switch ↔ OPNsense, switch ↔ borne UniFi). Une borne UniFi associe chaque SSID à un VLAN.
 - **Découpage envisagé** :
 
-| VLAN | Réseau | Usage |
-|---|---|---|
-| 1 (non tagué) | `192.168.10.0/24` | Principal : PC, NAS, serveurs |
-| 20 | `192.168.20.0/24` | Enfants : coupure Internet par réseau entier, horaires, « deny unknown clients » contre les adresses MAC rotatives |
-| 30 | `192.168.30.0/24` | Invités : Internet seulement, pas d'accès au LAN |
-| 40 | `192.168.40.0/24` | Objets connectés : caméras Eufy, TV, prises… isolés du reste |
+| VLAN | Réseau | Contenu | Règles |
+|---|---|---|---|
+| 1 (non tagué) | `192.168.10.0/24` | Proxmox et LXC, Home Assistant, NAS, switchs, Mac, téléphones des parents, Apple TV, HomePod, **SLZB-06M et Niko** (critiques, gardés ici) | Accès à tout |
+| 20 | `192.168.20.0/24` | Enfants : iPhones Elias/Tristan, iPad Cyril, Switch Nintendo (port 05), prises murales des chambres | Internet seulement, DNS forcé vers AdGuard (filtrage plus strict possible par sous-réseau). Coupure et horaires pour tout le VLAN |
+| 30 | `192.168.30.0/24` | Invités | Internet seulement, isolation des clients |
+| 40 | `192.168.40.0/24` | IoT : Meross ×2, Dreame ×2, clim, Eufy (HomeBase, caméras), P1 meter, station météo, Gigaset, TV LG | Internet seulement ; le VLAN 1 (HA) peut les joindre, pas l'inverse |
 
+- **Pièges** :
+  - **mDNS (AirPlay, HomeKit, Chromecast)** ne traverse pas les VLAN : garder Apple TV, HomePod et TV « castée » dans le VLAN 1, et si besoin activer `os-mdns-repeater` sur OPNsense entre VLAN 1 et 20.
+  - **Home Assistant** : autoriser VLAN 1 → 40 ; mettre à jour les intégrations configurées par IP quand les objets changent de sous-réseau.
+  - **Switchs non administrables** (TL-SG1005P, switch du grenier) : tout ce qui est derrière hérite du VLAN de leur port amont.
+  - Réservations DHCP, HA, dashboard homelab et Scanopy à adapter : migrer **un VLAN à la fois**.
+- **Ordre** : OPNsense → [VLAN IoT pilote](#vlan-iot-pilote-tl-wr802n) (apprendre, tester le passage des tags dans les switchs non administrables) → bornes UniFi avec 3 SSID (principal, IoT 2,4 GHz, invités), retrait des Deco → VLAN enfants (4e SSID, ou **PPSK** UniFi : un seul SSID, un mot de passe par VLAN).
 - **Ce qu'il faut** :
   - **OPNsense d'abord** : il fera le routage et les règles entre VLAN.
   - **Switch** : le D-Link DGS-1100-24 gère le 802.1Q, aucun achat nécessaire.
