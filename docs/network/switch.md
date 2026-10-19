@@ -26,7 +26,7 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 04 | Apple TV 4K (Salon) |
 | 05 | **Inconnu** : lien actif en 100 Mb/s (LED, 2026-10-19) mais aucune MAC au relevé. Candidat : Nintendo Switch (éteinte au relevé) |
 | 06 | Gigaset C5310-IP |
-| 07 | Mezzanine, bureau de Céline : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
+| 07 | Mezzanine, côté armoire Expedit : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
 | 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato ; gardé pour le [[projets-futurs#VLAN IoT pilote (TL-WR802N)|VLAN IoT pilote]]) |
 | 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base, réservation `.35`). L'autre bout (TL-WPA7617) est dans l'**abri de jardin** ; derrière lui, `.212` = robot tondeuse **Dreame A1 Pro**, réservé en `.28` (MAC `10:06:48:a2:7c:05`, SSH Dropbear 2019) |
 | 12 | TischNAS3 |
@@ -35,7 +35,7 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 19 | **Deco M4R Grenier** + Mac mini (Ethernet et Wi-Fi), clim Smart AC, `.208`, `.245` |
 | 22 | **Switch PoE TP-Link TL-SG1005P** (voir plus bas) → SLZB-06M (`.53`, coordinateur Zigbee, alimenté en PoE). Absent du relevé MAC (5 entrées non affichées par le switch) |
 | 23 | Niko Home Control 2 |
-| 24 | eufy HomeBase 2 |
+| 24 | Mezzanine, bureau de Céline : eufy HomeBase 2 |
 
 La Nintendo Switch (Ethernet, prise murale) n'apparaissait pas : éteinte au moment du relevé.
 
@@ -60,8 +60,8 @@ Pour UniFi : de quoi alimenter 3 bornes (U7 Lite ~13 W, U6+ < 10 W). Étant non 
 
 | Pièce | Prises | Utilisation |
 |---|---|---|
-| Mezzanine, bureau de Céline | 2 | Deco Étage 1 (port 07), CPL (port 11) |
-| Mezzanine, côté armoire Expedit | 2 | TL-WR802N (port 08), l'autre probablement libre |
+| Mezzanine, bureau de Céline | 2 | HomeBase Eufy (port 24), CPL (port 11) |
+| Mezzanine, côté armoire Expedit | 2 | Deco Étage 1 (port 07), TL-WR802N (port 08) |
 | Chambre d'Elias | 2 | libres |
 | Chambre de Tristan | 2 | libres |
 
