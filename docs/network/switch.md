@@ -25,9 +25,9 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 01 | **Deco M4R Salon** + ses clients Wi-Fi (HomePod Cuisine, P1 meter, iPad Cyril, Dreame, Meross caméra Cuisine, BSH, station météo, Salon (2)…) |
 | 04 | Apple TV 4K (Salon) |
 | 06 | Gigaset C5310-IP |
-| 07 | **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
-| 08 | TL-WR802N (Neato) |
-| 11 | **CPL TP-Link** + un appareil derrière, MAC `10:06:48:a2:7c:05` (= `.212`, non identifié, SSH Dropbear 2019) |
+| 07 | Mezzanine, bureau de Céline : **Deco M4R Étage 1** + clients (iPhone Elias, iPhone Tristan, caméra IndoorCam, Meross MSS210-1e56) |
+| 08 | Mezzanine, côté armoire Expedit : TL-WR802N (ancien Wi-Fi 2,4 GHz du Neato) |
+| 11 | Mezzanine, bureau de Céline : **CPL TP-Link** (adaptateur de base ; la réservation `.35` le dit « Salon », à corriger) + un appareil derrière, MAC `10:06:48:a2:7c:05` (= `.212`, non identifié, SSH Dropbear 2019) |
 | 12 | TischNAS3 |
 | 17 | **NIPoGi** (adaptateur USB LAN `vmbr1`) : Proxmox, pfSense LAN, Home Assistant, tous les LXC |
 | 18 | TischNAS2 |
@@ -36,3 +36,14 @@ Déduit de la table « Dynamic Forwarding Table » croisée avec l'ARP de pfSens
 | 24 | eufy HomeBase 2 |
 
 La Nintendo Switch (Ethernet, prise murale) n'apparaissait pas : éteinte au moment du relevé.
+
+## Prises murales connues
+
+| Pièce | Prises | Utilisation |
+|---|---|---|
+| Mezzanine, bureau de Céline | 2 | Deco Étage 1 (port 07), CPL (port 11) |
+| Mezzanine, côté armoire Expedit | 2 | TL-WR802N (port 08), l'autre probablement libre |
+| Chambre d'Elias | 2 | libres |
+| Chambre de Tristan | 2 | libres |
+
+Les prises libres des chambres permettront de câbler une borne UniFi ou un appareil fixe sans passer par le CPL.
