@@ -75,6 +75,8 @@ npm start              # or ./start-server.sh
 
 | Script | Purpose |
 |---|---|
+| `drp/nipogi-drp-backup.sh` | Nightly backup of the NIPoGi node config + Vaultwarden to the NAS (see `docs/drp/nipogi.md`) |
+| `drp/check-backups.sh` | Alerts when a VM/LXC or the node has no recent backup |
 | `nipogi-shutdown.sh` | Graceful shutdown of the NIPoGi mini-PC |
 | `synology-shutdown.sh` | Graceful shutdown of the Synology NAS |
 
