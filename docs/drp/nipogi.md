@@ -72,7 +72,7 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 
 | Quoi | Comment | Où | Fréquence | Rétention |
 |---|---|---|---|---|
-| Toutes les VM et LXC | vzdump (job Proxmox) | Stockage `syno-backup` sur un NAS (**à vérifier** : lequel, quel partage, NFS ou SMB) | Chaque nuit à 3h00 | 7 dernières + 5 jours + 4 semaines + 1 mois |
+| Toutes les VM et LXC | vzdump (job Proxmox) | Stockage `syno-backup` sur **TischNAS3** (`192.168.10.3`) | Chaque nuit à 3h00 | 7 dernières + 5 jours + 4 semaines + 1 mois |
 | Home Assistant | Sauvegarde automatique HA (dernière réussie le 2026-10-20 à 04h53) | **Dans la VM 100 uniquement** : aucun stockage réseau n'est monté dans HA | Chaque jour vers 04h50 | Réglage HA |
 | pfSense | Aucune sauvegarde dédiée connue (seulement via le vzdump de la VM) | — | — | — |
 | Config du nœud | **Aucune** | — | — | — |
@@ -81,12 +81,12 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 
 | Info | Valeur |
 |---|---|
-| NAS qui héberge `syno-backup` | _à compléter_ |
+| NAS qui héberge `syno-backup` | TischNAS3 (`192.168.10.3`), confirmé par Rudy le 2026-10-23 |
 | Partage et protocole | _à compléter_ |
 | Le job vise « tous les invités » ? | _à compléter_ (Scanopy, créé le 2026-10-19, doit y être) |
 | Volume total d'une nuit de sauvegarde | _à compléter_ (sert à estimer le temps de restauration) |
 
-⚠️ Si `syno-backup` est sur **TischNAS2**, son RAID5 `volume1` tourne sur 2 disques sur 3 depuis juillet (voir [[projets-futurs]]). Une deuxième panne de disque emporterait les sauvegardes.
+TischNAS3 est aussi le NAS le plus chargé (4 Go de RAM, stack Servarr) et il est sur le même onduleur que le NIPoGi : une surtension ou un incendie emporterait les deux. D'où l'importance de la copie hors site (point 3 ci-dessous).
 
 ## Ce qui manque
 
