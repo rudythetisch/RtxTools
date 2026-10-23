@@ -47,10 +47,10 @@ Relevé d'après la doc. La liste exacte est enregistrée chaque nuit par `nipog
 | 107 / 106 | LXC | Grafana / InfluxDB | `.182` / `.181` | 🟢 | Historiques indisponibles |
 | 114 | LXC | Linkwarden | `.187` | 🟢 | Favoris indisponibles |
 | 108 | LXC | RustDesk server | `.183` | 🟢 | Prise en main à distance indisponible |
-| 116 | LXC | **à identifier** (vu dans les sauvegardes du 2026-10-23, absent de la doc) | ? | ? | ? |
+| 116 | LXC | `homefinance-db` : PostgreSQL 15, base `homefinance` (finances perso), créé le 2026-09-11 | `.13` | 🟡 | L'appli de finances (hors NIPoGi) n'a plus de base |
 | 117 | LXC | Scanopy | `.18` | 🟢 | Cartographie réseau indisponible |
 
-**À vérifier** : la doc Proxmox indique encore pfSense en VM 104, mais Pocket ID occupe le LXC 104 et le plan OPNsense (relevé API du 2026-10-13) donne la VM 115. Le DRP retient 115.
+Inventaire vérifié sur le nœud le 2026-10-23 : tous les invités tournent, tous en démarrage automatique. pfSense est bien la VM 115 (l'ancienne mention « VM 104 » de la doc Proxmox est périmée). Seuls 103, 105, 116 et 117 ont une IP fixe dans leur config ; les autres LXC sont en DHCP et dépendent des réservations de pfSense (incluses dans la sauvegarde de la VM 115).
 
 ### Ce qui tourne sur le nœud lui-même (hors VM/LXC)
 
@@ -78,6 +78,8 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 | pfSense | Aucune sauvegarde dédiée connue (seulement via le vzdump de la VM) | — | — | — |
 | Config du nœud + copie Vaultwarden | `/root/drp/nipogi-drp-backup.sh` (cron `/etc/cron.d/nipogi-drp-backup`), ~5 Mo par nuit | `syno-backup/drp/<date>/` | Chaque nuit à 5h30 (depuis le 2026-10-23) | 14 dernières |
 | Contrôle | `/root/drp/check-backups.sh` (cron `/etc/cron.d/nipogi-check-backups`), mail seulement en cas de problème | — | Chaque jour à 8h00 | — |
+| Copie hors site (étape 1) | 2e job vzdump « offsite hebdo → pCloud » : tous les invités, `dumpdir /mnt/pve/syno-backup/offsite`, mail en cas d'échec | `syno-backup/offsite/` (~21 Go) | Dimanche 04:30 (depuis le 2026-10-25) | 1 copie (`keep-last=1`) |
+| Copie hors site (étape 2) | Conteneur `rclone-offsite` sur TischNAS3 (`/volume1/docker/rclone-offsite/`) : rclone chiffré (`crypt`, noms chiffrés) → pCloud UE (`eapi.pcloud.com`), dossier `RTX-offsite`. `offsite/` → `proxmox/<date>` (10 Mo/s max), `drp/` synchronisé. Marqueur de réussite : `/volume1/proxmox/offsite-status/offsite-last-success` | pCloud (UE) | Dimanche 10:00 (depuis le 2026-10-23) | 4 dates |
 
 À relever une fois et à noter ici (commande sur le nœud : `cat /etc/pve/storage.cfg` et `cat /etc/pve/jobs.cfg`) :
 
@@ -86,7 +88,7 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 | NAS qui héberge `syno-backup` | TischNAS3 (`192.168.10.3`), confirmé par Rudy le 2026-10-23 |
 | Partage et protocole | NFS `192.168.10.3:/volume1/proxmox`, monté sur `/mnt/pve/syno-backup` (11,2 To, 71 % utilisés au 2026-10-23) |
 | Le job vise « tous les invités » ? | Oui : job `backup-5366822d-fbb5`, 03:00, `all 1`, snapshot, zstd, `bwlimit 40960`, mail à chaque fois vers rudy.tixhon@gmail.com |
-| Volume total d'une nuit de sauvegarde | _à compléter_ (sert à estimer le temps de restauration) |
+| Volume total d'une nuit de sauvegarde | 20,6 GiB pour 18 invités (2026-10-23) ; les plus gros : VM 115 pfSense 4,8 Go, VM 100 HA 4,6 Go, LXC 110 et 114 ~2,1 Go. Le job de 03:00 finit vers 03:49 |
 
 TischNAS3 est aussi le NAS le plus chargé (4 Go de RAM, stack Servarr) et il est sur le même onduleur que le NIPoGi : une surtension ou un incendie emporterait les deux. D'où l'importance de la copie hors site (point 3 ci-dessous).
 
@@ -96,7 +98,7 @@ Classé par priorité.
 
 1. ✅ (installé le 2026-10-23) **Config du nœud non sauvegardée.** → Script `scripts/drp/nipogi-drp-backup.sh` (cette PR) : chaque nuit, copie `/etc/pve`, le réseau, NUT, cron, systemd, l'inventaire (VM, MAC, USB, versions) et une copie cohérente de Vaultwarden dans `syno-backup/drp/`.
 2. ✅ (installé le 2026-10-23) **Personne ne vérifie que tout est sauvegardé.** → Script `scripts/drp/check-backups.sh` (cette PR) : signale un invité sans sauvegarde de moins de 26 h, un job qui ne vise pas tous les invités, ou une sauvegarde du nœud absente. Un mail seulement en cas de problème.
-3. **Aucune copie hors de la maison.** Incendie, vol, surtension ou rançongiciel sur le NAS = tout est perdu, sauvegardes comprises. → Hyper Backup du dossier `syno-backup` vers Synology C2 ou Backblaze B2 (chiffré, hebdomadaire suffit), ou un disque USB externe rangé ailleurs.
+3. **Aucune copie hors de la maison.** Incendie, vol, surtension ou rançongiciel sur le NAS = tout est perdu, sauvegardes comprises. → Job Proxmox hebdomadaire vers `offsite/` (en place depuis le 2026-10-23), puis copie rclone chiffrée vers pCloud (en place depuis le 2026-10-23, testée sur `drp/`). Les deux mots de passe de chiffrement vont dans le kit d'urgence.
 4. **Sauvegardes Home Assistant enfermées dans la VM.** → Dans HA : Paramètres → Système → Stockage → Ajouter un stockage réseau (partage SMB du NAS, usage « Sauvegarde »), puis Paramètres → Système → Sauvegardes → le cocher comme emplacement. On peut alors restaurer HA sur n'importe quelle installation HAOS sans passer par Proxmox.
 5. **Les secrets de reprise sont dans Vaultwarden, donc sur le NIPoGi.** → Un kit d'urgence hors NIPoGi (voir plus bas).
 6. **Les alertes tournent sur la machine qu'elles surveillent.** Si le NIPoGi meurt, Prometheus et Alertmanager meurent avec lui : aucune alerte Telegram. → Un « dead man's switch » externe : par exemple un ping toutes les 5 min vers healthchecks.io depuis le nœud (alerte Telegram si les pings s'arrêtent), ou Uptime Kuma sur TischNAS3.
@@ -111,6 +113,7 @@ Classé par priorité.
 - Mot de passe maître Vaultwarden, et un export chiffré du coffre (Outils → Exporter, format « .json chiffré »), refait tous les 3 mois.
 - Mot de passe `root` Proxmox.
 - Compte du NAS qui héberge `syno-backup` (pour lire le partage depuis un portable).
+- Les deux mots de passe rclone `crypt` (fichier `~/Documents/DRP-rclone-pcloud-crypt.txt` du Mac mini, à recopier dans Vaultwarden et sur papier) et les identifiants pCloud : sans eux, la copie hors site est illisible.
 - Clé de chiffrement des sauvegardes Home Assistant (Paramètres → Système → Sauvegardes → Configurer).
 - Identifiants pfSense (`rtixhon`), Cloudflare, compte TP-Link Deco, et le cas échéant VOO.
 - Ce document, imprimé.
@@ -250,6 +253,21 @@ Puis reprendre point par point :
 - [ ] `/proxmox-health` (skill Claude Code) sans erreur
 - [ ] Le lendemain matin : e-mail de sauvegarde OK et `scripts/drp/check-backups.sh` sans problème
 
+### Si TischNAS3 est perdu aussi : repartir de pCloud
+
+Sur n'importe quel ordinateur avec [rclone](https://rclone.org/install/) :
+
+```bash
+rclone config   # remote "pcloud" (type pcloud, région UE : hostname eapi.pcloud.com)
+                # remote "pcloud-crypt" (type crypt, remote pcloud:RTX-offsite,
+                #   filename_encryption standard, les 2 mots de passe du kit d'urgence)
+rclone lsd pcloud-crypt:proxmox                  # dates disponibles
+rclone copy pcloud-crypt:proxmox/<date> ./dump -P
+rclone copy pcloud-crypt:drp ./drp -P
+```
+
+Mettre `dump/` à disposition du nouveau Proxmox (clé USB, disque ou partage NFS déclaré comme storage `syno-backup`), puis reprendre à l'étape 5.
+
 ## RTO et RPO
 
 **RTO** : temps pour revenir en service. **RPO** : quantité de données qu'on accepte de perdre.
@@ -260,7 +278,7 @@ Puis reprendre point par point :
 | Mots de passe (cache Bitwarden hors ligne) | immédiat, lecture seule | — |
 | Reprise complète, matériel en main | **~4 h** (installation 30 min, réseau et stockage 30 min, restauration 1–2 h, reconfiguration 45 min, vérifications 30 min) | **24 h** (vzdump de 3h00) |
 | Reprise complète, matériel à acheter | **1 à 3 jours** + 4 h | 24 h |
-| Sinistre de la maison (incendie, vol, surtension) | aucune reprise possible aujourd'hui | **tout** : pas de copie hors site |
+| Sinistre de la maison (incendie, vol, surtension) | 1 à 3 jours (matériel + téléchargement de ~21 Go depuis pCloud) + 4 h | **7 jours** (copie hebdomadaire du dimanche) |
 
 Précisions sur le RPO :
 
