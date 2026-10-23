@@ -6,7 +6,7 @@
 #
 #   /etc/cron.d/nipogi-check-backups :
 #   MAILTO=root
-#   0 8 * * * root /root/RtxTools/scripts/drp/check-backups.sh --quiet
+#   0 8 * * * root /root/drp/check-backups.sh --quiet
 #
 # Variables : DRP_STORAGE (défaut syno-backup), MAX_AGE_H (défaut 26),
 #             DRP_DEST (défaut /mnt/pve/$DRP_STORAGE/drp)

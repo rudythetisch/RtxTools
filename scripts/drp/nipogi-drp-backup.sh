@@ -12,7 +12,7 @@
 # À lancer en root sur le nœud, par exemple chaque nuit après le vzdump :
 #   /etc/cron.d/nipogi-drp-backup :
 #   MAILTO=root
-#   30 5 * * * root /root/RtxTools/scripts/drp/nipogi-drp-backup.sh >> /var/log/nipogi-drp-backup.log 2>&1
+#   30 5 * * * root /root/drp/nipogi-drp-backup.sh >> /var/log/nipogi-drp-backup.log 2>&1
 #
 # Variables (toutes optionnelles) :
 #   DRP_STORAGE         stockage Proxmox monté sous /mnt/pve (défaut : syno-backup)

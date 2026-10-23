@@ -47,6 +47,7 @@ Relevé d'après la doc. La liste exacte est enregistrée chaque nuit par `nipog
 | 107 / 106 | LXC | Grafana / InfluxDB | `.182` / `.181` | 🟢 | Historiques indisponibles |
 | 114 | LXC | Linkwarden | `.187` | 🟢 | Favoris indisponibles |
 | 108 | LXC | RustDesk server | `.183` | 🟢 | Prise en main à distance indisponible |
+| 116 | LXC | **à identifier** (vu dans les sauvegardes du 2026-10-23, absent de la doc) | ? | ? | ? |
 | 117 | LXC | Scanopy | `.18` | 🟢 | Cartographie réseau indisponible |
 
 **À vérifier** : la doc Proxmox indique encore pfSense en VM 104, mais Pocket ID occupe le LXC 104 et le plan OPNsense (relevé API du 2026-10-13) donne la VM 115. Le DRP retient 115.
@@ -75,15 +76,16 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 | Toutes les VM et LXC | vzdump (job Proxmox) | Stockage `syno-backup` sur **TischNAS3** (`192.168.10.3`) | Chaque nuit à 3h00 | 7 dernières + 5 jours + 4 semaines + 1 mois |
 | Home Assistant | Sauvegarde automatique HA (dernière réussie le 2026-10-20 à 04h53) | **Dans la VM 100 uniquement** : aucun stockage réseau n'est monté dans HA | Chaque jour vers 04h50 | Réglage HA |
 | pfSense | Aucune sauvegarde dédiée connue (seulement via le vzdump de la VM) | — | — | — |
-| Config du nœud | **Aucune** | — | — | — |
+| Config du nœud + copie Vaultwarden | `/root/drp/nipogi-drp-backup.sh` (cron `/etc/cron.d/nipogi-drp-backup`), ~5 Mo par nuit | `syno-backup/drp/<date>/` | Chaque nuit à 5h30 (depuis le 2026-10-23) | 14 dernières |
+| Contrôle | `/root/drp/check-backups.sh` (cron `/etc/cron.d/nipogi-check-backups`), mail seulement en cas de problème | — | Chaque jour à 8h00 | — |
 
 À relever une fois et à noter ici (commande sur le nœud : `cat /etc/pve/storage.cfg` et `cat /etc/pve/jobs.cfg`) :
 
 | Info | Valeur |
 |---|---|
 | NAS qui héberge `syno-backup` | TischNAS3 (`192.168.10.3`), confirmé par Rudy le 2026-10-23 |
-| Partage et protocole | _à compléter_ |
-| Le job vise « tous les invités » ? | _à compléter_ (Scanopy, créé le 2026-10-19, doit y être) |
+| Partage et protocole | NFS `192.168.10.3:/volume1/proxmox`, monté sur `/mnt/pve/syno-backup` (11,2 To, 71 % utilisés au 2026-10-23) |
+| Le job vise « tous les invités » ? | Oui : job `backup-5366822d-fbb5`, 03:00, `all 1`, snapshot, zstd, `bwlimit 40960`, mail à chaque fois vers rudy.tixhon@gmail.com |
 | Volume total d'une nuit de sauvegarde | _à compléter_ (sert à estimer le temps de restauration) |
 
 TischNAS3 est aussi le NAS le plus chargé (4 Go de RAM, stack Servarr) et il est sur le même onduleur que le NIPoGi : une surtension ou un incendie emporterait les deux. D'où l'importance de la copie hors site (point 3 ci-dessous).
@@ -92,8 +94,8 @@ TischNAS3 est aussi le NAS le plus chargé (4 Go de RAM, stack Servarr) et il es
 
 Classé par priorité.
 
-1. **Config du nœud non sauvegardée.** → Script `scripts/drp/nipogi-drp-backup.sh` (cette PR) : chaque nuit, copie `/etc/pve`, le réseau, NUT, cron, systemd, l'inventaire (VM, MAC, USB, versions) et une copie cohérente de Vaultwarden dans `syno-backup/drp/`.
-2. **Personne ne vérifie que tout est sauvegardé.** → Script `scripts/drp/check-backups.sh` (cette PR) : signale un invité sans sauvegarde de moins de 26 h, un job qui ne vise pas tous les invités, ou une sauvegarde du nœud absente. Un mail seulement en cas de problème.
+1. ✅ (installé le 2026-10-23) **Config du nœud non sauvegardée.** → Script `scripts/drp/nipogi-drp-backup.sh` (cette PR) : chaque nuit, copie `/etc/pve`, le réseau, NUT, cron, systemd, l'inventaire (VM, MAC, USB, versions) et une copie cohérente de Vaultwarden dans `syno-backup/drp/`.
+2. ✅ (installé le 2026-10-23) **Personne ne vérifie que tout est sauvegardé.** → Script `scripts/drp/check-backups.sh` (cette PR) : signale un invité sans sauvegarde de moins de 26 h, un job qui ne vise pas tous les invités, ou une sauvegarde du nœud absente. Un mail seulement en cas de problème.
 3. **Aucune copie hors de la maison.** Incendie, vol, surtension ou rançongiciel sur le NAS = tout est perdu, sauvegardes comprises. → Hyper Backup du dossier `syno-backup` vers Synology C2 ou Backblaze B2 (chiffré, hebdomadaire suffit), ou un disque USB externe rangé ailleurs.
 4. **Sauvegardes Home Assistant enfermées dans la VM.** → Dans HA : Paramètres → Système → Stockage → Ajouter un stockage réseau (partage SMB du NAS, usage « Sauvegarde »), puis Paramètres → Système → Sauvegardes → le cocher comme emplacement. On peut alors restaurer HA sur n'importe quelle installation HAOS sans passer par Proxmox.
 5. **Les secrets de reprise sont dans Vaultwarden, donc sur le NIPoGi.** → Un kit d'urgence hors NIPoGi (voir plus bas).
