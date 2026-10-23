@@ -113,6 +113,7 @@ Classé par priorité.
 - Mot de passe maître Vaultwarden, et un export chiffré du coffre (Outils → Exporter, format « .json chiffré »), refait tous les 3 mois.
 - Mot de passe `root` Proxmox.
 - Compte du NAS qui héberge `syno-backup` (pour lire le partage depuis un portable).
+- Clé de chiffrement Hyper Backup (fichier `.pem`) et identifiants pCloud : sans eux, la copie hors site est illisible.
 - Clé de chiffrement des sauvegardes Home Assistant (Paramètres → Système → Sauvegardes → Configurer).
 - Identifiants pfSense (`rtixhon`), Cloudflare, compte TP-Link Deco, et le cas échéant VOO.
 - Ce document, imprimé.
