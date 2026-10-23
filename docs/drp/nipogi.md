@@ -78,6 +78,8 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 | pfSense | Aucune sauvegarde dédiée connue (seulement via le vzdump de la VM) | — | — | — |
 | Config du nœud + copie Vaultwarden | `/root/drp/nipogi-drp-backup.sh` (cron `/etc/cron.d/nipogi-drp-backup`), ~5 Mo par nuit | `syno-backup/drp/<date>/` | Chaque nuit à 5h30 (depuis le 2026-10-23) | 14 dernières |
 | Contrôle | `/root/drp/check-backups.sh` (cron `/etc/cron.d/nipogi-check-backups`), mail seulement en cas de problème | — | Chaque jour à 8h00 | — |
+| Copie hors site (étape 1) | 2e job vzdump « offsite hebdo → pCloud » : tous les invités, `dumpdir /mnt/pve/syno-backup/offsite`, mail en cas d'échec | `syno-backup/offsite/` (~21 Go) | Dimanche 04:30 (depuis le 2026-10-25) | 1 copie (`keep-last=1`) |
+| Copie hors site (étape 2) | Hyper Backup TischNAS3 → pCloud (WebDAV `ewebdav.pcloud.com`), chiffré côté client, dossiers `proxmox/offsite` + `proxmox/drp` | pCloud (UE) | Dimanche 10:00 | 4 versions |
 
 À relever une fois et à noter ici (commande sur le nœud : `cat /etc/pve/storage.cfg` et `cat /etc/pve/jobs.cfg`) :
 
@@ -86,7 +88,7 @@ Rien de tout ça n'est dans les sauvegardes vzdump :
 | NAS qui héberge `syno-backup` | TischNAS3 (`192.168.10.3`), confirmé par Rudy le 2026-10-23 |
 | Partage et protocole | NFS `192.168.10.3:/volume1/proxmox`, monté sur `/mnt/pve/syno-backup` (11,2 To, 71 % utilisés au 2026-10-23) |
 | Le job vise « tous les invités » ? | Oui : job `backup-5366822d-fbb5`, 03:00, `all 1`, snapshot, zstd, `bwlimit 40960`, mail à chaque fois vers rudy.tixhon@gmail.com |
-| Volume total d'une nuit de sauvegarde | _à compléter_ (sert à estimer le temps de restauration) |
+| Volume total d'une nuit de sauvegarde | 20,6 GiB pour 18 invités (2026-10-23) ; les plus gros : VM 115 pfSense 4,8 Go, VM 100 HA 4,6 Go, LXC 110 et 114 ~2,1 Go. Le job de 03:00 finit vers 03:49 |
 
 TischNAS3 est aussi le NAS le plus chargé (4 Go de RAM, stack Servarr) et il est sur le même onduleur que le NIPoGi : une surtension ou un incendie emporterait les deux. D'où l'importance de la copie hors site (point 3 ci-dessous).
 
@@ -96,7 +98,7 @@ Classé par priorité.
 
 1. ✅ (installé le 2026-10-23) **Config du nœud non sauvegardée.** → Script `scripts/drp/nipogi-drp-backup.sh` (cette PR) : chaque nuit, copie `/etc/pve`, le réseau, NUT, cron, systemd, l'inventaire (VM, MAC, USB, versions) et une copie cohérente de Vaultwarden dans `syno-backup/drp/`.
 2. ✅ (installé le 2026-10-23) **Personne ne vérifie que tout est sauvegardé.** → Script `scripts/drp/check-backups.sh` (cette PR) : signale un invité sans sauvegarde de moins de 26 h, un job qui ne vise pas tous les invités, ou une sauvegarde du nœud absente. Un mail seulement en cas de problème.
-3. **Aucune copie hors de la maison.** Incendie, vol, surtension ou rançongiciel sur le NAS = tout est perdu, sauvegardes comprises. → Hyper Backup du dossier `syno-backup` vers Synology C2 ou Backblaze B2 (chiffré, hebdomadaire suffit), ou un disque USB externe rangé ailleurs.
+3. **Aucune copie hors de la maison.** Incendie, vol, surtension ou rançongiciel sur le NAS = tout est perdu, sauvegardes comprises. → Job Proxmox hebdomadaire vers `offsite/` (en place depuis le 2026-10-23), puis Hyper Backup chiffré vers pCloud (à configurer dans DSM). La clé de chiffrement Hyper Backup va dans le kit d'urgence.
 4. **Sauvegardes Home Assistant enfermées dans la VM.** → Dans HA : Paramètres → Système → Stockage → Ajouter un stockage réseau (partage SMB du NAS, usage « Sauvegarde »), puis Paramètres → Système → Sauvegardes → le cocher comme emplacement. On peut alors restaurer HA sur n'importe quelle installation HAOS sans passer par Proxmox.
 5. **Les secrets de reprise sont dans Vaultwarden, donc sur le NIPoGi.** → Un kit d'urgence hors NIPoGi (voir plus bas).
 6. **Les alertes tournent sur la machine qu'elles surveillent.** Si le NIPoGi meurt, Prometheus et Alertmanager meurent avec lui : aucune alerte Telegram. → Un « dead man's switch » externe : par exemple un ping toutes les 5 min vers healthchecks.io depuis le nœud (alerte Telegram si les pings s'arrêtent), ou Uptime Kuma sur TischNAS3.
@@ -260,7 +262,7 @@ Puis reprendre point par point :
 | Mots de passe (cache Bitwarden hors ligne) | immédiat, lecture seule | — |
 | Reprise complète, matériel en main | **~4 h** (installation 30 min, réseau et stockage 30 min, restauration 1–2 h, reconfiguration 45 min, vérifications 30 min) | **24 h** (vzdump de 3h00) |
 | Reprise complète, matériel à acheter | **1 à 3 jours** + 4 h | 24 h |
-| Sinistre de la maison (incendie, vol, surtension) | aucune reprise possible aujourd'hui | **tout** : pas de copie hors site |
+| Sinistre de la maison (incendie, vol, surtension) | 1 à 3 jours (matériel + téléchargement de ~21 Go depuis pCloud) + 4 h, une fois Hyper Backup en place | **7 jours** (copie hebdomadaire du dimanche) |
 
 Précisions sur le RPO :
 
