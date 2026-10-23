@@ -10,7 +10,7 @@ Gestion du nœud Proxmox (`192.168.10.2`) via Claude Code + MCP.
 | 101 | LXC | mqtt | 192.168.10.14 | Mosquitto MQTT broker |
 | 102 | LXC | z2m | 192.168.10.15 | Zigbee2MQTT |
 | 103 | LXC | adguard | 192.168.10.12 | AdGuard Home (DNS + ad blocking) |
-| 104 | VM | pfSense | 192.168.10.1 | Firewall / routeur |
+| 104 | LXC | pocketid | 192.168.10.188 | Pocket ID (SSO) |
 | 105 | LXC | nginxproxymanager | 192.168.10.11 | Nginx Proxy Manager (reverse proxy) |
 | 106 | LXC | influxdb | 192.168.10.181 | InfluxDB (time series) |
 | 107 | LXC | grafana | 192.168.10.182 | Grafana (dashboards) |
@@ -21,6 +21,9 @@ Gestion du nœud Proxmox (`192.168.10.2`) via Claude Code + MCP.
 | 112 | LXC | prometheus-blackbox-exporter | 192.168.10.186 | Blackbox Exporter |
 | 113 | LXC | prometheus | 192.168.10.184 | Prometheus |
 | 114 | LXC | linkwarden | 192.168.10.187 | Linkwarden (bookmarks) |
+| 115 | VM | pfSense | 192.168.10.1 | Firewall / routeur |
+| 116 | LXC | homefinance-db | 192.168.10.13 | PostgreSQL 15, base `homefinance` |
+| 117 | LXC | scanopy | 192.168.10.18 | Scanopy (cartographie réseau) |
 
 ## MCP Proxmox
 

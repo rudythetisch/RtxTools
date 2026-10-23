@@ -47,10 +47,10 @@ Relevé d'après la doc. La liste exacte est enregistrée chaque nuit par `nipog
 | 107 / 106 | LXC | Grafana / InfluxDB | `.182` / `.181` | 🟢 | Historiques indisponibles |
 | 114 | LXC | Linkwarden | `.187` | 🟢 | Favoris indisponibles |
 | 108 | LXC | RustDesk server | `.183` | 🟢 | Prise en main à distance indisponible |
-| 116 | LXC | **à identifier** (vu dans les sauvegardes du 2026-10-23, absent de la doc) | ? | ? | ? |
+| 116 | LXC | `homefinance-db` : PostgreSQL 15, base `homefinance` (finances perso), créé le 2026-09-11 | `.13` | 🟡 | L'appli de finances (hors NIPoGi) n'a plus de base |
 | 117 | LXC | Scanopy | `.18` | 🟢 | Cartographie réseau indisponible |
 
-**À vérifier** : la doc Proxmox indique encore pfSense en VM 104, mais Pocket ID occupe le LXC 104 et le plan OPNsense (relevé API du 2026-10-13) donne la VM 115. Le DRP retient 115.
+Inventaire vérifié sur le nœud le 2026-10-23 : tous les invités tournent, tous en démarrage automatique. pfSense est bien la VM 115 (l'ancienne mention « VM 104 » de la doc Proxmox est périmée). Seuls 103, 105, 116 et 117 ont une IP fixe dans leur config ; les autres LXC sont en DHCP et dépendent des réservations de pfSense (incluses dans la sauvegarde de la VM 115).
 
 ### Ce qui tourne sur le nœud lui-même (hors VM/LXC)
 
