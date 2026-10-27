@@ -1,0 +1,91 @@
+# Alertes d'espace disque des LXC et des stockages du NiPoGi (Proxmox 192.168.10.2)
+# Déployé dans LXC 113 (prometheus) : /etc/prometheus/rules/proxmox-disk.yml
+# Source des métriques : pve-exporter sur le nœud (:9221, chemin /pve)
+# Les VM QEMU sont exclues : sans agent invité, PVE rapporte un usage disque de 0.
+groups:
+  - name: proxmox-disk
+    rules:
+      # Taux d'occupation du rootfs de chaque LXC, avec son nom
+      - record: pve:lxc_disk_used:ratio
+        expr: |
+          (pve_disk_usage_bytes{id=~"lxc/.*"} / on(id) pve_disk_size_bytes{id=~"lxc/.*"})
+          * on(id) group_left(name) pve_guest_info
+
+      # Taux d'occupation des stockages Proxmox (local, local-lvm, syno-backup) et du disque du nœud
+      - record: pve:storage_disk_used:ratio
+        expr: |
+          pve_disk_usage_bytes{id=~"storage/.*|node/.*"} / on(id) pve_disk_size_bytes{id=~"storage/.*|node/.*"}
+
+      # --- Seuils LXC ---
+      - alert: LXCDiskWarning
+        expr: pve:lxc_disk_used:ratio > 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disque LXC {{ $labels.name }} ({{ $labels.id }}) à {{ $value | humanizePercentage }}"
+          description: "Agrandir avec `pct resize {{ reReplaceAll \"lxc/\" \"\" $labels.id }} rootfs +2G` sur le NiPoGi, ou faire le ménage."
+
+      - alert: LXCDiskCritical
+        expr: pve:lxc_disk_used:ratio > 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disque LXC {{ $labels.name }} ({{ $labels.id }}) presque plein : {{ $value | humanizePercentage }}"
+          description: "Risque de blocage du service et des mises à jour. `pct resize {{ reReplaceAll \"lxc/\" \"\" $labels.id }} rootfs +2G` sur le NiPoGi."
+
+      # --- Prévisions LXC (predict_linear) ---
+      # Tendance lente : plein dans moins de 3 jours au rythme des 6 dernières heures
+      - alert: LXCDiskFillingUp
+        expr: |
+          (
+            (predict_linear(pve_disk_usage_bytes{id=~"lxc/.*"}[6h], 3 * 86400)
+              > on(id) pve_disk_size_bytes{id=~"lxc/.*"})
+            * on(id) group_left(name) pve_guest_info
+          )
+          and on(id) (pve:lxc_disk_used:ratio > 0.5)
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disque LXC {{ $labels.name }} ({{ $labels.id }}) plein dans moins de 3 jours"
+          description: "Occupation actuelle : {{ with printf \"pve:lxc_disk_used:ratio{id='%s'}\" $labels.id | query }}{{ . | first | value | humanizePercentage }}{{ end }}, croissance continue sur 6 h."
+
+      # Emballement : plein dans moins de 12 h au rythme de la dernière heure
+      - alert: LXCDiskFillingUpFast
+        expr: |
+          (
+            (predict_linear(pve_disk_usage_bytes{id=~"lxc/.*"}[1h], 12 * 3600)
+              > on(id) pve_disk_size_bytes{id=~"lxc/.*"})
+            * on(id) group_left(name) pve_guest_info
+          )
+          and on(id) (pve:lxc_disk_used:ratio > 0.7)
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disque LXC {{ $labels.name }} ({{ $labels.id }}) plein dans moins de 12 h"
+          description: "Occupation actuelle : {{ with printf \"pve:lxc_disk_used:ratio{id='%s'}\" $labels.id | query }}{{ . | first | value | humanizePercentage }}{{ end }}, forte croissance sur la dernière heure (logs ? cache ?)."
+
+      # --- Stockages Proxmox ---
+      - alert: PVEStorageWarning
+        expr: pve:storage_disk_used:ratio > 0.85
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stockage Proxmox {{ $labels.id }} à {{ $value | humanizePercentage }}"
+          description: "local-lvm est en thin provisioning : s'il se remplit, tous les LXC/VM se bloquent en écriture."
+
+      - alert: PVEStorageFillingUp
+        expr: |
+          (predict_linear(pve_disk_usage_bytes{id=~"storage/.*|node/.*"}[12h], 7 * 86400)
+            > on(id) pve_disk_size_bytes{id=~"storage/.*|node/.*"})
+          and on(id) (pve:storage_disk_used:ratio > 0.6)
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stockage Proxmox {{ $labels.id }} plein dans moins de 7 jours"
+          description: "Occupation actuelle : {{ with printf \"pve:storage_disk_used:ratio{id='%s'}\" $labels.id | query }}{{ . | first | value | humanizePercentage }}{{ end }}."
