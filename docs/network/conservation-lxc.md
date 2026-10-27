@@ -15,7 +15,7 @@ Trois causes de croissance, communes à presque tous les LXC :
 Cas particuliers :
 
 - **AdGuard (103)** : historique des requêtes DNS gardé 90 jours (`querylog.json`, 2,3 Go) et `/var/log/AdGuardHome.err` de 460 Mo, sans rotation.
-- **InfluxDB (106)** : 3,9 Go dans `/var/lib/influxdb/engine`. Durée de conservation du bucket non vérifiée (il faut un jeton Influx, `influx bucket list -o <org>`).
+- **InfluxDB (106)** : 3,9 Go dans `/var/lib/influxdb/engine`, bucket `homeassistant` en conservation infinie depuis le 2025-03-07 (environ 200 Mo par mois). Passé à **548 jours (1,5 an)** le 2026-10-27 via l'API (`PATCH /api/v2/buckets/d18f68f77392d9ad`, `everySeconds: 47347200`). Volume attendu à terme : environ 3,6 Go. Jeton : `~/.config/rtxtools/influxdb-token` sur le Mac mini.
 - **Vaultwarden (110)** : 4,3 Go de restes de compilation dans `/root` (`.rustup` 2,6 Go, `vaultwarden-1.37.0/target` 1,3 Go). Laissés en place : disque de 20 Go, et la toolchain sert aux mises à jour depuis les sources.
 - **Linkwarden (114)** : `/root/.rustup` 1,4 Go, `/root/.cache/ms-playwright` 1,2 Go. Laissés en place pour la même raison.
 - **z2m (102)** : caches pnpm/npm dans `/root` (~1 Go), recréés à chaque mise à jour.
