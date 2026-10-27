@@ -238,7 +238,7 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 ---
 
-## Servarr (Sonarr/Radarr/Prowlarr/Bazarr/Readarr/qBittorrent)
+## Servarr (Sonarr/Radarr/Prowlarr/Lidarr/Bazarr/qBittorrent)
 
 **Rôle** : stack de gestion médias (séries, films, indexers, sous-titres, livres, torrents).
 
@@ -248,20 +248,23 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 
 **Commande de mise à jour** : `cd /volume1/docker/SERVARR && sudo /usr/local/bin/docker compose pull <service> && sudo /usr/local/bin/docker compose up -d <service>` — un service à la fois, jamais tous en même temps pour un saut de version majeur.
 
-**Versions (2026-08-02)** :
+**Versions (2026-10-27)** :
 
 | Service | Port | Version |
 |---|---|---|
-| Sonarr | 8989 | v4.0.19.2979 |
-| Radarr | 7878 | v6.3.0.10514 |
-| Prowlarr | 9696 | v2.5.2.5491 |
-| Bazarr | 6767 | v1.6.0 |
-| qBittorrent | 8080 | v5.2.3 |
-| Readarr | 8787 | 0.3.32 (tag `develop`, **non mis à jour** — voir pièges) |
-| FlareSolverr | 8191 | 3.5.0 |
+| Sonarr | 8989 | v4.0.20.3014 |
+| Radarr | 7878 | v6.4.4.10685 |
+| Prowlarr | 9696 | v2.6.5.5623 |
+| Lidarr | 8686 | v3.1.6.5079 |
+| Bazarr | 6767 | v1.6.2 |
+| qBittorrent | 8080 | v5.3.0 |
+| FlareSolverr | 8191 | 3.5.2 |
+
+Readarr a été retiré le 2026-10-27 (projet abandonné en amont, plus de mises à jour). Sa config reste dans `/volume1/docker/SERVARR/readarr`.
 
 **Pièges rencontrés** :
 - **Toutes les images étaient restées figées depuis 2024-08-31** malgré le tag `:latest` — `docker compose up -d` sans `pull` ne récupère jamais une nouvelle image, il faut explicitement `pull` avant.
+- **`lscr.io` coupe souvent la connexion depuis le NAS** (`connection reset by peer`, 2026-10-27) : `docker compose pull` échoue alors pour tous les services d'un coup. Tirer les images une par une (`docker pull -q <image>`) avec quelques réessais, puis `docker compose up -d`.
 - **`sudo docker compose pull` échoue parfois avec `toomanyrequests: retry-after ...`** (rate-limit du registry `lscr.io`) — dans ce cas `docker compose up -d` recrée quand même le conteneur mais avec l'**ancienne image en cache**, sans erreur visible autre que le pull raté. Toujours vérifier après coup avec `docker inspect <container> --format '{{.Config.Image}} {{.Created}}'` et comparer la version affichée dans l'UI/les logs, pas seulement le succès de la commande.
 - **Readarr (`lscr.io/linuxserver/readarr:develop`) : `no matching manifest for linux/amd64 in the manifest list entries`** — le tag `develop` n'a pas toujours de build `linux/amd64` publié côté registre (upstream, intermittent). `docker compose up -d` recrée alors le conteneur avec l'ancienne image, sans casser le service. Retester périodiquement (`docker compose pull readarr`), pas de fix côté NAS possible.
 - **qBittorrent : warning Sonarr/Radarr "Download client places downloads in the root folder ... You should not download to a root folder."** — nouveau health check introduit par Sonarr v4/Radarr v6, absent des anciennes versions. Cause : `categories.json` de qBittorrent avait les catégories `TVSHOWS`/`MOVIES` avec `save_path` pointé **directement** sur les root folders (`/downloads/TVSHOWS`, `/downloads/MOVIES`), au lieu de passer par un dossier intermédiaire. Fix appliqué : `save_path` de ces deux catégories changé vers `/downloads/_TORRENTCOMPLETE/TVSHOWS` et `/downloads/_TORRENTCOMPLETE/MOVIES` (dossiers créés avec `chown 1031:101`, UID/GID du conteneur), en s'alignant sur le pattern déjà utilisé pour la catégorie `BDZ`. Édition faite conteneur arrêté (qBittorrent verrouille `categories.json` en cours d'exécution).
@@ -274,6 +277,7 @@ Voir [[proxmox/README]] pour la documentation complète du nœud et des LXC/VMs.
 | Date | Changement |
 |------|-----------|
 | 2026-08-02 | Mise à jour complète (sauf Readarr) : Sonarr 3→v4, Radarr 4→v6, Prowlarr 1.21→v2.5, Bazarr 1.4→v1.6, qBittorrent 4.5→v5.2 (migrations DB OK, aucune régression). Fix qBittorrent `categories.json` (root folder warning Sonarr/Radarr). Backup complet des configs avant upgrade. FlareSolverr mis à jour manuellement 3.3.12→3.5.0 (hors compose) le même jour, resync au `up -d`. Readarr non mis à jour — pas de manifest `linux/amd64` disponible pour le tag `develop` (retenté sans succès, problème amont) |
+| 2026-10-27 | Audit RAM du NAS : Readarr retiré du compose (backup `compose.yaml.bak.<date>`). Mise à jour : Sonarr 4.0.20, Radarr 6.4.4, Prowlarr 2.6.5, Lidarr 3.1.6, Bazarr 1.6.2, qBittorrent 5.3.0, FlareSolverr 3.5.2. FlareSolverr est désormais géré par compose (l'ancien conteneur hors compose a été supprimé). |
 
 ---
 
