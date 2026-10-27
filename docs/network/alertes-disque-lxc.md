@@ -44,7 +44,8 @@ L'agrandissement se fait à chaud, sans redémarrer le LXC. Penser à vérifier 
 
 ## État au 2026-10-27
 
-- z2m (102) : 91 % → déclenche LXCDiskWarning
+- z2m (102) : 91 % → déclenche LXCDiskWarning, agrandi 4 → 6 Go le jour même (64 %)
+- local-lvm est surprovisionné (379 Go alloués pour 349 Go de pool), couvert par PVEStorageWarning / PVEStorageFillingUp
 - adguard (103) : 75 %
 - influxdb (106) : 69 %
 - linkwarden (114) : 67 %
