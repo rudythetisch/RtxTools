@@ -149,3 +149,5 @@ Suite à une coupure électrique où l'UPS n'a pas tenu la charge d'un arrêt pr
 ## Premier test d'arrêt réel (2026-10-29)
 
 Arrêt complet mesuré : **189 s** pour le script, ~245 s depuis le déclenchement avec le minuteur, soit plus que l'autonomie de 165 s. NAS, NIPoGi et pfSense ne redémarrent pas seuls. Détails, chronologie et pistes dans [`docs/network/ups-shutdown-test-2026-10-29.md`](../../docs/network/ups-shutdown-test-2026-10-29.md). Le script `/etc/nut/shutdown-script.sh` a aussi été corrigé le même jour (appels NAS en parallèle avec `timeout`, horodatage de chaque étape).
+
+**Mise à jour (2026-10-29 14:19)** : le script d'arrêt passe en parallèle (NAS + VM + LXC, plus d'attente fixe), copie de référence dans `scripts/nut/shutdown-script.sh` ; ordre de démarrage Proxmox : pfSense (`order=1,up=20`) puis AdGuard (`order=2,up=5`). Essai à blanc : `DRY_RUN=1 /etc/nut/shutdown-script.sh`.
