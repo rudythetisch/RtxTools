@@ -63,3 +63,10 @@ Après reprise : NAS3 `[UUUU]`, NAS2 md3 toujours `[UU_]` (inchangé, pas pire),
 - **Point 1 (redémarrage automatique)** : option DSM déjà active sur NAS2 et NAS3 (rien à changer) ; reste le BIOS de NIPoGi (AMI Aptio 5.26, UEFI), à faire à la main, et éventuellement un Wake-on-LAN des NAS depuis NIPoGi au démarrage.
 - **Question ouverte** : l'UPS rallume-t-il ses prises tout seul, secteur présent ? `upscmd -l` ne liste pas `shutdown.return` pour ce modèle (seulement `shutdown.reboot` et `shutdown.stop`). À observer au prochain test.
 - **Decos** : le temps de retour « en ligne » n'a pas été mesuré (sonde perdue). Hypothèse : ils attendent un Internet fonctionnel, donc le modem VOO (tunnel Cloudflare revenu à 14:04:50).
+
+## Wake-on-LAN des NAS — installé et testé le 2026-10-29 à 14:29
+
+- **Principe** : au démarrage de NIPoGi, le service `wol-nas.service` lance `/usr/local/sbin/wol-nas.sh` : pour chaque NAS qui ne répond pas au ping, un paquet magique (UDP 9 et 7, broadcast 192.168.10.255) toutes les 20 s, 15 min maximum. Copies de référence : `scripts/nut/wol-nas.sh` et `scripts/nut/wol-nas.service`. Journal : `journalctl -t wol-nas`.
+- **MAC utilisées** (LAN 1, `eth0`, WoL actif dans DSM) : TischNAS2 `00:11:32:6d:d9:09`, TischNAS3 `90:09:d0:90:0d:c7`.
+- **Test réel sur TischNAS2** : arrêt propre demandé 14:30:02, plus de ping à 14:30:32 ; réveil lancé 14:31:12 ; **noyau démarré 14:31:29** (le premier paquet suffit) ; ping 14:33:13 (+2:01) ; **DSM joignable 14:33:28 (+2:16)**. RAID inchangé (`md3` `[UU_]`). NAS3 non testé (même configuration).
+- **Limites** : ne fonctionne que si NIPoGi démarre lui-même au retour du courant, donc **après le réglage BIOS « Power On »** (toujours à faire). Les NAS sont aussi réveillés si NIPoGi redémarre alors qu'ils ont été éteints volontairement.

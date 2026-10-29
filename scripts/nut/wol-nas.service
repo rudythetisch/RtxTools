@@ -1,0 +1,11 @@
+[Unit]
+Description=Reveil des NAS (Wake-on-LAN) au demarrage de NIPoGi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/wol-nas.sh
+
+[Install]
+WantedBy=multi-user.target
