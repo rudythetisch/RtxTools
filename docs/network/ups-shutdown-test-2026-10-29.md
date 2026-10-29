@@ -4,8 +4,9 @@ Test de l'arrêt d'urgence NUT (voir `scripts/guides/configure-nut-ups.md`), dé
 
 ## ⚠️ Ce qui limite la valeur du test
 
-- **Le courant de toute la maison a été coupé** pendant le test (pour un branchement électrique), vers 13:56-13:57, puis rétabli vers 13:57:30. La **phase d'arrêt est fiable** (terminée avant), mais la **reprise ne teste pas l'UPS** : modem, Decos et Mac mini ont redémarré à cause de la maison, pas de l'UPS.
-- On ne sait donc **pas** si l'UPS coupe ses prises tout seul en fin d'arrêt (l'heure 13:56:05 relevée au rack peut être la coupure de la maison). À confirmer par un nouveau test sans coupure externe.
+- **Le courant de toute la maison a été coupé** pendant le test (pour un branchement électrique), **après** que l'UPS a coupé ses prises (13:56:05), puis rétabli avant ~13:57:30 (le Mac mini a redémarré à 13:57:54 : la coupure a donc duré moins que les « 2 minutes après » estimées de mémoire). La **phase d'arrêt est fiable** (terminée avant), mais la **reprise ne teste pas l'UPS** : modem, Decos et Mac mini ont redémarré à cause de la maison.
+- **Établi** : l'UPS a bien coupé ses prises en fin d'arrêt, à 13:56:05, soit **60 s après l'extinction de NIPoGi** (13:55:05) et non 20 s comme `ups.delay.shutdown` le laissait penser.
+- **Non établi** : si l'UPS aurait rallumé ses prises tout seul, secteur présent. La coupure de la maison est intervenue avant. À confirmer par un nouveau test sans coupure externe.
 - **La sonde (`scripts/ups-test/probe.sh`) a été perdue** : le Mac mini a perdu le courant et son `/tmp` a été vidé au redémarrage (boot 13:57:54). Le Mac mini n'est donc pas protégé contre une coupure générale. Les mesures ci-dessous viennent des journaux des serveurs (`ups-shutdown.log`, tâches Proxmox, `uptime -s`) et des relevés manuels, pas de la sonde.
 
 ## Arrêt (fiable) — temps depuis T0 = 13:51:16
