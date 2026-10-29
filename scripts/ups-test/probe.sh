@@ -17,7 +17,8 @@
 # Tout autre repère apparaît dans la chronologie.
 
 set -u
-DIR="${UPSTEST_DIR:-$PWD}"
+# Ne pas mettre le journal dans /tmp : macOS le vide au redémarrage (cf. test du 2026-10-29).
+DIR="${UPSTEST_DIR:-$HOME/ups-test}"
 PIDF="$DIR/probe.pid"
 CUR="$DIR/probe.current"
 SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
