@@ -49,7 +49,7 @@ Après reprise : NAS3 `[UUUU]`, NAS2 md3 toujours `[UU_]` (inchangé, pas pire),
 
 ## Constats et pistes
 
-1. **Redémarrage automatique à activer** : BIOS de NIPoGi (« Restore on AC power loss » → Power On) et DSM sur les deux NAS (« Redémarrer automatiquement après une panne de courant »). Sans ça, après une vraie coupure avec rallumage des prises de l'UPS, tout reste éteint jusqu'à l'intervention manuelle. **Priorité.**
+1. **Redémarrage automatique** : sur les NAS, « Redémarrer automatiquement après une panne de courant » est **déjà activé** (vérifié le 2026-10-29 via `SYNO.Core.Hardware.PowerRecovery`, `rc_power_config: true`, WoL activé sur LAN 1). Mais cette option ne s'applique que si le NAS **tournait** quand le courant a disparu : après un arrêt logiciel propre (NUT → `synoshutdown`), il reste éteint au retour du courant, ce qui explique le constat. Pistes : (a) BIOS de NIPoGi en « Power On » (démarre toujours au retour du courant, même après un arrêt propre) ; (b) NIPoGi envoie un paquet Wake-on-LAN aux deux NAS à son démarrage. **Priorité.**
 2. **Raccourcir l'arrêt** : supprimer l'attente fixe de 30 s (les NAS reçoivent leur ordre en 2 s) et arrêter VM/LXC **en parallèle** au lieu d'un par un. Le goulot restera Home Assistant (jusqu'à 60 s). Estimation : ~70 s au lieu de 189 s, soit ~100 s depuis le déclenchement, sous les 165 s de batterie.
 3. **Ordre de démarrage Proxmox** : `startup: order=1` pour pfSense (VM 115), `order=2` pour AdGuard (LXC 103). Gain estimé ~40 s sur le retour d'Internet et fin des erreurs DNS de cloudflared.
 4. **Home Assistant (VM 100)** met 60 s à s'arrêter (tout le timeout) : à examiner (agent invité, add-ons).
@@ -60,6 +60,6 @@ Après reprise : NAS3 `[UUUU]`, NAS2 md3 toujours `[UU_]` (inchangé, pas pire),
 
 - **Point 2 (arrêt en parallèle)** : `/etc/nut/shutdown-script.sh` réécrit (copie de référence : `scripts/nut/shutdown-script.sh`, ancienne version sauvegardée en `.bak-20261029-141931`). NAS, VM et LXC partent en même temps, plus d'attente de 30 s. Essai à blanc (`DRY_RUN=1`) : 18 invités traités, rien d'arrêté. **Durée réelle à mesurer au prochain test** ; attendue : ~70 s (limitée par Home Assistant, jusqu'à 60 s).
 - **Point 3 (ordre de démarrage)** : `qm set 115 --startup order=1,up=20` (pfSense) et `pct set 103 --startup order=2,up=5` (AdGuard). Les autres invités démarrent ensuite. Retour arrière : `qm set 115 --delete startup` / `pct set 103 --delete startup`.
-- **Point 1 (redémarrage automatique)** : à faire à la main (BIOS NIPoGi : AMI Aptio 5.26, UEFI ; DSM sur NAS2 et NAS3).
+- **Point 1 (redémarrage automatique)** : option DSM déjà active sur NAS2 et NAS3 (rien à changer) ; reste le BIOS de NIPoGi (AMI Aptio 5.26, UEFI), à faire à la main, et éventuellement un Wake-on-LAN des NAS depuis NIPoGi au démarrage.
 - **Question ouverte** : l'UPS rallume-t-il ses prises tout seul, secteur présent ? `upscmd -l` ne liste pas `shutdown.return` pour ce modèle (seulement `shutdown.reboot` et `shutdown.stop`). À observer au prochain test.
 - **Decos** : le temps de retour « en ligne » n'a pas été mesuré (sonde perdue). Hypothèse : ils attendent un Internet fonctionnel, donc le modem VOO (tunnel Cloudflare revenu à 14:04:50).
