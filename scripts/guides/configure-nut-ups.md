@@ -126,3 +126,22 @@ Suite à une coupure électrique où l'UPS n'a pas tenu la charge d'un arrêt pr
 - **Ordre d'arrêt du script `/etc/nut/shutdown-script.sh`** (déclenché par `SHUTDOWNCMD` en cas de batterie critique) : TischNAS2 → TischNAS3 (SSH + `sudo synoshutdown --shutdown`, les plus longs à arrêter proprement) → attente 30s → VMs Proxmox (`qm shutdown`) → LXC Proxmox (`pct shutdown`) → NIPoGi lui-même (`shutdown -h now`). Logs dans `/var/log/ups-shutdown.log` sur NIPoGi.
 - **Droit sudo ajouté** au compte `claude` sur les deux NAS : `NOPASSWD: /usr/syno/sbin/synoshutdown` (en plus de `docker`/`df`/`free` déjà en place) — nécessaire pour que le script d'arrêt fonctionne sans mot de passe interactif. Clé publique de `root@nipogi` (`id_rsa.pub`) ajoutée aux `authorized_keys` `claude` des deux NAS pour permettre l'appel SSH sortant depuis NIPoGi.
 - **Non testé en conditions réelles** (débrancher l'UPS pour de vrai) — le risque d'un test complet (arrêt effectif de tout le homelab) n'a pas été jugé nécessaire ; chaque maillon (SSH+sudo vers les 2 NAS, énumération VM/LXC, service upsmon actif) a été vérifié individuellement à la place.
+
+## Arrêt anticipé dès le passage sur batterie (2026-10-29)
+
+**Pourquoi** : `upsc` annonce une autonomie de **~165 s** à 100 % de charge (`ups.load` remonte maintenant, ~42 %), alors que le seuil « batterie faible » est à 120 s (`battery.runtime.low`). Attendre LB ne laissait qu'environ 2 min pour toute la séquence d'arrêt, trop juste pour les NAS. L'arrêt démarre maintenant **15 s après le passage sur batterie** (tolérance pour les micro-coupures), si le courant n'est pas revenu. Le déclenchement sur LB reste en place comme filet de sécurité.
+
+**Chaîne** :
+1. `upsmon.conf` : `NOTIFYFLAG ONBATT/ONLINE SYSLOG+WALL+EXEC` → appelle `upssched` (`NOTIFYCMD`, déjà présent mais sans effet faute de `NOTIFYFLAG ... EXEC` jusque-là).
+2. `upssched.conf` : `AT ONBATT * START-TIMER onbatt-shutdown 15` / `AT ONLINE * CANCEL-TIMER onbatt-shutdown`, `CMDSCRIPT /etc/nut/upssched-cmd`.
+3. `/etc/nut/upssched-cmd` (tourne en utilisateur `nut`) : à l'expiration du timer, `touch /run/nut/fsd-request`.
+4. `nut-fsd-request.path` (systemd, root) surveille ce fichier → `nut-fsd-request.service` exécute `/sbin/upsmon -c fsd`.
+5. `upsmon` (root) passe en FSD → `SHUTDOWNCMD` → `/etc/nut/shutdown-script.sh` (séquence inchangée).
+
+**Pourquoi le relais systemd** : `upssched` tourne en `nut` et ne peut pas signaler le processus `upsmon` parent (root, PID dans `/run/nut/upsmon.pid`), et `sudo` n'est pas installé sur Proxmox.
+
+**Tests faits (sans arrêt réel)** : ONBATT puis ONLINE simulés via `upssched` → timer créé puis annulé, aucun FSD ; relais systemd testé avec `ExecStart` neutralisé (drop-in temporaire, retiré ensuite) → déclenché et fichier supprimé. Non testé : l'arrêt réel (`upsmon -c fsd`).
+
+**Logs** : `journalctl -t upssched -t upssched-cmd -u nut-fsd-request`, puis `/var/log/ups-shutdown.log`. Sauvegardes : `/etc/nut/*.bak-20261029-*`.
+
+**Changer le délai** : modifier `15` dans `/etc/nut/upssched.conf` (pas de reload nécessaire, relu à chaque événement).
