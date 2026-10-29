@@ -70,3 +70,13 @@ Après reprise : NAS3 `[UUUU]`, NAS2 md3 toujours `[UU_]` (inchangé, pas pire),
 - **MAC utilisées** (LAN 1, `eth0`, WoL actif dans DSM) : TischNAS2 `00:11:32:6d:d9:09`, TischNAS3 `90:09:d0:90:0d:c7`.
 - **Test réel sur TischNAS2** : arrêt propre demandé 14:30:02, plus de ping à 14:30:32 ; réveil lancé 14:31:12 ; **noyau démarré 14:31:29** (le premier paquet suffit) ; ping 14:33:13 (+2:01) ; **DSM joignable 14:33:28 (+2:16)**. RAID inchangé (`md3` `[UU_]`). NAS3 non testé (même configuration).
 - **Limites** : ne fonctionne que si NIPoGi démarre lui-même au retour du courant, donc **après le réglage BIOS « Power On »** (toujours à faire). Les NAS sont aussi réveillés si NIPoGi redémarre alors qu'ils ont été éteints volontairement.
+
+## Redémarrage de NIPoGi pour le réglage BIOS — 2026-10-29, 14:38
+
+- **BIOS « Power On » réglé** par l'utilisateur (non encore vérifié par un `poweroff` suivi d'un débranchement de l'alimentation).
+- **Arrêt propre Proxmox** (`reboot`) : `stopall` 14:38:15 → 14:41:46 (3 min 31 s ; VM 100 HA 33 s). pfSense s'arrête en dernier (14:41:26-14:41:46) : l'ordre de démarrage défini plus tôt s'applique aussi à l'arrêt, dans l'ordre inverse.
+- **Redémarrage** : noyau 14:47:56, `startall` 14:48:08 → 14:49:25 (77 s). **pfSense démarre premier (14:48:08)**, AdGuard à 14:48:30 (après le délai de 20 s), HA à 14:48:37, cloudflared à 14:49:01. L'ordre de démarrage fonctionne. Tous les invités reviennent (2 VM, 16 LXC).
+- **Retour d'Internet tardif, toujours le même** : lien WAN de pfSense monté à 14:48:39, démarrage de pfSense terminé à 14:50:34, **adresse WAN obtenue à 14:54:38** (91.86.181.7), tunnel Cloudflare enregistré à 14:54:47 : **6 min après le lien WAN**. Après la coupure générale : 13:59:33 → 14:04:50 (5 min 17 s). Le modem n'avait pas redémarré cette fois, et pfSense démarrait cette fois en premier : **ce n'est donc ni la resynchronisation du modem ni l'ordre de démarrage**. Le délai vient de l'obtention du bail DHCP sur le WAN (serveur VOO ou client DHCP de pfSense). Le journal DHCP de pfSense n'est pas lisible avec le compte API `claude` (403).
+- **Autre délai** : le lien LAN de pfSense (`vtnet1`, carte USB `enxc8a3622c3f03`) n'est monté qu'à 14:49:56, 77 s après le WAN.
+- **Pistes** : (a) redémarrer uniquement la VM pfSense en capturant le trafic DHCP sur `vmbr0` de NIPoGi pour voir quand le serveur VOO répond (coupe Internet ~6 min) ; (b) lire les journaux DHCP via la GUI ; (c) régler « Protocol Timing » du client DHCP du WAN dans pfSense (Interfaces → WAN).
+
