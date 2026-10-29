@@ -1,5 +1,7 @@
 # TischNAS3 — Stack Docker Servarr
 
+> **2026-10-29** : Readarr retiré (conteneur supprimé, entrée Prowlarr retirée) ; SABnzbd ajouté. Prowlarr n'a pas encore d'indexeur Usenet synchronisé (NZBIndex ne se synchronise pas vers les *arr, il faut un indexeur Newznab avec clé API).
+
 Doc de référence pour le stack Docker (Container Manager Synology) tournant sur TischNAS3 (`192.168.10.3`).
 
 > **2026-07-25** : Jellyfin et Jellyseerr ont été migrés vers TischNAS2 (`192.168.10.5`) — voir section [[#Migration Jellyfin/Jellyseerr vers TischNAS2]]. Ce doc ne les couvre plus que pour l'historique de l'incident.
@@ -14,7 +16,8 @@ RAM du NAS très limitée : **3.8 Gi total**, pas d'extension possible (slot fix
 |-----|------|-----------------|-------------|
 | radarr-rtx | Gestion films | unless-stopped | ~135 MB |
 | sonarr-rtx | Gestion séries | unless-stopped | ~180-200 MB |
-| readarr-rtx | Gestion livres | unless-stopped | ~160-620 MB (pic au démarrage/scan) |
+| lidarr-rtx | Gestion musique | unless-stopped | — |
+| sabnzbd-rtx | Client Usenet (Tweaknews, SSL 563), port 8085, compose séparé `compose.sabnzbd.yaml` | unless-stopped | — |
 | prowlarr-rtx | Agrégateur indexeurs | unless-stopped | ~140-175 MB |
 | bazarr-rtx | Sous-titres | unless-stopped | ~25 MB |
 | qbittorrent-rtx | Client torrent | unless-stopped | ~20 MB |

@@ -1018,23 +1018,6 @@
       "dockerContainer": "bazarr-rtx"
     },
     {
-      "id": "readarr",
-      "name": "Readarr",
-      "ip": "192.168.10.3",
-      "ipType": "static",
-      "hostname": null,
-      "mac": null,
-      "port": 8787,
-      "url": "http://192.168.10.3:8787",
-      "role": "Gestion livres/ebooks",
-      "version": "",
-      "installedAt": "",
-      "installScript": "",
-      "notes": "",
-      "actions": [],
-      "dockerContainer": "readarr-rtx"
-    },
-    {
       "id": "qbittorrent",
       "name": "qBittorrent",
       "ip": "192.168.10.3",
