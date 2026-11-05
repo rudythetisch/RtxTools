@@ -64,6 +64,8 @@ Mêmes boutons que les autres appareils, dans la sous-vue « Temps d'écran ». 
 - Automation `appletv_temps_ecoule` : sur `timer.finished`, coupe Internet, affiche une alerte sur la TV et notifie l'iPhone de Rudy.
 - Automation `appletv_coupure_manuelle` : une coupure manuelle annule le minuteur en cours.
 
+- Automation `appletv_coupure_veille` (ajoutée le 2026-11-05) : 15 s après le passage de `switch.internet_apple_tv` de on à off (minuteur fini, « Couper » ou « Tout couper »), appelle `media_player.turn_off` sur `media_player.salon_2` pour mettre l'Apple TV en veille. L'intégration Apple TV passe par le LAN, donc elle marche Internet coupé. Les 15 s laissent le temps de voir l'alerte. Créée via l'API HA ; **pas encore testée** (à faire quand la TV est libre). Elle ne bloque pas la remise en marche à la télécommande, seulement Internet reste coupé.
+
 **Messages sur la TV** : `notify.lg_webos_tv_oled65c11lb` (toast) et `system.notifications/createToast` ne s'affichent **pas** quand l'entrée HDMI de l'Apple TV est à l'écran. Seule une alerte passe, via `webostv.command`, commande `system.notifications/createAlert` avec un bouton OK. Elle reste à l'écran jusqu'à ce qu'on appuie sur OK (télécommande LG).
 
 ## pfSense
