@@ -1,0 +1,76 @@
+# Alertes d'espace disque des hôtes scrapés par node_exporter (NAS, Mac mini, MacBook Pro...)
+# + alerte "cible injoignable" (un exporter tombé ne doit plus passer inaperçu).
+# Remplace le groupe `homelab-disk` de homelab.yml (DiskSpaceWarning / DiskSpaceCritical).
+# Déployé dans /etc/prometheus/rules/ du LXC 113.
+groups:
+  - name: node-disk-record
+    rules:
+      # % utilisé de chaque système de fichiers "réel" : exclut les types virtuels/réseau,
+      # les montages en lecture seule (images .dmg, volume système macOS scellé, cryptex)
+      # et les montages techniques (@docker de Synology, loop, Recovery).
+      - record: node:filesystem_used:percent
+        expr: |
+          (
+            (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|devtmpfs|devfs|devicefs|overlay|squashfs|iso9660|autofs|nfs|nfs4|cifs|smbfs|fuse.*|ramfs|proc|sysfs|cgroup.*",mountpoint!~"/volume[0-9]+/@.*|/tmp/.*|/Volumes/Recovery|/boot/efi|/private/var/run/.*|.*/DeviceFS"}
+              / node_filesystem_size_bytes)
+            * 100
+          )
+          and on (instance, device, mountpoint) (node_filesystem_size_bytes > 0)
+          unless on (instance, device, mountpoint) (node_filesystem_readonly == 1)
+
+  - name: node-disk
+    rules:
+      - alert: NodeDiskWarning
+        expr: node:filesystem_used:percent > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disque > 80 % sur {{ $labels.instance }}"
+          description: "{{ $labels.mountpoint }} à {{ $value | printf \"%.1f\" }} % sur {{ $labels.instance }}"
+
+      - alert: NodeDiskCritical
+        expr: node:filesystem_used:percent > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disque CRITIQUE > 90 % sur {{ $labels.instance }}"
+          description: "{{ $labels.mountpoint }} à {{ $value | printf \"%.1f\" }} % sur {{ $labels.instance }}"
+
+      # Tendance : plein dans moins de 3 jours (pente des 6 dernières heures)
+      - alert: NodeDiskFillingUp
+        expr: |
+          predict_linear(node_filesystem_avail_bytes[6h], 3 * 86400) < 0
+          and on (instance, device, mountpoint) (node:filesystem_used:percent > 50)
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disque plein dans < 3 jours sur {{ $labels.instance }}"
+          description: "{{ $labels.mountpoint }} sur {{ $labels.instance }} sera plein dans moins de 3 jours au rythme actuel"
+
+      # Tendance rapide : plein dans moins de 12 heures (pente de la dernière heure)
+      - alert: NodeDiskFillingUpFast
+        expr: |
+          predict_linear(node_filesystem_avail_bytes[1h], 12 * 3600) < 0
+          and on (instance, device, mountpoint) (node:filesystem_used:percent > 70)
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disque plein dans < 12 h sur {{ $labels.instance }}"
+          description: "{{ $labels.mountpoint }} sur {{ $labels.instance }} sera plein dans moins de 12 h au rythme actuel"
+
+  - name: target-health
+    rules:
+      # Exclus : homeassistant (/metrics en 404, Prometheus non activé côté HA) et les
+      # portables (job mac-portable : souvent éteints, aucune alerte de disparition).
+      - alert: TargetDown
+        expr: up{job!~"homeassistant|mac-portable"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cible de supervision injoignable : {{ $labels.job }}"
+          description: "{{ $labels.instance }} ({{ $labels.job }}) ne répond plus à Prometheus depuis 5 min : plus aucune alerte disque possible sur cet hôte."
