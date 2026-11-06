@@ -11,7 +11,7 @@ Chaîne : `node_exporter` (hôte) → Prometheus (LXC 113) → Alertmanager (LXC
 | TischNAS2 | binaire `/usr/local/bin/node_exporter`, démarré par `/etc/rc.local` | `nas-tischnas2` |
 | TischNAS3 | conteneur Docker `node-exporter-rtx` (`--restart unless-stopped`) | `nas-tischnas3` |
 | Mac mini | `brew services` (`node_exporter`, flags dans `/opt/homebrew/etc/node_exporter.args`) | `mac-mini` |
-| MacBook Pro | à installer (job `mac-portable`, exclu de TargetDown) | — |
+| MacBook Pro (192.168.10.243) | `brew install node_exporter && brew services start node_exporter` à lancer sur le portable | `mac-portable` (exclu de TargetDown) |
 | LXC / VM Proxmox, stockages | pve-exporter | `proxmox` |
 
 Les VM QEMU (HA 100, 115) n'ont pas d'alerte disque (pas d'agent invité).
