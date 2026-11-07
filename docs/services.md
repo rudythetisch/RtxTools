@@ -179,7 +179,8 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | `rtxtradingbot.tixhon.be` | ✅ Access (préexistant) | rudy.tixhon@gmail.com |
 | `hass.tixhon.be` | ❌ Retiré 2026-07-25 (incompatible app companion Android) | — protection via login HA natif, voir section Home Assistant |
 | `vw.tixhon.be` | ❌ Retiré 2026-07-25 (incompatible app Bitwarden native) | — protection via `/admin` restreint réseau + mot de passe maître, voir section Vaultwarden |
-| `linkwarden.tixhon.be`, `homeplan.tixhon.be` | ❌ Aucune (auth applicative native seulement) | — |
+| `linkwarden.tixhon.be` | ❌ Aucune (auth applicative native seulement) | — |
+| `homeplan.tixhon.be` | ✅ Policy « Foyer » (rudy.tixhon@gmail.com + celine.dumo@gmail.com), ajoutée le 2026-11-07 | Application Access `homeplan` (id 6898eb66-32dc-4769-bb3f-f79a81cf6b48) ; la supprimer pour revenir en arrière |
 
 ⚠️ **Piège de test important** : depuis le LAN, AdGuard résout `*.tixhon.be` directement vers l'IP interne (split-horizon DNS) — **tout test depuis le réseau local contourne Cloudflare Access entièrement**, donnant une fausse impression que la protection ne fonctionne pas. Pour tester réellement : DNS-over-HTTPS externe (`curl https://cloudflare-dns.com/dns-query?name=...&type=A -H "accept: application/dns-json"`) puis `curl --resolve host:443:<ip-cloudflare>` — ou plus simple, tester en 4G/5G.
 
@@ -433,3 +434,15 @@ Root cause identifiée : **le point d'accès CPL (courant porteur, `http://192.1
 **Contrôleur UniFi** : à héberger en LXC Proxmox via le script `community-scripts` **Unifi OS Server** (`ct/unifi-os-server.sh`, port 11443, x86-64/ARM64, maintenu activement — dernière MAJ du script le 2026-08-13). Prochain VMID libre au moment de l'investigation : **116** (suivant pocketid 104, linkwarden 114) ; IP suggérée en suivant la convention `.18x` : **192.168.10.189** (après linkwarden `.187`, pocketid `.188`). Dimensionnement largement suffisant pour 3 AP : 2 vCPU / 2GB RAM / 8GB disque.
 
 **Statut** : investigation uniquement, **rien déployé** — LXC contrôleur pas encore provisionné, matériel pas encore acheté. Prochaine étape quand l'utilisateur commande les AP : provisionner le LXC 116, adopter les AP dans le contrôleur, créer les VLANs (IoT/Guest/LAN) sur le switch + interfaces VLAN pfSense + règles firewall par VLAN.
+
+
+## Migration Mac mini → LXC (2026-11-07)
+
+homeplan et homefinance ne tournent plus sur le Mac mini (LaunchAgents arrêtés et désactivés avec `launchctl disable`) :
+
+| App | LXC | IP:port | Détails |
+|---|---|---|---|
+| homeplan | 118 `homeplan` | 192.168.10.19:8710 | Debian 12, Node 24, SQLite dans `/opt/homeplan/homeplan.db`, services systemd (app, rappels 15 min, sauvegarde 03:00 UTC, watchdog), sauvegardes dans `/opt/homeplan-backups` |
+| homefinance | 119 `homefinance` | 192.168.10.20:8735 | Debian 12, Node 24, code dans `/opt/homefinance`, `homefinance.service`, base Postgres directe sur 192.168.10.13:5432 (LXC 116, plus de tunnel SSH). Le build Turbopack a échoué sous Linux sur `next/font/google` ; repli : `NODE_OPTIONS=--dns-result-order=ipv4first npx next build --webpack` |
+
+Les proxy hosts NPM `homeplan` (id 39) et `homefinance` (id 44) pointent sur ces IP. Les LXC sont inclus dans la sauvegarde Proxmox quotidienne (`all 1`). Retour arrière : `launchctl enable` + `bootstrap` des agents `be.tixhon.homeplan*` / `be.tixhon.homefinance`, et NPM vers 192.168.10.98.
