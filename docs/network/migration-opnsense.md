@@ -117,6 +117,8 @@ Relevé via l'API le 2026-10-13.
 | 192.168.10.187 | `bc:24:11:bf:6f:f5` | linkwarden | linkwarden |
 | 192.168.10.188 | `bc:24:11:ac:7c:bb` | pocketid | Pocket ID (LXC 104) |
 
+**Réservation à créer (pfSense, Services → DHCP Server → LAN)** : `192.168.10.249`, MAC `00:15:99:e3:e8:53` (déduite du nom mDNS), imprimante Samsung SCX-3400 Series. Cette ligne n'est pas encore dans pfSense ni dans le tableau ci-dessus. À reporter dans OPNsense avec les autres.
+
 ### Non repris
 
 - Résolveur DNS Unbound (désactivé, avec un ancien forward vers `.21`) : c'est AdGuard qui fait le DNS.
