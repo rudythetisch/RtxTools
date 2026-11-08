@@ -48,3 +48,7 @@ Une règle d'inhibition Alertmanager masque l'avertissement quand la critique du
 
 - Mac : Réglages Système > Général > Stockage ; `du -xhd1 ~ | sort -h`.
 - NAS : `sudo df -h`, purger les images Docker (`docker image prune -a`), vérifier `/volume1/@recycle`.
+
+## Fréquence de rappel (2026-11-08)
+
+Alertmanager (LXC 111) : les alertes `severity = warning` (NodeDiskWarning, NodeDiskFillingUp) ne sont répétées qu'**une fois par 24 h** (avant : 4 h). Les `critical` restent à 1 h. Route ajoutée sous `routes:` dans `/etc/alertmanager/alertmanager.yml` (sauvegarde `.bak-20261108`), rechargée par `curl -X POST :9093/-/reload`.
