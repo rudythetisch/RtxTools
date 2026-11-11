@@ -29,7 +29,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Proxmox | node | 192.168.10.2 | https://192.168.10.2:8006 | Proxmox VE |
 | Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
 | Pocket ID | LXC 104 | 192.168.10.188 | https://id.tixhon.be | Pocket ID v2.11.0 (binaire + systemd) |
-| FMF Compta | Mac Mini | 192.168.10.98:8734 | https://fmfcompta.tixhon.be (LAN only) | Next.js (launchd) |
+| FMF Compta | LXC 120 | 192.168.10.24:8734 | https://fmfcompta.tixhon.be | Next.js (systemd), données Supabase |
 
 ---
 
@@ -438,11 +438,13 @@ Root cause identifiée : **le point d'accès CPL (courant porteur, `http://192.1
 
 ## Migration Mac mini → LXC (2026-11-07)
 
-homeplan et homefinance ne tournent plus sur le Mac mini (LaunchAgents arrêtés et désactivés avec `launchctl disable`) :
+homeplan, homefinance et (depuis le 2026-11-11) fmfcompta ne tournent plus sur le Mac mini (LaunchAgents arrêtés et désactivés avec `launchctl disable`) :
 
 | App | LXC | IP:port | Détails |
 |---|---|---|---|
 | homeplan | 118 `homeplan` | 192.168.10.19:8710 | Debian 12, Node 24, SQLite dans `/opt/homeplan/homeplan.db`, services systemd (app, rappels 15 min, sauvegarde 03:00 UTC, watchdog), sauvegardes dans `/opt/homeplan-backups` |
 | homefinance | 119 `homefinance` | 192.168.10.20:8735 | Debian 12, Node 24, code dans `/opt/homefinance`, `homefinance.service`, base Postgres directe sur 192.168.10.13:5432 (LXC 116, plus de tunnel SSH). Le build Turbopack a échoué sous Linux sur `next/font/google` ; repli : `NODE_OPTIONS=--dns-result-order=ipv4first npx next build --webpack` |
 
-Les proxy hosts NPM `homeplan` (id 39) et `homefinance` (id 44) pointent sur ces IP. Les LXC sont inclus dans la sauvegarde Proxmox quotidienne (`all 1`). Retour arrière : `launchctl enable` + `bootstrap` des agents `be.tixhon.homeplan*` / `be.tixhon.homefinance`, et NPM vers 192.168.10.98.
+| fmfcompta | 120 `fmfcompta` | 192.168.10.24:8734 | Debian 12, Node 24, clone sparse (`compta/app`) de fernelevents/fernelevents-docs dans `/opt/fmfcompta` (clé de déploiement lecture seule `nipogi-lxc120`), `fmfcompta.service`, données sur Supabase (`.env.local` copié à la main, hors git), CSV bancaires dans `/opt/fmfcompta/compta/trx`. Redéploiement : `git pull`, `npm ci`, `npx next build`, `systemctl restart fmfcompta` (ou `POST /api/restart`, systemd relance) |
+
+Les proxy hosts NPM `fmfcompta` (id 43), `homeplan` (id 39) et `homefinance` (id 44) pointent sur ces IP. Les LXC sont inclus dans la sauvegarde Proxmox quotidienne (`all 1`). Retour arrière : `launchctl enable` + `bootstrap` des agents `be.tixhon.homeplan*` / `be.tixhon.homefinance` / `be.fernelevents.compta` (+ watchdog `be.tixhon.fmfcompta-watchdog`), et NPM vers 192.168.10.98.
