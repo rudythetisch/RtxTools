@@ -47,6 +47,7 @@ Une règle d'inhibition Alertmanager masque l'avertissement quand la critique du
 ## Réagir
 
 - Mac : Réglages Système > Général > Stockage ; `du -xhd1 ~ | sort -h`.
+- Mac mini, gros postes qui reviennent : VM de Claude Desktop (`~/Library/Application Support/Claude/vm_bundles`, ~10 Go, à supprimer Claude quitté) et cache uv (`~/.cache/uv`, +3 Go/semaine, `uv cache prune`/`clean` une fois les MCP arrêtés). Purge du 2026-11-12 : 91 % → 74 %.
 - NAS : `sudo df -h`, purger les images Docker (`docker image prune -a`), vérifier `/volume1/@recycle`.
 
 ## Fréquence de rappel (2026-11-08)
