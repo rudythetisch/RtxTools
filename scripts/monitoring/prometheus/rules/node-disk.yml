@@ -21,12 +21,12 @@ groups:
   - name: node-disk
     rules:
       - alert: NodeDiskWarning
-        expr: node:filesystem_used:percent > 80
+        expr: node:filesystem_used:percent > 85
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "Disque > 80 % sur {{ $labels.instance }}"
+          summary: "Disque > 85 % sur {{ $labels.instance }}"
           description: "{{ $labels.mountpoint }} à {{ $value | printf \"%.1f\" }} % sur {{ $labels.instance }}"
 
       - alert: NodeDiskCritical

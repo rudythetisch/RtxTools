@@ -20,7 +20,7 @@ Les VM QEMU (HA 100, 115) n'ont pas d'alerte disque (pas d'agent invité).
 
 | Alerte | Condition | Délai | Sévérité |
 |---|---|---|---|
-| NodeDiskWarning | > 80 % | 10 min | warning |
+| NodeDiskWarning | > 85 % (80 % avant le 2026-11-12) | 10 min | warning |
 | NodeDiskCritical | > 90 % | 5 min | critical |
 | NodeDiskFillingUp | plein dans < 3 j (tendance 6 h) et > 50 % | 1 h | warning |
 | NodeDiskFillingUpFast | plein dans < 12 h (tendance 1 h) et > 70 % | 15 min | critical |
