@@ -117,8 +117,7 @@ Fichier : `/etc/prometheus/rules/homelab.yml` sur LXC 113.
 |--------|-------|----------|
 | HighCPU | CPU > 90% pendant 5min | warning |
 | HighMemory | RAM > 85% pendant 5min | warning |
-| DiskSpaceWarning | Disque > 80% | warning |
-| DiskSpaceCritical | Disque > 90% | critical |
+| ~~DiskSpaceWarning/Critical~~ | remplacées le 2026-11-06 par `node-disk.yml` (NodeDiskWarning > 85 %, NodeDiskCritical > 90 %), voir [[alertes-disque-hotes]] | — |
 | NASHighCPUTemp | Temp CPU NAS > 85°C | warning |
 | ProxmoxContainerDown | pve_up == 0 pendant 1min | critical |
 | ProxmoxNodeHighCPU | CPU nœud > 90% pendant 5min | warning |
@@ -128,7 +127,7 @@ Fichier : `/etc/prometheus/rules/homelab.yml` sur LXC 113.
 
 Alertmanager (LXC 111) : `telegram_configs` natif, bot `8791888244:AAGFTD-...`, chat `7251478112`.
 - Alertes `critical` : group_wait 10s, repeat 1h
-- Alertes `warning` : group_wait 30s, repeat 4h
+- Alertes `warning` : group_wait 30s, repeat 24h (4h avant le 2026-11-08)
 - Inhibition : une alerte `critical` supprime le `warning` correspondant
 
 ### Ajouter un nouveau device

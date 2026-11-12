@@ -52,3 +52,18 @@ Une règle d'inhibition Alertmanager masque l'avertissement quand la critique du
 ## Fréquence de rappel (2026-11-08)
 
 Alertmanager (LXC 111) : les alertes `severity = warning` (NodeDiskWarning, NodeDiskFillingUp) ne sont répétées qu'**une fois par 24 h** (avant : 4 h). Les `critical` restent à 1 h. Route ajoutée sous `routes:` dans `/etc/alertmanager/alertmanager.yml` (sauvegarde `.bak-20261108`), rechargée par `curl -X POST :9093/-/reload`.
+
+## Seuil warning relevé à 85 % (2026-11-12)
+
+`NodeDiskWarning` passe de 80 à **85 %** (Prometheus LXC 113, `node-disk.yml`) ; `NodeDiskCritical` reste à 90 %. Motif : le Mac mini (`/System/Volumes/Data`, 228 Gio) tourne durablement autour de 80-84 % et déclenchait l'avertissement sans action utile.
+
+## Mac mini : pistes de nettoyage disque (relevé 2026-11-12)
+
+État mesuré : 152 Gio utilisés / 31 Gio libres (84 %), donc juste sous le nouveau seuil. Gros postes récupérables, **non encore purgés au moment de ce relevé** :
+
+| Poste | Taille | Commande / remarque |
+|---|---|---|
+| Cache `uv` | ~12 Go | `uv cache clean` (se reconstitue à la demande) |
+| VM de Claude Desktop (`~/Library/Application Support/Claude/vm_bundles`) | ~9,7 Go | à supprimer quand Claude Desktop est fermé ; recréée au besoin |
+
+Gain estimé : ~20 Go, soit environ 75 % d'occupation après nettoyage. Mettre cette section à jour une fois la purge faite.
