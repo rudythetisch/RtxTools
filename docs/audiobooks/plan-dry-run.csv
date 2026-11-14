@@ -1,0 +1,106 @@
+source,destination,action,raison
+.DS_Store,.DS_Store,IGNORER,fichier macOS
+LIVRES ECOUTES.txt,LIVRES ECOUTES.txt,GARDER,liste des livres écoutés (Latin-1) : à convertir en UTF-8 / ecoutes.csv
+Albert Camus - La Peste,Albert Camus/La Peste,DEPLACER,
+Albert Camus - La chute - Livre audio,,HORS_PERIMETRE,archive RAR + nzb non extraits (aucun mp3) : à extraire ou supprimer après accord
+Bernard Werber - L'ultime Secret,Bernard Werber/L'Ultime Secret,DEPLACER,
+Brigitte Aubert - La Mort Des Bois,Brigitte Aubert/La Mort des bois,DEPLACER,
+Brigitte Aubert - La morsure des ténébres,Brigitte Aubert/La Morsure des ténèbres,DEPLACER,faute corrigée (ténébres)
+Franck Thilliez - Le syndrome E,Franck Thilliez/Le Syndrome E,DEPLACER,
+Franck Thilliez - Puzzle,Franck Thilliez/Puzzle,DEPLACER,sous-dossiers Partie 1/2 conservés
+"H.P. Lovecraft - 11 nouvelles/Herbert West, réanimateur","H.P. Lovecraft/11 nouvelles/Herbert West, réanimateur",DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Je suis d'ailleurs,H.P. Lovecraft/11 nouvelles/Je suis d'ailleurs,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/L'indicible,H.P. Lovecraft/11 nouvelles/L'indicible,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/La Maison Maudite (adaptation radiophonique),H.P. Lovecraft/11 nouvelles/La Maison Maudite,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/La maison dans la vallée,H.P. Lovecraft/11 nouvelles/La maison dans la vallée,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Le monstre sur le seuil,H.P. Lovecraft/11 nouvelles/Le monstre sur le seuil,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Le retour d'Hastur,H.P. Lovecraft/11 nouvelles/Le retour d'Hastur,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Le sceau de Rlyeh,H.P. Lovecraft/11 nouvelles/Le sceau de Rlyeh,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Les engoulevents de la colline,H.P. Lovecraft/11 nouvelles/Les engoulevents de la colline,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Les rats dans les murs,H.P. Lovecraft/11 nouvelles/Les rats dans les murs,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - 11 nouvelles/Quelque chose en bois,H.P. Lovecraft/11 nouvelles/Quelque chose en bois,DEPLACER,recueil conservé tel quel (chevauche des titres isolés)
+H.P. Lovecraft - L'affaire Charles Dexter Ward (1927),H.P. Lovecraft/L'Affaire Charles Dexter Ward,DEPLACER,année retirée
+H.P. Lovecraft - L'appel de Cthulhu,H.P. Lovecraft/L'Appel de Cthulhu,DEPLACER,
+H.P. Lovecraft - Le Sceau de Rlyeh,H.P. Lovecraft/Le Sceau de Rlyeh,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (taille différente 76M/143M)
+H.P. Lovecraft - Le cauchemar d'Innsmouth,H.P. Lovecraft/Le Cauchemar d'Innsmouth,DEPLACER,
+H.P. Lovecraft - Le monstre sur le seuil,H.P. Lovecraft/Le Monstre sur le seuil,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (64M/84M)
+H.P. Lovecraft - Le retour d'Hastur,H.P. Lovecraft/Le Retour d'Hastur,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (77M/142M)
+H.P. Lovecraft - Quelque chose en bois,H.P. Lovecraft/Quelque chose en bois,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (38M/17M)
+Histoire de France pour les nuls,_Collections/Pour les Nuls/Histoire de France pour les nuls,DEPLACER,collection thématique (comme BOOKS)
+JRR Tolkien Le Seigneur des anneaux (Nouvelle version - Conteur Féminin)/JRR Tolkien Le Seigneur des Anneaux 01 La communauté de l'Anneau,J.R.R. Tolkien/Le Seigneur des anneaux/01 - La Communauté de l'Anneau,DEPLACER,version conteur féminin (nom du parent perdu -> à garder dans ecoutes/notes ?)
+JRR Tolkien Le Seigneur des anneaux (Nouvelle version - Conteur Féminin)/JRR Tolkien Le Seigneur des Anneaux 02 Les deux tours,J.R.R. Tolkien/Le Seigneur des anneaux/02 - Les Deux Tours,DEPLACER,version conteur féminin (nom du parent perdu -> à garder dans ecoutes/notes ?)
+JRR Tolkien Le Seigneur des anneaux (Nouvelle version - Conteur Féminin)/JRR Tolkien Le Seigneur des Anneaux 03 Le retour du Roi,J.R.R. Tolkien/Le Seigneur des anneaux/03 - Le Retour du Roi,DEPLACER,version conteur féminin (nom du parent perdu -> à garder dans ecoutes/notes ?)
+Jean Christophe Grange - La Foret Des Manes (2009),Jean-Christophe Grangé/La Forêt des mânes,DEPLACER,
+Jean-Christophe Grange - L empire des loups,Jean-Christophe Grangé/L'Empire des loups,DEPLACER,CD1/CD2 conservés
+Jean-Louis Feitjane - Le Pas De Merlin T2 - Broceliande,Jean-Louis Fetjaine/Le Pas de Merlin/02 - Brocéliande,DEPLACER,auteur corrigé en Fetjaine
+Jean-Louis Feitjane - Le Pas de Merlin,Jean-Louis Fetjaine/Le Pas de Merlin/01 - Le Pas de Merlin,DEPLACER,"AMBIGU : auteur ""Feitjane"" -> graphie officielle Fetjaine ; T1 déduit (pas de numéro)"
+Ken Folett - Peur Blanche,Ken Follett/Peur blanche,DEPLACER,faute corrigée (Folett)
+Ken Follett - Code Zero,Ken Follett/Code Zéro,DEPLACER,
+Ken Follett - Les piliers de la terre T3-Un monde sans fin,Ken Follett/Kingsbridge/02 - Un monde sans fin,DEPLACER,"AMBIGU : nom dit ""Piliers de la terre T3"" mais Un monde sans fin = tome 2 de Kingsbridge ; Piliers (T1) absent"
+La Captive De L'hiver,Serge Brussolo/La Captive de l'hiver,DEPLACER,auteur lu dans les tags ID3
+Marc Levy - Le premier jour,Marc Levy/Le Premier jour,DEPLACER,"dossier ""Les Enfants de la liberté"" = livre distinct"
+Marc Levy - Les enfants de la liberté,Marc Levy/Les Enfants de la liberté,DEPLACER,
+Maxime Chattam - Le Sang Du Temps,Maxime Chattam/Le Sang du temps,DEPLACER,
+Maxime Chattam - Les arcanes du chaos,Maxime Chattam/Les Arcanes du chaos,DEPLACER,CD1/CD2 conservés
+Maxime Chattam - T4 - Entropia - 2011,Maxime Chattam/Autre-Monde/04 - Entropia,DEPLACER,"T1-T3 absents (L'Alliance des Trois, Malronce, Le Cœur de la Terre : dans la liste ""écoutés"")"
+Maxime Chattam - T5 - Oz - 2012,Maxime Chattam/Autre-Monde/05 - Oz,DEPLACER,
+Maxime Chattam-Le Sang Du Temps [128kbps],_Quarantaine/Doublons/Maxime Chattam-Le Sang Du Temps [128kbps],QUARANTAINE,"DOUBLON EXACT (44 mp3, md5 identiques) de ""Maxime Chattam - Le Sang Du Temps"""
+Maxime Gillio - Bienvenue a Dunkerque - L abattoir dans la dune,Maxime Gillio/Bienvenue à Dunkerque - L'Abattoir dans la dune,DEPLACER,
+Michael Byrnes - Le mystere de l arche sacree,Michael Byrnes/Le Mystère de l'arche sacrée,DEPLACER,
+Michael Connelly - Dans la ville en feu,Michael Connelly/Dans la ville en feu,DEPLACER,
+Michael Connelly - Mariachi Plaza,Michael Connelly/Mariachi Plaza,DEPLACER,
+N.V. Peale - Le pouvoir de la pensee positive,Norman Vincent Peale/Le Pouvoir de la pensée positive,DEPLACER,auteur développé (tag ID3)
+Patricia Cornwell - Les Mémoires Mortes,Patricia Cornwell/Les Mémoires mortes,DEPLACER,
+Serge Brussolo - L armure de vengeance,Serge Brussolo/L'Armure de vengeance,DEPLACER,
+Serge Brussolo - Le chateau des poisons,Serge Brussolo/Le Château des poisons,DEPLACER,
+Six contes de Grimm lus par Anny Duperey [mp3 128 Kbps],Jacob et Wilhelm Grimm/Six contes de Grimm (lus par Anny Duperey),DEPLACER,CD1/CD2 conservés
+Stephen King Sale gosse.par2,Stephen King/Sale gosse,DEPLACER,"AMBIGU : suffixe "".par2"" parasite ; tags = narrateur (Julien Chatelet), auteur non confirmé"
+Sun Tzu - L'art de la guerre,Sun Tzu/L'Art de la guerre,DEPLACER,
+[ECOUTÉ] Arnaldur Indridason - Hypothermie (2011),Arnaldur Indridason/Hypothermie,DEPLACER,année retirée ; statut écouté -> ecoutes.csv
+[ECOUTÉ] Brigitte Aubert - Ténèbres sur Jacksonville,Brigitte Aubert/Ténèbres sur Jacksonville,DEPLACER,préfixe [ECOUTÉ] retiré -> statut noté dans ecoutes.csv
+[ECOUTÉ] H.P. Lovecraft - 2 Histoires,H.P. Lovecraft/2 Histoires,DEPLACER,statut écouté -> ecoutes.csv
+[ECOUTÉ] H.P. Lovecraft - La maison dans la vallée,H.P. Lovecraft/La Maison dans la vallée,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (126M/237M)
+[ECOUTÉ] H.P. Lovecraft - Les Montagnes Hallucinées,H.P. Lovecraft/Les Montagnes hallucinées,DEPLACER,statut écouté -> ecoutes.csv
+[ECOUTÉ] H.P. Lovecraft - Les engoulevents de la colline,H.P. Lovecraft/Les Engoulevents de la colline,DEPLACER,AMBIGU : existe aussi dans 11 nouvelles (91M/172M)
+_Agatha Christie (complet)/Autres  romans/02 Dix petits nègres,Agatha Christie/Dix petits nègres,DEPLACER,"hors série (n° 01/02/03 = ordre du dossier, pas une série)"
+_Agatha Christie (complet)/Autres  romans/03 Destination inconnue,Agatha Christie/Destination inconnue,DEPLACER,"hors série (n° 01/02/03 = ordre du dossier, pas une série)"
+_Agatha Christie (complet)/Autres  romans/[ECOUTÉ] 01 L'homme au complet marron,Agatha Christie/L'homme au complet marron,DEPLACER,"hors série (n° 01/02/03 = ordre du dossier, pas une série) ; statut écouté -> ecoutes.csv"
+_Agatha Christie (complet)/Hercule Poirot/01 La mystérieuse affaire de Styles,Agatha Christie/Hercule Poirot/01 - La mystérieuse affaire de Styles,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Hercule Poirot/02 Le meurtre de Roger Ackroyd,Agatha Christie/Hercule Poirot/02 - Le meurtre de Roger Ackroyd,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Hercule Poirot/03 Le crime de l'Orient Express,Agatha Christie/Hercule Poirot/03 - Le crime de l'Orient Express,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Hercule Poirot/04 Carte sur table,Agatha Christie/Hercule Poirot/04 - Carte sur table,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Hercule Poirot/05 Meurtre en Mésopotamie,Agatha Christie/Hercule Poirot/05 - Meurtre en Mésopotamie,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Hercule Poirot/06 Mort sur le Nil,Agatha Christie/Hercule Poirot/06 - Mort sur le Nil,DEPLACER,"séparateur "" - "" ajouté"
+_Agatha Christie (complet)/Miss Marple,Agatha Christie/Miss Marple,DEPLACER,"AMBIGU : 12 fichiers, album ""Audio Thélème"" -> titre inconnu"
+_Agatha Christie (complet)/Agatha Christie - Cinq petits cochons [mp3],Agatha Christie/Hercule Poirot/Cinq petits cochons,DEPLACER,série Poirot déduite (roman de Poirot) ; AMBIGU : n° tome non fourni
+_Agatha Christie (complet)/Agatha Christie - Meurtre en Mesopotamie [mp3  256kbps],Agatha Christie/Hercule Poirot/Meurtre en Mésopotamie (lu par Guillaume Gallienne),DEPLACER,"AMBIGU : doublon probable de ""05 - Meurtre en Mésopotamie"" (autre lecteur, 407M vs 203M) -> garder les deux"
+Andrzej Sapkowski -  Le Sorceleur T1 - Le Dernier vœu,Andrzej Sapkowski/Le Sorceleur/01 - Le Dernier vœu,DEPLACER,double espace dans le nom source
+Livre audio - 21 histoires - Walt Disney - L'histoire et les dialogues (MP3.128Kbps),_Collections/Contes et histoires pour enfants/21 histoires Walt Disney,DEPLACER,recueil
+"Livre audio - 34 contes classiques pour enfants (lus par Marlène Jobert, Mp3 en 192kbs)",_Collections/Contes et histoires pour enfants/34 contes classiques (Marlène Jobert),DEPLACER,recueil
+Stephen King - Bazaar [mp3-64K],Stephen King/Bazaar,DEPLACER,
+Jordan - La roue du temps/Robert Jordan - La Roue du Temps 1 - L'Œil du monde [Mp3 64 kbps],Robert Jordan/La Roue du temps/01 - L'Œil du monde,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - La Roue du Temps 6 - Le Seigneur du chaos [mp3-64K],Robert Jordan/La Roue du temps/06 - Le Seigneur du chaos,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - La Roue du Temps 8 - Le Chemin des dagues [mp3-64K],Robert Jordan/La Roue du temps/08 - Le Chemin des dagues,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - La grande quête La Roue du Temps 2,Robert Jordan/La Roue du temps/02 - La Grande Quête,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - La roue du temps 7 - Une couronne d'épées [mp3-64K],Robert Jordan/La Roue du temps/07 - Une couronne d'épées,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - La roue du temps 9 - Le Coeur de l'hiver [mp3-64K],Robert Jordan/La Roue du temps/09 - Le Cœur de l'hiver,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - Le Dragon réincarné La Roue du Temps 3,Robert Jordan/La Roue du temps/03 - Le Dragon réincarné,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - Le carrefour du crépuscule - La Roue du temps 10 [mp3-64K],Robert Jordan/La Roue du temps/10 - Le Carrefour du crépuscule,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - Les Feux du ciel - La roue du temps T5 [mp3-64K),Robert Jordan/La Roue du temps/05 - Les Feux du ciel,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+Jordan - La roue du temps/Robert Jordan - Un lever de ténèbres La roue du temps 4,Robert Jordan/La Roue du temps/04 - Un lever de ténèbres,DEPLACER,numéro extrait du nom source ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T2 - Harry Potter - La Chambre des Secrets [mp3 64kbps],J.K. Rowling/Harry Potter/02 - La Chambre des secrets,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T7 - Harry Potter - Les Reliques de la Mort [mp3 64kbps],J.K. Rowling/Harry Potter/07 - Les Reliques de la Mort,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T5 - Harry Potter - L'Ordre du Phenix [mp3 64kbps],J.K. Rowling/Harry Potter/05 - L'Ordre du Phénix,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T3 - Harry Potter - Le Prisonnier d'Azkaban [mp3 64kbps],J.K. Rowling/Harry Potter/03 - Le Prisonnier d'Azkaban,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T6 -  Harry Potter - Le Prince de Sang-Mele [mp3 64kbps],J.K. Rowling/Harry Potter/06 - Le Prince de sang-mêlé,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T4 - Harry Potter - la Coupe de Feu [mp3 64kbps],J.K. Rowling/Harry Potter/04 - La Coupe de feu,DEPLACER,T-n -> NN ; tag qualité retiré
+J.K. Rowling - Harry Potter - Intégrale - 7 Tomes [mp3 64kbps]/T1 - Harry Potter - L'Ecole des Sorciers [mp3 64kbps],J.K. Rowling/Harry Potter/01 - À l'école des sorciers,DEPLACER,T-n -> NN ; tag qualité retiré
+C.S. Lewis - Le Neveu du Magicien - Narnia 1 [mp3-128],C.S. Lewis/Le Monde de Narnia/01 - Le Neveu du magicien,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+"C.S. Lewis - Le Lion, la Sorcière Blanche et l'Armoire magique - Narnia 2 [mp3-128]","C.S. Lewis/Le Monde de Narnia/02 - Le Lion, la Sorcière blanche et l'Armoire magique",DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+C.S. Lewis - Le Monde de Narnia 5 - L'Odyssée du Passeur d'Aurore [mp3-64],C.S. Lewis/Le Monde de Narnia/05 - L'Odyssée du Passeur d'Aurore,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+C.S. Lewis - Le Prince Caspian - Le Monde de Narnia 4 [mp3-64],C.S. Lewis/Le Monde de Narnia/04 - Le Prince Caspian,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+Rick Riordan - Le Voleur de foudre - Percy Jackson 1 [mp3],Rick Riordan/Percy Jackson/01 - Le Voleur de foudre,DEPLACER,
+JRR Tolkien - Le Hobbit - sKa [mp3][312],J.R.R. Tolkien/Le Hobbit,DEPLACER,tag release (sKa) retiré
+C.S. Lewis - Le Monde de Narnia 3 - Le Cheval et son écuyer [mp3-64],C.S. Lewis/Le Monde de Narnia/03 - Le Cheval et son écuyer,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+C.S. Lewis - Le Monde de Narnia 6 - Le Fauteuil d'argent,C.S. Lewis/Le Monde de Narnia/06 - Le Fauteuil d'argent,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
+C.S. Lewis - Le Monde de Narnia 7 - La Dernière Bataille,C.S. Lewis/Le Monde de Narnia/07 - La Dernière Bataille,DEPLACER,numérotation de lecture (Narnia N) ; tag qualité retiré
