@@ -30,7 +30,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
 | Pocket ID | LXC 104 | 192.168.10.188 | https://id.tixhon.be | Pocket ID v2.11.0 (binaire + systemd) |
 | FMF Compta | LXC 120 | 192.168.10.24:8734 | https://fmfcompta.tixhon.be | Next.js (systemd), données Supabase |
-| Grimmory | LXC 122 | 192.168.10.29:6060 | http://192.168.10.29:6060 (LAN seulement) | Grimmory v3.5.0 + MariaDB (Docker) |
+| Grimmory | LXC 122 | 192.168.10.29:6060 | https://grimmory.tixhon.be (LAN/WireGuard seulement) | Grimmory v3.5.0 + MariaDB (Docker) |
 
 ---
 
@@ -459,7 +459,7 @@ Mis en place le 2026-11-14. Bibliothèque auto-hébergée (lecteur web, OPDS, sy
 | Élément | Valeur |
 |---------|--------|
 | LXC | 122 `grimmory`, Debian 13, 2 cœurs / 2 Go / swap 512 Mo, disque 16 Go (local-lvm), non privilégié, `nesting=1,keyctl=1`, `onboot` |
-| IP / URL | 192.168.10.29, http://192.168.10.29:6060 (LAN seulement, pas de NPM/tunnel/DNS pour l'instant) |
+| IP / URL | 192.168.10.29, http://192.168.10.29:6060 ; https://grimmory.tixhon.be via NPM (proxy host 46, cert wildcard) — résolu en interne par AdGuard, **pas exposé via Cloudflare** (décision 2026-11-14 : accès uniquement LAN ou WireGuard) |
 | Stack | Docker (docker.io + compose) dans `/opt/grimmory` : `grimmory` (image `ghcr.io/grimmory-tools/grimmory:v3.5.0`, version épinglée) + `grimmory-db` (MariaDB 11.4 linuxserver) |
 | Secrets | `/opt/grimmory/.env` (mots de passe base générés, chmod 600). Compte admin créé par l'utilisateur au premier accès web |
 | Données | `/opt/grimmory/data` (métadonnées, couvertures), `/opt/grimmory/config` (MariaDB), `/opt/grimmory/bookdrop` |
@@ -474,4 +474,4 @@ Mis en place le 2026-11-14. Bibliothèque auto-hébergée (lecteur web, OPDS, sy
 
 **Montages ajoutés (2026-11-14)** : `AUDIO BOOKS` → `/audiobooks` (`mp1`) et `BDZ` → `/bdz` (`mp2`), mêmes options (`ro=1,backup=0`), passés au conteneur dans `docker-compose.yml`. Bibliothèques à créer dans l'UI sur `/books`, `/audiobooks`, `/bdz`. Komga conservé en parallèle pour les BD.
 
-**Pistes non faites** : accès externe via NPM + Pocket ID (OIDC supporté).
+**Pistes non faites** : exposition publique (tunnel Cloudflare + Access, écartée) ; SSO Pocket ID (OIDC supporté).
