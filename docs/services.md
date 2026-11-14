@@ -474,4 +474,6 @@ Mis en place le 2026-11-14. Bibliothèque auto-hébergée (lecteur web, OPDS, sy
 
 **Montages ajoutés (2026-11-14)** : `AUDIO BOOKS` → `/audiobooks` (`mp1`) et `BDZ` → `/bdz` (`mp2`), mêmes options (`ro=1,backup=0`), passés au conteneur dans `docker-compose.yml`. Bibliothèques à créer dans l'UI sur `/books`, `/audiobooks`, `/bdz`. Komga conservé en parallèle pour les BD.
 
+**Incident disque plein (2026-11-14)** : le LXC (16 Go) était à 100 % à cause de ~13 Go de copies `pdfium4j-autorepair-*.pdf` laissées dans `/tmp` du conteneur `grimmory` (réparation de gros PDF pendant le scan initial, fichiers jamais supprimés). Nettoyé (retour à 19 %) et cron `/etc/cron.d/grimmory-tmp-clean` dans le LXC (toutes les 10 min, supprime ces fichiers de plus de 10 min). Disque non agrandi (espace local-lvm libre ~220 Go si besoin : `pct resize 122 rootfs +8G`). Seuil d'alerte disque 85 % : à vérifier côté Prometheus que le LXC 122 est bien dans la cible (non confirmé).
+
 **Pistes non faites** : exposition publique (tunnel Cloudflare + Access, écartée) ; SSO Pocket ID (OIDC supporté).
