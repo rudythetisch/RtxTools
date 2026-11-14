@@ -472,4 +472,6 @@ Mis en place le 2026-11-14. Bibliothèque auto-hébergée (lecteur web, OPDS, sy
 
 **Sauvegarde** : le LXC est couvert par le job vzdump quotidien 03:00 (`all 1`, stockage `syno-backup`) et par l'offsite hebdo vers pCloud. Le bind-mount des livres est exclu (`backup=0`, la source reste sur le NAS).
 
-**Pistes non faites** : audiobooks (`DOWNLOADS/AUDIO BOOKS`) et BD (`BDZ`) non montés ; accès externe via NPM + Pocket ID (OIDC supporté).
+**Montages ajoutés (2026-11-14)** : `AUDIO BOOKS` → `/audiobooks` (`mp1`) et `BDZ` → `/bdz` (`mp2`), mêmes options (`ro=1,backup=0`), passés au conteneur dans `docker-compose.yml`. Bibliothèques à créer dans l'UI sur `/books`, `/audiobooks`, `/bdz`. Komga conservé en parallèle pour les BD.
+
+**Pistes non faites** : accès externe via NPM + Pocket ID (OIDC supporté).
