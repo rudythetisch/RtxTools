@@ -24,6 +24,7 @@ Gestion du nœud Proxmox (`192.168.10.2`) via Claude Code + MCP.
 | 115 | VM | pfSense | 192.168.10.1 | Firewall / routeur |
 | 116 | LXC | homefinance-db | 192.168.10.13 | PostgreSQL 15, base `homefinance` |
 | 117 | LXC | scanopy | 192.168.10.18 | Scanopy (cartographie réseau) |
+| 122 | LXC | grimmory | 192.168.10.29 | Grimmory (bibliothèque EPUB/PDF/BD, Docker, livres en NFS ro) |
 
 ## MCP Proxmox
 

@@ -30,6 +30,7 @@ Détails et identifiants dans la mémoire Claude (`nas-access.md`, `vaultwarden-
 | Homelab Dashboard | Mac Mini | 192.168.10.98:8160 | http://dashboard.tixhon.be (LAN only) | React + Express (LaunchAgent) |
 | Pocket ID | LXC 104 | 192.168.10.188 | https://id.tixhon.be | Pocket ID v2.11.0 (binaire + systemd) |
 | FMF Compta | LXC 120 | 192.168.10.24:8734 | https://fmfcompta.tixhon.be | Next.js (systemd), données Supabase |
+| Grimmory | LXC 122 | 192.168.10.29:6060 | http://192.168.10.29:6060 (LAN seulement) | Grimmory v3.5.0 + MariaDB (Docker) |
 
 ---
 
@@ -448,3 +449,29 @@ homeplan, homefinance et (depuis le 2026-11-11) fmfcompta ne tournent plus sur l
 | fmfcompta | 120 `fmfcompta` | 192.168.10.24:8734 | Debian 12, Node 24, clone sparse (`compta/app`) de fernelevents/fernelevents-docs dans `/opt/fmfcompta` (clé de déploiement lecture seule `nipogi-lxc120`), `fmfcompta.service`, données sur Supabase (`.env.local` copié à la main, hors git), CSV bancaires dans `/opt/fmfcompta/compta/trx`. Redéploiement : `git pull`, `npm ci`, `npx next build`, `systemctl restart fmfcompta` (ou `POST /api/restart`, systemd relance) |
 
 Les proxy hosts NPM `fmfcompta` (id 43), `homeplan` (id 39) et `homefinance` (id 44) pointent sur ces IP. Les LXC sont inclus dans la sauvegarde Proxmox quotidienne (`all 1`). Retour arrière : `launchctl enable` + `bootstrap` des agents `be.tixhon.homeplan*` / `be.tixhon.homefinance` / `be.fernelevents.compta` (+ watchdog `be.tixhon.fmfcompta-watchdog`), et NPM vers 192.168.10.98.
+
+---
+
+## Grimmory (bibliothèque EPUB/PDF/BD) — LXC 122
+
+Mis en place le 2026-11-14. Bibliothèque auto-hébergée (lecteur web, OPDS, sync Kobo/KOReader) sur la collection `DOWNLOADS/BOOKS` de TischNAS3 (~27 Go).
+
+| Élément | Valeur |
+|---------|--------|
+| LXC | 122 `grimmory`, Debian 13, 2 cœurs / 2 Go / swap 512 Mo, disque 16 Go (local-lvm), non privilégié, `nesting=1,keyctl=1`, `onboot` |
+| IP / URL | 192.168.10.29, http://192.168.10.29:6060 (LAN seulement, pas de NPM/tunnel/DNS pour l'instant) |
+| Stack | Docker (docker.io + compose) dans `/opt/grimmory` : `grimmory` (image `ghcr.io/grimmory-tools/grimmory:v3.5.0`, version épinglée) + `grimmory-db` (MariaDB 11.4 linuxserver) |
+| Secrets | `/opt/grimmory/.env` (mots de passe base générés, chmod 600). Compte admin créé par l'utilisateur au premier accès web |
+| Données | `/opt/grimmory/data` (métadonnées, couvertures), `/opt/grimmory/config` (MariaDB), `/opt/grimmory/bookdrop` |
+| Livres | NFS lecture seule, voir ci-dessous |
+| Mémoire | JVM plafonnée à `-Xmx768m`, `DISK_TYPE=NETWORK` (opérations de fichiers désactivées dans l'UI) |
+
+**Montage des livres** : l'export NFS existant `192.168.10.3:/volume1/DOWNLOADS` (autorisé pour `192.168.10.0/24`, rien changé côté NAS) est monté **sur l'hôte Proxmox** en lecture seule sur `/mnt/nas3-downloads` (ligne `fstab`, options `ro,nfsvers=3,_netdev,nofail,soft`). Le sous-dossier `BOOKS` est injecté dans le LXC par bind-mount `mp0: /mnt/nas3-downloads/BOOKS,mp=/books,ro=1,backup=0` (évite un LXC privilégié ; écriture impossible des deux côtés). Si TischNAS3 est éteint (test UPS), le LXC démarre quand même (`nofail`), `/books` est alors vide jusqu'au remontage (`mount /mnt/nas3-downloads` sur l'hôte puis `pct reboot 122`).
+
+**Komga** (conteneur sur TischNAS3) monte tout `/volume1/DOWNLOADS` en lecture/écriture (`/data`), donc BOOKS est probablement déjà exposé à Komga selon ses bibliothèques. Les deux outils lisent les mêmes fichiers sans conflit : Grimmory est en lecture seule et garde ses métadonnées dans sa propre base.
+
+**Sauvegarde** : le LXC est couvert par le job vzdump quotidien 03:00 (`all 1`, stockage `syno-backup`) et par l'offsite hebdo vers pCloud. Le bind-mount des livres est exclu (`backup=0`, la source reste sur le NAS).
+
+**Montages ajoutés (2026-11-14)** : `AUDIO BOOKS` → `/audiobooks` (`mp1`) et `BDZ` → `/bdz` (`mp2`), mêmes options (`ro=1,backup=0`), passés au conteneur dans `docker-compose.yml`. Bibliothèques à créer dans l'UI sur `/books`, `/audiobooks`, `/bdz`. Komga conservé en parallèle pour les BD.
+
+**Pistes non faites** : accès externe via NPM + Pocket ID (OIDC supporté).
